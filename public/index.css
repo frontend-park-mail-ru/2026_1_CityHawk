@@ -1,0 +1,5 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, sans-serif; background: #f3f4f6; }
+#root { max-width: 800px; margin: 0 auto; padding: 24px; }
+.card { background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 16px; }
+.code { background: #111; color: #8de88d; padding: 8px; border-radius: 6px; font-family: monospace; }

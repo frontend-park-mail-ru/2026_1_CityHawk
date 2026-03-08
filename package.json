@@ -1,0 +1,14 @@
+{
+  "name": "cityhawk-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./server/index.js",
+    "dev": "node ./server/index.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "morgan": "^1.10.1"
+  }
+}
