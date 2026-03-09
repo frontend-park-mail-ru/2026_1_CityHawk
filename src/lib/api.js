@@ -48,6 +48,16 @@ export async function login(payload) {
   return data;
 }
 
+export async function register(payload) {
+  const data = await request('/auth/register', {
+    method: 'POST',
+    body: payload,
+  }, false);
+
+  setAccessToken(data.access_token);
+  return data;
+}
+
 export async function refresh() {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
@@ -71,6 +81,10 @@ export async function refresh() {
 
 export async function getMe() {
   return request('/me');
+}
+
+export async function getPlaces() {
+  return request('/places');
 }
 
 export async function logout() {

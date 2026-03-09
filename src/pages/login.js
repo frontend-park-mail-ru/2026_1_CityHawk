@@ -1,5 +1,5 @@
-import { pageLayout } from '../templates/layout.js';
 import { login } from '../lib/api.js';
+import { renderTemplate } from '../templates/renderer.js';
 
 export function loginPage() {
   setTimeout(() => {
@@ -18,19 +18,10 @@ export function loginPage() {
         password: formData.get('password'),
       });
 
-      window.location.href = '/';
+      window.history.pushState(null, '', '/');
+      window.dispatchEvent(new PopStateEvent('popstate'));
     });
   });
 
-  return pageLayout({
-    title: 'Login',
-    description: 'Страница входа пользователя.',
-    content: `
-      <form id="login-form">
-        <input name="email" type="email" placeholder="Email" />
-        <input name="password" type="password" placeholder="Password" />
-        <button type="submit">Login</button>
-      </form>
-    `,
-  });
+  return renderTemplate('login');
 }

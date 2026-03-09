@@ -55,9 +55,9 @@ export class Router {
     this.navigate(new URL(href, window.location.origin).pathname);
   }
 
-  renderByPath(path) {
+  async renderByPath(path) {
     const renderer = this.routes[path] || this.notFound;
-    const html = renderer({ path, navigate: this.navigate.bind(this) });
+    const html = await renderer({ path, navigate: this.navigate.bind(this) });
     this.root.innerHTML = html;
   }
 }
