@@ -3,10 +3,6 @@
     <h2 class="login__form-title">Регистрация</h2>
 
     <form id="register-form" class="login__fields">
-      {{#if formError}}
-        <p class="login__form-error">{{formError}}</p>
-      {{/if}}
-
       <div class="login__field">
         <label for="name">Имя</label>
         <div class="login__input-wrapper">
@@ -16,8 +12,8 @@
             name="name"
             placeholder="Введите имя"
             value="{{name}}"
-            class="{{#if nameError}}is-error{{/if}}"
-            aria-invalid="{{#if nameError}}true{{else}}false{{/if}}"
+            class="{{#if nameError}}is-error{{else}}{{#if formError}}is-error{{/if}}{{/if}}"
+            aria-invalid="{{#if nameError}}true{{else}}{{#if formError}}true{{else}}false{{/if}}{{/if}}"
           />
           {{#if nameError}}
             <p class="login__error-message">{{nameError}}</p>
@@ -34,8 +30,8 @@
             name="email"
             placeholder="Введите email"
             value="{{email}}"
-            class="{{#if emailError}}is-error{{/if}}"
-            aria-invalid="{{#if emailError}}true{{else}}false{{/if}}"
+            class="{{#if emailError}}is-error{{else}}{{#if formError}}is-error{{/if}}{{/if}}"
+            aria-invalid="{{#if emailError}}true{{else}}{{#if formError}}true{{else}}false{{/if}}{{/if}}"
           />
           {{#if emailError}}
             <p class="login__error-message">{{emailError}}</p>
@@ -51,8 +47,8 @@
             id="register-password"
             name="password"
             placeholder="Введите пароль"
-            class="{{#if passwordError}}is-error{{/if}}"
-            aria-invalid="{{#if passwordError}}true{{else}}false{{/if}}"
+            class="{{#if passwordError}}is-error{{else}}{{#if formError}}is-error{{/if}}{{/if}}"
+            aria-invalid="{{#if passwordError}}true{{else}}{{#if formError}}true{{else}}false{{/if}}{{/if}}"
           />
           <button class="login__password-toggle" type="button" aria-label="Показать пароль">
             <img src="/public/static/assets/eye.svg" alt="" />
@@ -71,8 +67,8 @@
             id="register-password-repeat"
             name="passwordRepeat"
             placeholder="Повторите пароль"
-            class="{{#if passwordRepeatError}}is-error{{/if}}"
-            aria-invalid="{{#if passwordRepeatError}}true{{else}}false{{/if}}"
+            class="{{#if passwordRepeatError}}is-error{{else}}{{#if formError}}is-error{{/if}}{{/if}}"
+            aria-invalid="{{#if passwordRepeatError}}true{{else}}{{#if formError}}true{{else}}false{{/if}}{{/if}}"
           />
           <button class="login__password-toggle" type="button" aria-label="Показать пароль">
             <img src="/public/static/assets/eye.svg" alt="" />
@@ -84,6 +80,10 @@
       </div>
 
       <button class="login__submit" type="submit">Зарегистрироваться</button>
+
+      {{#if formError}}
+        <p class="login__error-message login__error-message--form">{{formError}}</p>
+      {{/if}}
 
       <div class="login__secondary-action">
         <a href="/login" class="login__register">Уже есть аккаунт?</a>

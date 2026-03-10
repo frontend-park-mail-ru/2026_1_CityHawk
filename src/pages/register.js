@@ -4,6 +4,27 @@ import { renderTemplate } from '../templates/renderer.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function getRegisterErrorState(error, nextState) {
+  if (error?.status === 409) {
+    return {
+      ...nextState,
+      emailError: 'Пользователь с таким email уже существует.',
+    };
+  }
+
+  if (error?.status === 400) {
+    return {
+      ...nextState,
+      formError: 'Проверьте корректность данных регистрации.',
+    };
+  }
+
+  return {
+    ...nextState,
+    formError: 'Не удалось выполнить регистрацию.',
+  };
+}
+
 function setFieldError(field, message) {
   if (!field) {
     return;
@@ -40,7 +61,7 @@ function clearFieldError(field) {
 }
 
 function clearFormError(form) {
-  form?.querySelector('.login__form-error')?.remove();
+  form?.querySelector('.login__error-message--form')?.remove();
 }
 
 function createRegisterView(state = {}) {
@@ -195,10 +216,7 @@ function createRegisterView(state = {}) {
         try {
           await register({ email, password });
         } catch (error) {
-          const nextView = createRegisterView({
-            ...nextState,
-            formError: error.message || 'Не удалось выполнить регистрацию.',
-          });
+          const nextView = createRegisterView(getRegisterErrorState(error, nextState));
           root.innerHTML = nextView.html;
           nextView.mount(root);
           return;

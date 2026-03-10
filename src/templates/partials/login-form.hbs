@@ -3,10 +3,6 @@
     <h2 class="login__form-title">Вход</h2>
 
     <form id="login-form" class="login__fields">
-      {{#if formError}}
-        <p class="login__form-error">{{formError}}</p>
-      {{/if}}
-
       <div class="login__field login__email">
         <label for="email">Email</label>
         <div class="login__input-wrapper">
@@ -47,6 +43,10 @@
       </div>
 
       <button class="login__submit" type="submit">Войти</button>
+
+      {{#if formError}}
+        <p class="login__error-message login__error-message--form">{{formError}}</p>
+      {{/if}}
 
       <div class="login__secondary-action">
         <a href="/register" class="login__register">Еще нет аккаунта?</a>

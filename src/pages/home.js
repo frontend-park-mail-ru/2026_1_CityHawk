@@ -29,14 +29,17 @@ export async function homePage({ navigate }) {
     html: renderTemplate('home', { user }),
     mount(root) {
       const logoutButton = root.querySelector('[data-action="logout"]');
-      if (!logoutButton) {
-        return;
-      }
 
-      logoutButton.addEventListener('click', async () => {
+      const handleLogout = async () => {
         await logout().catch(() => {});
         navigate('/', { replace: true });
-      });
+      };
+
+      logoutButton?.addEventListener('click', handleLogout);
+
+      return () => {
+        logoutButton?.removeEventListener('click', handleLogout);
+      };
     },
   };
 }

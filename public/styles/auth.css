@@ -22,7 +22,7 @@
   --color-base: #fdf0d5;
   --font-primary: "Inter", sans-serif;
   --font-company: "Lexend Giga", sans-serif;
-  --font-slogan: "Nunito", sans-serif;
+  --font-slogan: "Inter", sans-serif;
   --font-links: "Inter", sans-serif;
   --font-annotation: "Inter", sans-serif;
   --text-company-name: 64px;
@@ -419,6 +419,12 @@
   padding: 12px 16px;
   border-radius: var(--radius-messages);
   background: rgba(230, 48, 52, 0.12);
+}
+
+.login__error-message--form {
+  width: 100%;
+  text-align: center;
+  margin-top: -6px;
 }
 
 .login__password {

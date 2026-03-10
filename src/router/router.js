@@ -3,6 +3,7 @@ export class Router {
     this.root = root;
     this.routes = routes;
     this.notFound = notFound;
+    this.cleanup = null;
     this.onPopState = this.onPopState.bind(this);
     this.onDocumentClick = this.onDocumentClick.bind(this);
   }
@@ -56,6 +57,11 @@ export class Router {
   }
 
   async renderByPath(path) {
+    if (typeof this.cleanup === 'function') {
+      this.cleanup();
+      this.cleanup = null;
+    }
+
     const renderer = this.routes[path] || this.notFound;
     const view = await renderer({ path, navigate: this.navigate.bind(this) });
     const html = typeof view === 'string' ? view : view?.html || '';
@@ -63,7 +69,10 @@ export class Router {
     this.root.innerHTML = html;
 
     if (view && typeof view.mount === 'function') {
-      view.mount(this.root);
+      const cleanup = view.mount(this.root);
+      if (typeof cleanup === 'function') {
+        this.cleanup = cleanup;
+      }
     }
   }
 }

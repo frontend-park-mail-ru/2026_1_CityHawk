@@ -52,7 +52,7 @@ function clearFieldError(field) {
 }
 
 function clearFormError(form) {
-  form?.querySelector('.login__form-error')?.remove();
+  form?.querySelector('.login__error-message--form')?.remove();
 }
 
 function createLoginView(state = {}) {
