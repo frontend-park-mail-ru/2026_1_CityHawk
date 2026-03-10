@@ -1,0 +1,17 @@
+<div class="site-header">
+  <div class="container">
+    <div class="header-top">
+      <a href="/" class="logo">CityHawk</a>
+
+      <div class="header-actions">
+        <a href="#" class="header-link">Москва</a>
+        {{#if user}}
+          <span class="header-link header-user">{{user.displayName}}</span>
+          <button type="button" class="header-link header-link--button" data-action="logout">Выход</button>
+        {{else}}
+          <a href="/login" class="header-link">Вход</a>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</div>
