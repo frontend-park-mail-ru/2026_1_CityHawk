@@ -1,0 +1,11 @@
+export function notFoundPage({ path }) {
+  return `
+    <section class="card">
+      <h1>404</h1>
+      <p>Страница <strong>${path}</strong> не найдена.</p>
+      <nav class="nav">
+        <a href="/">На главную</a>
+      </nav>
+    </section>
+  `;
+}

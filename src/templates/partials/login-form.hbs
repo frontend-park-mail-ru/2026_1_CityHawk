@@ -1,0 +1,56 @@
+<div class="login__form">
+  <div class="login__wrapper">
+    <h2 class="login__form-title">Вход</h2>
+
+    <form id="login-form" class="login__fields">
+      <div class="login__field login__email">
+        <label for="email">Email</label>
+        <div class="login__input-wrapper">
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Введите email"
+            value="{{email}}"
+            class="{{#if emailError}}is-error{{else}}{{#if formError}}is-error{{/if}}{{/if}}"
+            aria-invalid="{{#if emailError}}true{{else}}{{#if formError}}true{{else}}false{{/if}}{{/if}}"
+          />
+          {{#if emailError}}
+            <p class="login__error-message">{{emailError}}</p>
+          {{/if}}
+        </div>
+      </div>
+
+      <div class="login__field login__password">
+        <label for="password">Пароль</label>
+        <div class="login__input-wrapper">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Введите пароль"
+            class="{{#if passwordError}}is-error{{else}}{{#if formError}}is-error{{/if}}{{/if}}"
+            aria-invalid="{{#if passwordError}}true{{else}}{{#if formError}}true{{else}}false{{/if}}{{/if}}"
+          />
+          <button class="login__password-toggle" type="button" aria-label="Показать пароль">
+            <img src="/public/static/assets/eye.svg" alt="" />
+          </button>
+          {{#if passwordError}}
+            <p class="login__error-message">{{passwordError}}</p>
+          {{/if}}
+        </div>
+        <a href="#" class="login__forgot">Забыли пароль?</a>
+      </div>
+
+      <button class="login__submit" type="submit">Войти</button>
+
+      {{#if formError}}
+        <p class="login__error-message login__error-message--form">{{formError}}</p>
+      {{/if}}
+
+      <div class="login__secondary-action">
+        <a href="/register" class="login__register">Еще нет аккаунта?</a>
+      </div>
+    </form>
+  </div>
+</div>

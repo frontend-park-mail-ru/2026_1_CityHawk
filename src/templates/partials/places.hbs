@@ -1,0 +1,19 @@
+<section class="main-top">
+  <div class="container">
+    <section class="places">
+      <h2 class="section-title section-title--light">
+        Места, которые стоит посетить
+      </h2>
+
+      <div class="places-grid">
+        {{#each places}}
+          <article class="card">
+            <img src="{{imageUrl}}" alt="{{title}}" class="card-image" />
+            <h3 class="card-title">{{title}}</h3>
+            <p class="card-text">{{description}}</p>
+          </article>
+        {{/each}}
+      </div>
+    </section>
+  </div>
+</section>
