@@ -1,471 +1,601 @@
 :root {
-  --color-background-tone-1: #244c87;
-  --color-blank: #fefefe;
-  --color-background: #edeeef;
-  --color-accent-1: #b7d5f5;
-  --color-accent-2: #003049;
-  --color-accent-3: #004366;
-  --color-accent-4: #5a8af9;
-  --color-accent-5: #3c6a9c;
-  --color-input-midtone-1: rgba(120, 120, 128, 0.16);
-  --color-placeholder: rgba(0, 0, 0, 0.5);
-  --color-grey: rgba(120, 120, 128, 0.5);
-  --color-background-blur: rgba(0, 0, 0, 0.4);
-  --color-vk: #0079ff;
-  --color-yandex: #ff1b00;
-  --color-google-blue: #4285f4;
-  --color-google-red: #eb4335;
-  --color-google-yellow: #fbbc05;
-  --color-google-green: #34a853;
-  --color-dark: #780000;
-  --color-mid: #e63034;
-  --color-base: #fdf0d5;
-  --font-primary: "Inter", sans-serif;
-  --font-company: "Lexend Giga", sans-serif;
-  --font-slogan: "Inter", sans-serif;
-  --font-links: "Inter", sans-serif;
-  --font-annotation: "Inter", sans-serif;
-  --text-company-name: 64px;
-  --text-slogan: 36px;
-  --text-input: 20px;
-  --text-button: 24px;
-  --text-annotation: 20px;
-  --text-links: 20px;
-  --text-small-annotation: 16px;
-  --text-form-title: 40px;
-  --radius-logo: 100px;
-  --height-logo: 92px;
-  --gap-logo: 14px;
-  --ticket-width: 240px;
-  --gap-tickets: 15px;
-  --gap-ticket-groups: 15px;
-  --shift-ticket-group-1: 0;
-  --shift-ticket-group-2: 250px;
-  --shift-ticket-group-3: 0;
-  --stroke-ticket: 10px;
-  --gap-logo-section: 0;
-  --width-input: 500px;
-  --height-input: 50px;
-  --padding-input: 20px;
-  --radius-input: 10px;
-  --stroke-input-active: 2px;
-  --width-input-half: 350px;
-  --icon-height-input: 30px;
-  --radius-button: 40px;
-  --height-button: 50px;
-  --width-button: 500px;
-  --width-button-half: 300px;
-  --gap-buttons-half: 50px;
-  --gap-annotation: 20px;
-  --gap-password-forgot: 10px;
-  --gap-fields: 24px;
-  --gap-oauth-fields: 30px;
-  --gap-small-annotation: 10px;
-  --padding-bottom-field: 40px;
-  --paddings-sidebar: 50px;
-  --sidebar-gap: 60px;
-  --size-oauth: 50px;
-  --stroke-oauth: 1px;
-  --width-or-lines: 170px;
-  --gap-or-lines: 40px;
-  --gap-oauth-logos: 50px;
-  --jump--oauth-logos: 5px;
-  --radius-messages: 20px;
+    /* 
+     * ========================================
+     * COLORS
+     * ========================================
+     */
+    
+    /* Основные тона */
+    --color-background-tone-1: #244C87;  /* Background tone 1 */
+    --color-blank: #FEFEFE;               /* Blank */
+    --color-background: #EDEEEF;          /* background */
+    
+    /* Акценты */
+    --color-accent-1: #B7D5F5;            /* Accent 1 */
+    --color-accent-2: #003049;            /* Accent 2 */
+    --color-accent-3: #004366;            /* Accent 3 */
+    --color-accent-4: #5A8AF9;            /* Accent 4 */
+    --color-accent-5: #3C6A9C;            /* Accent 5 */
+    
+    /* Цвета для форм */
+    --color-input-midtone-1: rgba(120, 120, 128, 0.16); /* Input midtone 1 */
+    --color-placeholder: rgba(0, 0, 0, 0.5);            /* Placeholder */
+    --color-grey: rgba(120, 120, 128, 0.5);             /* grey */
+    --color-background-blur: rgba(0, 0, 0, 0.4);        /* Background blur */
+    
+    /* Соцсети */
+    --color-vk: #0079FF;                  /* VK color */
+    --color-yandex: #FF1B00;               /* Yandex color */
+    --color-google-blue: #4285F4;          /* Google blue color */
+    --color-google-red: #EB4335;           /* Google red color */
+    --color-google-yellow: #FBBC05;        /* Google yellow color */
+    --color-google-green: #34A853;         /* Google green color */
+    
+    /* Дополнительные */
+    --color-dark: #780000;                 /* Dark */
+    --color-mid: #E63034;                   /* Mid */
+    --color-base: #FDF0D5;                 /* Base */
+    
+    /* 
+     * ========================================
+     * TYPOGRAPHY (только параметры, без текста)
+     * ========================================
+     */
+    
+    /* Семейства шрифтов */
+    --font-primary: 'Inter', sans-serif;
+    --font-company: 'Lexend Giga', sans-serif;
+    --font-slogan: 'Nunito', sans-serif;
+    --font-links: 'Inter', sans-serif;
+    --font-annotation: 'Inter', sans-serif;
+    
+    /* Размеры текста */
+    --text-company-name: 70px;            /* Company name size */
+    --text-slogan: 40px;                    /* Slogan size */
+    --text-input: 20px;                      /* Input text size */
+    --text-button: 24px;                     /* Buttons text size */
+    --text-annotation: 20px;                 /* Input annotation size */
+    --text-links: 20px;                      /* Links size */
+    --text-small-annotation: 16px;           /* Small annotation size */
+    --text-form-title: 40px;                    /* Form title size */
+    
+    /* 
+     * ========================================
+     * SPACING & SIZES
+     * ========================================
+     */
+    
+    /* Логотип */
+    --radius-logo: 100px;                   /* Logo frame (corner radius) */
+    --height-logo: 100px;                    /* PC logo height */
+    --gap-logo: 20px;                        /* PC logo gap */
+    
+    /* Билетики */
+    --ticket-width: 300px;                    /* PC ticket width */
+    --gap-tickets: 15px;                     /* PC tickets gap */
+    --gap-ticket-groups: 15px;                /* PC ticket groups gap */
+    --shift-ticket-group-1: 0;                /* PC ticket group 1 shift */
+    --shift-ticket-group-2: 250px;            /* PC ticket group 2 shift */
+    --shift-ticket-group-3: 0;                /* PC ticket group 3 shift */
+    --shift-ticket-group-1-before: 0;         /* PC ticket group 1 shift before animation */
+    --shift-ticket-group-2-before: 1900px;    /* PC ticket group 2 shift before animation */
+    --shift-ticket-group-3-before: 0;         /* PC ticket group 3 shift before animation*/
+    --stroke-ticket: 10px;                    /* Ticket stroke */
+    
+    /* Секции */
+    --gap-logo-section: 10px;                 /* PC logo section gap */
+    
+    /* Инпуты */
+    --width-input: 500px;                     /* PC input width */
+    --height-input: 50px;                      /* PC input height */
+    --padding-input: 20px;                     /* Input padding */
+    --radius-input: 10px;                      /* Input corner radius */
+    --stroke-input-active: 2px;                /* Input active stroke */
+    --width-input-half: 220px;                 /* PC half input width */
+    --icon-height-input: 30px;                    /* PC input icon height */
+    
+    /* Кнопки */
+    --radius-button: 40px;                    /* Buttons corner radius */
+    --height-button: 50px;                     /* PC buttons height */
+    --width-button: 500px;                     /* PC buttons width */
+    --width-button-half: 220px;                 /* PC half button width */
+    --gap-buttons-half: 50px;                   /* Half buttons gap */
+    
+    /* Отступы */
+    --gap-annotation: 20px;                    /* Annotation gap */
+    --gap-password-forgot: 10px;                /* Password forgot gap */
+    --gap-fields: 50px;                         /* Fields gap */
+    --gap-oauth-fields: 30px;                   /* Oauth fields gap */
+    --gap-small-annotation: 10px;               /* Small annotation gap */
+    --padding-bottom-field: 30px;                /* Bottom field padding above button */
+    --paddings-sidebar: 65px;                 /* PC sidebar top and bottom padding */
+    --sidebar-gap: 90px;                      /* PC sidebar gap between logo and tickets */
+    
+    /* OAuth */
+    --size-oauth: 50px;                         /* PC oauth size */
+    --stroke-oauth: 1px;                        /* PC oauth stroke */
+    --width-or-lines: 130px;                     /* PC or lines width */
+    --gap-or-lines: 40px;                        /* PC or lines gap */
+    --gap-oauth-logos: 50px;                     /* PC oauth logos gap */
+    --jump--oauth-logos: 5px;                     /* PC oauth logos jump on hover */
+    
+    /* Сообщения */
+    --radius-messages: 20px;                    /* Messages corner radius */
+}
+
+/* ========================================
+   ASIDE STYLES (левая часть)
+   ======================================== */
+
+main.login {
+  height: 100vh;
+  width: 100vw;
 }
 
 .login__aside {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sidebar-gap);
-  justify-content: center;
-  padding-top: var(--paddings-sidebar);
-  padding-bottom: var(--paddings-sidebar);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sidebar-gap);
+    justify-content: center;
+
+    padding-top: var(--paddings-sidebar);
+    padding-bottom: var(--paddings-sidebar);
+    gap: var(--sidebar-gap); 
 }
 
 .login__title {
-  font-family: var(--font-company, sans-serif);
-  font-size: var(--text-company-name);
-  color: var(--color-blank);
-  letter-spacing: -0.07em;
-  line-height: 100%;
-  font-weight: 400;
+    font-family: var(--font-company, sans-serif);
+    font-size: var(--text-company-name);
+    color: var(--color-blank);
+    
+    letter-spacing: -0.07em;
+    
+    line-height: 100%;
+    font-weight: 400;
 }
 
 .login__slogan {
-  font-family: var(--font-slogan, sans-serif);
-  font-size: var(--text-slogan);
-  color: var(--color-blank);
-  line-height: 100%;
-  font-weight: 400;
+    font-family: var(--font-slogan, sans-serif);
+    font-size: var(--text-slogan);
+    color: var(--color-blank);
+    
+    line-height: 100%;
+    font-weight: 400;
 }
 
 .login__naming {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-logo-section);
-  align-items: flex-end;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-logo-section);
+    align-items: flex-end;
 }
 
 .login__logo {
-  height: var(--height-logo);
-  width: auto;
+    height: var(--height-logo);
+    width: auto;
 }
 
 .login__branding {
-  display: flex;
-  flex-direction: row;
-  gap: var(--gap-logo);
-  align-items: center;
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap-logo);
+    align-items: center;
 }
 
-.login__tickets-first img,
+.login__tickets-first img {
+    transform: rotate(180deg);
+}
+
 .login__tickets-third img {
-  transform: rotate(180deg);
+    transform: rotate(180deg);
 }
 
 .login {
-  display: flex;
-  background-color: var(--color-blank);
-  height: 100dvh;
-  min-height: 100dvh;
-  width: 100%;
-  overflow: hidden;
+    display: flex;
+    background-color: var(--color-blank);
+    height: 100%;
+    width: 100%;
 }
 
-.login__aside,
-.login__form {
-  flex: 1;
-  flex-shrink: 0;
+.login__aside, .login__form {
+    flex: 1;
+    flex-shrink: 0;
 }
 
 .login__aside {
-  flex: 1 1 0;
-  min-width: 0;
-  background-color: var(--color-background-tone-1);
-  border-top-right-radius: var(--radius-logo);
-  border-bottom-right-radius: var(--radius-logo);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
+    flex: 1 1 0;
+    min-width: 0;
+    background-color: var(--color-background-tone-1);
+    border-top-right-radius: var(--radius-logo);
+    border-bottom-right-radius: var(--radius-logo);
+    
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .login__tickets {
-  width: max-content;
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-ticket-groups);
+    width: max-content;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-ticket-groups);
 }
 
 .login__tickets-group {
-  display: flex;
-  flex-direction: row;
-  gap: var(--gap-tickets);
-  width: max-content;
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap-tickets);    
+    width: max-content;
 }
 
 .login__ticket {
-  width: var(--ticket-width);
-  object-fit: cover;
-  flex-shrink: 0;
+    width: var(--ticket-width);
+    object-fit: cover;
+    flex-shrink: 0;
 }
 
 .login__tickets-first {
-  padding-left: var(--shift-ticket-group-1);
+    padding-left: var(--shift-ticket-group-1);
 }
 
 .login__tickets-second {
-  padding-left: var(--shift-ticket-group-2);
+    padding-left: var(--shift-ticket-group-2);
 }
 
 .login__tickets-third {
-  padding-left: var(--shift-ticket-group-3);
+    padding-left: var(--shift-ticket-group-3);
 }
 
+/* ========================================
+   FORM STYLES (правая часть)
+   ======================================== */
+
 .login__form {
-  flex: 1;
-  display: grid;
-  place-items: center;
-  height: 100dvh;
-  padding: 24px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
 }
 
 .login__wrapper {
-  width: min(100%, var(--width-button));
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
+    width: max-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-logo);    
 }
 
 .login__form-title {
-  margin: 0;
-  font-family: var(--font-slogan, sans-serif);
-  font-size: var(--text-form-title);
-  color: var(--color-background-tone-1);
-  font-weight: 700;
-  line-height: 100%;
+    font-family: var(--font-slogan, sans-serif);
+    font-size: var(--text-form-title);
+    color: var(--color-background-tone-1);
+    font-weight: 700;
+    line-height: 100%;
 }
 
 .login__fields {
-  width: 100%;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-fields);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-fields);
 }
 
 .login__field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-annotation);
-}
-
-.login__input-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-small-annotation);
-  width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-annotation);
 }
 
 .login__field label {
-  font-family: var(--font-annotation, sans-serif);
-  font-size: var(--text-annotation);
-  color: var(--color-accent-2);
-  font-weight: 400;
-  line-height: 100%;
+    font-family: var(--font-annotation, sans-serif);
+    font-size: var(--text-annotation);
+    color: var(--color-accent-2);
+    font-weight: 400;
+    line-height: 100%;
 }
 
 .login__field input {
-  width: 100%;
-  height: var(--height-input);
-  padding: 0 var(--padding-input);
-  border: var(--stroke-input-active) solid transparent;
-  border-radius: var(--radius-input);
-  font-family: var(--font-primary, sans-serif);
-  font-size: var(--text-input);
-  color: var(--color-accent-2);
-  background: var(--color-input-midtone-1);
-  transition: border-color 0.3s ease-out;
+    width: var(--width-input);
+    height: var(--height-input);
+    padding: 0 var(--padding-input);
+    border: none;
+    border-radius: var(--radius-input);
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-input);
+    color: var(--color-accent-2);
+    background: var(--color-input-midtone-1);
 }
 
 .login__field input::placeholder {
-  color: var(--color-placeholder);
-  font-size: var(--text-input);
-  opacity: 1;
+    color: var(--color-placeholder);
+    font-size: var(--text-input);
+    opacity: 1;
 }
 
 .login__forgot {
-  font-family: var(--font-links, sans-serif);
-  font-size: var(--text-links);
-  color: var(--color-accent-2);
-  text-decoration: underline;
-  align-self: flex-end;
-  line-height: 100%;
+    font-family: var(--font-links, sans-serif);
+    font-size: var(--text-links);
+    color: var(--color-accent-2);
+    text-decoration: underline;
+    align-self: flex-end;
+    line-height: 100%;
 }
 
 .login__submit {
-  width: var(--width-button);
-  height: var(--height-button);
-  background: var(--color-background-tone-1);
-  color: var(--color-blank);
-  font-family: var(--font-primary, sans-serif);
-  font-size: var(--text-button);
-  font-weight: 400;
-  border: none;
-  border-radius: var(--radius-button);
-  cursor: pointer;
-  transition: background-color 0.3s ease-out;
-}
-
-.login__secondary-action {
-  width: 100%;
-  display: flex;
-  justify-content: center;
+    width: var(--width-button);
+    height: var(--height-button);
+    background: var(--color-background-tone-1);
+    color: var(--color-blank);
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-button);
+    font-weight: 400;
+    border: none;
+    border-radius: var(--radius-button);
+    cursor: pointer;
 }
 
 .login__oauth {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-oauth-fields);
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-oauth-fields);
+    align-items: center;
 }
 
 .login__divider {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: var(--gap-or-lines);
-  width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: var(--gap-or-lines);
+    width: 100%;
 }
 
 .login__divider::before,
 .login__divider::after {
-  content: "";
-  width: var(--width-or-lines);
-  height: var(--stroke-oauth);
-  background: var(--color-accent-2, #003049);
+    content: '';
+    width: var(--width-or-lines);
+    height: var(--stroke-oauth);
+    background: var(--color-accent-2, #003049);
 }
 
 .login__divider-text {
-  font-family: var(--font-annotation, sans-serif);
-  font-size: var(--text-small-annotation);
-  color: var(--color-accent-2);
-  line-height: 100%;
+    font-family: var(--font-annotation, sans-serif);
+    font-size: var(--text-small-annotation);  
+    color: var(--color-accent-2);
+    line-height: 100%;
 }
 
 .login__oauth-buttons {
-  display: flex;
-  justify-content: center;
-  gap: var(--gap-oauth-logos);
+    display: flex;
+    justify-content: center;
+    gap: var(--gap-oauth-logos);
 }
 
 .login__oauth-wrapper {
-  width: var(--size-oauth);
-  height: calc(var(--size-oauth) + var(--jump--oauth-logos));
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
+    width: var(--size-oauth);
+    height: calc(var(--size-oauth) + var(--jump--oauth-logos));
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .login__oauth-btn {
-  width: var(--size-oauth);
-  height: var(--size-oauth);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  cursor: pointer;
-  transition: transform 0.3s ease-out;
+    width: var(--size-oauth);
+    height: var(--size-oauth);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
 }
 
 .login__oauth-btn--yandex {
-  background-image: url("/public/static/assets/yandex.svg");
+    background-image: url('/public/static/assets/yandex.svg');
 }
 
 .login__oauth-btn--google {
-  background-image: url("/public/static/assets/google.svg");
+    background-image: url('/public/static/assets/google.svg');
 }
 
 .login__oauth-btn--vk {
-  background-image: url("/public/static/assets/vk.svg");
+    background-image: url('/public/static/assets/vk.svg');
 }
 
 .login__register {
-  font-family: var(--font-primary, sans-serif);
-  font-size: var(--text-links);
-  color: var(--color-accent-2, #003049);
-  text-decoration: underline;
-  text-align: center;
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-links);
+    color: var(--color-accent-2, #003049);
+    text-decoration: underline;
+    text-align: center;
 }
+
+.login__bottomfield {
+    padding-bottom: var(--padding-bottom-field);
+}
+
+.login__buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--gap-buttons-half);
+}
+
+.login__next,
+.login__prev {
+    width: var(--width-button-half);
+    height: var(--height-button);
+    background: var(--color-background-tone-1);
+    color: var(--color-blank);
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-button);
+    font-weight: 400;
+    border: none;
+    border-radius: var(--radius-button);
+    cursor: pointer;
+}
+
+/* ========================================
+   HOVER & ACTIVE STATES
+   ======================================== */
 
 .login__forgot:hover,
 .login__register:hover {
-  color: var(--color-accent-5);
+    color: var(--color-accent-5);
 }
 
 .login__forgot:active,
 .login__register:active {
-  color: var(--color-accent-4);
+    color: var(--color-accent-4);
 }
 
-.login__submit:hover {
-  background: var(--color-accent-5);
+.login__submit {
+    transition: background-color 0.3s ease-out;
+}
+
+.login__submit:hover {  
+    background: var(--color-accent-5);
 }
 
 .login__submit:active {
-  background: var(--color-accent-4);
-  transform: scale(0.98);
-  transition: all 0.1s ease-out;
+    background: var(--color-accent-4);
+    transform: scale(0.98);
+    transition: all 0.1s ease-out;
+}
+
+.login__oauth-btn {
+    transition: transform 0.3s ease-out;
 }
 
 .login__oauth-btn:hover {
-  transform: translateY(calc(var(--jump--oauth-logos) * -1));
+    transform: translateY(calc(var(--jump--oauth-logos) * -1));
 }
 
 .login__oauth-btn:active {
-  transform: scale(0.95) translateY(calc(var(--jump--oauth-logos) * -1));
-  transition: transform 0.1s ease-out;
+    transform: scale(0.95) translateY(calc(var(--jump--oauth-logos) * -1));
+    transition: transform 0.1s ease-out;
+}
+
+.login__field input {
+    transition: border-color 0.3s ease-out;
+    border: var(--stroke-input-active) solid transparent;
 }
 
 .login__field input:hover {
-  border-color: var(--color-accent-5);
+    border-color: var(--color-accent-5);
 }
 
 .login__field input:focus {
-  border-color: var(--color-accent-2);
+    border-color: var(--color-accent-2);
 }
 
-.login__field input.is-error,
-.login__field input.is-error:hover,
-.login__field input.is-error:focus {
-  border-color: var(--color-mid);
+/* ========================================
+   PASSWORD TOGGLE BUTTON
+   ======================================== */
+
+.login__field-icon-wrapper {
+    position: relative;
 }
 
-.login__form-error,
-.login__error-message {
-  margin: 0;
-  color: var(--color-mid);
-  font-family: var(--font-annotation, sans-serif);
-  font-size: var(--text-small-annotation);
-}
-
-.login__form-error {
-  width: 100%;
-  padding: 12px 16px;
-  border-radius: var(--radius-messages);
-  background: rgba(230, 48, 52, 0.12);
-}
-
-.login__error-message--form {
-  width: 100%;
-  text-align: center;
-  margin-top: -6px;
-}
-
-.login__password {
-  position: relative;
-}
-
-.login__password input {
-  width: 100%;
-  padding-right: calc(var(--padding-input) + 40px);
+.login__field-icon-wrapper input {
+    padding-right: calc(var(--padding-input) * 2 + var(--icon-height-input));
 }
 
 .login__password-toggle {
-  position: absolute;
-  right: var(--padding-input);
-  top: calc(var(--height-input) / 2);
-  transform: translateY(-50%);
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
+    position: absolute;
+    right: var(--padding-input);
+    top: 50%;
+    transform: translateY(-50%);
+    width: var(--icon-height-input);
+    height: var(--icon-height-input);
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 2;
 }
 
 .login__password-toggle img {
-  width: var(--icon-height-input);
-  height: var(--icon-height-input);
-  object-fit: contain;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
-.login__password-toggle:hover img {
-  opacity: 1;
+.login__password-toggle:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
-.login__password-toggle:active img {
-  opacity: 0.8;
-  transform: scale(0.95);
+.login__field-icon-wrapper input:hover {
+    border-color: var(--color-accent-5);
+}
+
+.login__field-icon-wrapper input:active,
+.login__field-icon-wrapper input:focus {
+    border-color: var(--color-accent-2);
+}
+
+.login__field-icon-wrapper-noicon input {
+    padding-right: var(--padding-input);
+}
+
+/* ========================================
+   TICKETS LOAD ANIMATION
+   ======================================== */
+
+.login__tickets-group {
+    transition: padding-left 0.8s cubic-bezier(0.34, 1.3, 0.5, 1);  /* пружинистая анимация */
+}
+
+/* Начальное состояние */
+.login__tickets-first {
+    padding-left: var(--shift-ticket-group-1-before);
+}
+
+.login__tickets-second {
+    padding-left: var(--shift-ticket-group-2-before);
+}
+
+.login__tickets-third {
+    padding-left: var(--shift-ticket-group-3-before);
+}
+
+/* Конечное состояние */
+.login.loaded .login__tickets-first {
+    padding-left: var(--shift-ticket-group-1);
+}
+
+.login.loaded .login__tickets-second {
+    padding-left: var(--shift-ticket-group-2);
+}
+
+.login.loaded .login__tickets-third {
+    padding-left: var(--shift-ticket-group-3);
+}
+
+/* ========================================
+   ERROR MESSAGES
+   ======================================== */
+
+.login__field-error-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-small-annotation);
+}
+
+.login__error-message {
+    color: var(--color-mid);
+    font-family: var(--font-annotation);
+    font-size: var(--text-small-annotation);
+}
+
+.login__error-message:empty {
+    display: none;
+}
+
+.login__field-error-wrapper--error input,
+.login__field-error-wrapper--error input:hover,
+.login__field-error-wrapper--error input:focus,
+.login__field-error-wrapper--error input:active {
+    border-color: var(--color-mid);
 }
