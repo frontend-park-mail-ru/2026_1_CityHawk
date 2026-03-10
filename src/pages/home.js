@@ -1,4 +1,4 @@
-import { getMe, logout } from '../lib/api.js';
+import { getHome, getMe, logout } from '../lib/api.js';
 import { getAccessToken } from '../lib/auth-store.js';
 import { renderTemplate } from '../templates/renderer.js';
 
@@ -12,6 +12,26 @@ function getUserDisplayName(user) {
 
 export async function homePage({ navigate }) {
   let user = null;
+  let homeData = {
+    places: [],
+    moodLeft: [],
+    moodTall: {},
+  };
+
+  try {
+    const response = await getHome();
+    homeData = {
+      places: Array.isArray(response?.places) ? response.places : [],
+      moodLeft: Array.isArray(response?.moodLeft) ? response.moodLeft : [],
+      moodTall: response?.moodTall ?? {},
+    };
+  } catch {
+    homeData = {
+      places: [],
+      moodLeft: [],
+      moodTall: {},
+    };
+  }
 
   if (getAccessToken()) {
     try {
@@ -26,7 +46,12 @@ export async function homePage({ navigate }) {
   }
 
   return {
-    html: renderTemplate('home', { user }),
+    html: renderTemplate('home', {
+      user,
+      places: homeData.places,
+      moodLeft: homeData.moodLeft,
+      moodTall: homeData.moodTall,
+    }),
     mount(root) {
       const logoutButton = root.querySelector('[data-action="logout"]');
 

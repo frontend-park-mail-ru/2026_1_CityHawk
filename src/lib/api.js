@@ -100,6 +100,10 @@ export async function getPlaces() {
   return request('/places');
 }
 
+export async function getHome() {
+  return request('/api/home');
+}
+
 export async function logout() {
   await fetch(`${API_BASE_URL}/auth/logout`, {
     method: 'POST',

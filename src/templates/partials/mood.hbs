@@ -5,25 +5,17 @@
 
       <div class="mood-layout">
         <div class="mood-left">
-          <article class="mood-card mood-card--wide">
-            <img src="/public/static/img/club.jpeg" alt="Ночная жизнь" class="mood-image" />
-            <span class="mood-tag">Ночная жизнь</span>
-          </article>
-
-          <article class="mood-card">
-            <img src="/public/static/img/eat.jpg" alt="Гастро-места" class="mood-image" />
-            <span class="mood-tag">Гастро-места</span>
-          </article>
-
-          <article class="mood-card">
-            <img src="/public/static/img/love.jpg" alt="Романтический вечер" class="mood-image" />
-            <span class="mood-tag">Романтический вечер</span>
-          </article>
+          {{#each moodLeft}}
+            <article class="mood-card {{modifier}}">
+              <img src="{{imageUrl}}" alt="{{title}}" class="mood-image" />
+              <span class="mood-tag">{{title}}</span>
+            </article>
+          {{/each}}
         </div>
 
         <article class="mood-card mood-card--tall">
-          <img src="/public/static/img/photo.jpeg" alt="Места для фото" class="mood-image" />
-          <span class="mood-tag">Места для фото</span>
+          <img src="{{moodTall.imageUrl}}" alt="{{moodTall.title}}" class="mood-image" />
+          <span class="mood-tag">{{moodTall.title}}</span>
         </article>
       </div>
     </section>
