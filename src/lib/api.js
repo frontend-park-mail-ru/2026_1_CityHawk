@@ -28,7 +28,20 @@ async function request(path, options = {}, retry = true) {
   }
 
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
+    let errorMessage = `HTTP ${response.status}`;
+
+    try {
+      const errorData = await response.json();
+      if (typeof errorData?.error === 'string' && errorData.error) {
+        errorMessage = errorData.error;
+      }
+    } catch {
+      // Keep fallback message when response body is not JSON.
+    }
+
+    const error = new Error(errorMessage);
+    error.status = response.status;
+    throw error;
   }
 
   if (response.status === 204) {

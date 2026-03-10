@@ -14,6 +14,7 @@ if (!root) {
 
 async function startApp() {
   await loadTemplates();
+  await refresh().catch(() => {});
 
   const router = new Router({
     root,
@@ -26,7 +27,6 @@ async function startApp() {
   });
 
   router.start();
-  refresh().catch(() => {});
 }
 
 startApp().catch((error) => {

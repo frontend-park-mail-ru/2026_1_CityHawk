@@ -4,8 +4,12 @@
 
     <div class="header-actions">
       <a href="#" class="header-link">Москва</a>
-      <a href="/login" class="header-link">Вход</a>
-      <a href="/register" class="header-link">Регистрация</a>
+      {{#if user}}
+        <span class="header-link header-user">{{user.displayName}}</span>
+        <button type="button" class="header-link header-link--button" data-action="logout">Выход</button>
+      {{else}}
+        <a href="/login" class="header-link">Вход</a>
+      {{/if}}
     </div>
   </div>
 </div>

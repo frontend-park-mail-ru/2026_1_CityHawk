@@ -57,7 +57,13 @@ export class Router {
 
   async renderByPath(path) {
     const renderer = this.routes[path] || this.notFound;
-    const html = await renderer({ path, navigate: this.navigate.bind(this) });
+    const view = await renderer({ path, navigate: this.navigate.bind(this) });
+    const html = typeof view === 'string' ? view : view?.html || '';
+
     this.root.innerHTML = html;
+
+    if (view && typeof view.mount === 'function') {
+      view.mount(this.root);
+    }
   }
 }

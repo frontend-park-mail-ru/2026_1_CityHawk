@@ -93,6 +93,18 @@ input {
     color 0.2s ease;
 }
 
+.header-link--button {
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.header-user {
+  opacity: 1;
+  color: #ffffff;
+}
+
 .hero-content {
   display: flex;
   flex-direction: column;
@@ -300,7 +312,7 @@ input {
 .footer {
   background: #f2f2f2;
   padding: 34px 0 22px;
-  color: #48627c;
+  color: #17324f;
 }
 
 .footer-grid {
@@ -344,7 +356,7 @@ input {
   margin-top: 26px;
   text-align: center;
   font-size: var(--text-body);
-  color: #48627c;
+  color: #17324f;
 }
 
 .footer-bottom p {
