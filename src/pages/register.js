@@ -4,8 +4,9 @@ import { renderTemplate } from '../templates/renderer.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function animateLoginTickets(root) {
-  if (!root) return;
+function animateLoginTickets(root, state) {
+
+  if (!root || state.step !== 1) return;
 
   const loginEl = root.classList.contains('login')
     ? root
@@ -13,7 +14,14 @@ function animateLoginTickets(root) {
 
   if (!loginEl) return;
 
-  setTimeout(() => loginEl.classList.add('loaded'), 100);
+  setTimeout(() => {
+
+    if (state.step === 1) {
+      loginEl.classList.add('loaded');
+    }
+
+  }, 100);
+
 }
 
 /* ================= STEP 1 ================= */
@@ -172,8 +180,6 @@ function setupStep2(root, state, rerender) {
 
   }
 
-  /* ===== EMAIL ===== */
-
   function validateEmail() {
 
     const wrapper = emailInput.closest('.login__field-error-wrapper');
@@ -201,8 +207,6 @@ function setupStep2(root, state, rerender) {
   }
 
   emailInput.addEventListener('input', validateEmail);
-
-  /* ===== PASSWORD ===== */
 
   function updatePasswordField() {
 
@@ -248,8 +252,6 @@ function setupStep2(root, state, rerender) {
     if (!result.isError) hideMessage(wrapper);
 
   });
-
-  /* ===== CONFIRM PASSWORD ===== */
 
   function updateConfirmField() {
 
@@ -302,8 +304,6 @@ function setupStep2(root, state, rerender) {
 
   });
 
-  /* ===== NAV BUTTONS ===== */
-
   prevBtn.addEventListener('click', function (e) {
 
     e.preventDefault();
@@ -334,8 +334,7 @@ function setupStep2(root, state, rerender) {
     try {
 
       await register({
-        name: state.name,
-        surname: state.surname,
+        username: state.name,
         email: state.email,
         password: state.password
       });
@@ -374,7 +373,7 @@ function mountRegister(root, state, rerender) {
   attachPasswordToggles(root);
 
   if (state.step === 1) {
-    animateLoginTickets(root);
+    animateLoginTickets(root, state);
     setupStep1(root, state, rerender);
   }
 

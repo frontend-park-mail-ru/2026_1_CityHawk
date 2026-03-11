@@ -1,0 +1,17 @@
+services:
+  frontend:
+    build: .
+    ports:
+      - "80:8000"
+    environment:
+      - PORT=8000
+      # set API_BASE_URL to your backend address when running in compose,
+      # e.g. API_BASE_URL=http://backend:8080
+    # Uncomment and adjust the following if you have a backend service
+    # depends_on:
+    #   - backend
+
+# backend:
+#   image: 2026_1_cityhawk_backend
+#   ports:
+#     - "8080:8080"
