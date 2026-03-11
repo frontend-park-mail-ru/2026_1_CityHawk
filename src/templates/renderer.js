@@ -6,7 +6,9 @@ const partialNames = [
   'login-form',
   'mood',
   'places',
-  'register-form',
+  'register-form-step1',
+  'register-form-step2',
+  'register-form-step3',
 ];
 
 const pageNames = [
@@ -49,6 +51,7 @@ export async function loadTemplates() {
 
   partials.forEach(([name, source]) => {
     Handlebars.registerPartial(name, source);
+    templateCache.set(name, Handlebars.compile(source)); // <— добавляем в кэш
   });
 
   const pages = await Promise.all(
