@@ -5,23 +5,35 @@ import { renderTemplate } from '../templates/renderer.js';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function animateLoginTickets(root, state) {
-
-  if (!root || state.step !== 1) return;
+  if (!root) return;
 
   const loginEl = root.classList.contains('login')
     ? root
     : root.querySelector('.login');
-
   if (!loginEl) return;
 
-  setTimeout(() => {
+  if (state.step === 1) {
+    // remove class so we start from initial state (useful when coming back)
+    loginEl.classList.remove('loaded');
 
-    if (state.step === 1) {
-      loginEl.classList.add('loaded');
-    }
+    // schedule addition on next frame; double rAF helps ensure browser
+    // has applied the removed state before we add it, triggering the CSS
+    // transition. using a timeout caused problems when user clicked fast.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (state.step === 1) {
+          loginEl.classList.add('loaded');
+        }
+      });
+    });
+    return;
+  }
 
-  }, 100);
-
+  // on steps 2+ we want tickets already in final position and **no
+  // animation**, so just keep the class present (adding it if missing
+  // does not trigger a transition because the element is not
+  // transitioning at that moment).
+  loginEl.classList.add('loaded');
 }
 
 /* ================= STEP 1 ================= */
@@ -369,18 +381,18 @@ function getStepTemplate(step) {
 }
 
 function mountRegister(root, state, rerender) {
-
   attachPasswordToggles(root);
 
+  // animation always evaluated because it handles other steps itself
+  animateLoginTickets(root, state);
+
   if (state.step === 1) {
-    animateLoginTickets(root, state);
     setupStep1(root, state, rerender);
   }
 
   if (state.step === 2) {
     setupStep2(root, state, rerender);
   }
-
 }
 
 function createRegisterView(state = {}) {

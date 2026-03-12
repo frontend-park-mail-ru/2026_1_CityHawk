@@ -110,6 +110,7 @@
     --padding-bottom-field: 30px;                /* Bottom field padding above button */
     --paddings-sidebar: 65px;                 /* PC sidebar top and bottom padding */
     --sidebar-gap: 90px;                      /* PC sidebar gap between logo and tickets */
+    --final-register-gap: 70px;                    /* Gap between final register message and button */
     
     /* OAuth */
     --size-oauth: 50px;                         /* PC oauth size */
@@ -598,4 +599,91 @@ main.login {
 .login__field-error-wrapper--error input:focus,
 .login__field-error-wrapper--error input:active {
     border-color: var(--color-mid);
+}
+
+/* ========================================
+   THANK YOU PAGE STYLES
+   ======================================== */
+
+.login__form--thankyou .login__wrapper {
+    text-align: center;
+}
+
+.login__form--thankyou .login__form-title {
+    color: var(--color-background-tone-1);
+    text-align: center;
+}
+
+.login__form--thankyou .login__fields {
+    width: 100%;
+    align-items: center;
+}
+
+.login__fields-thankyou {
+    display: flex;
+    flex-direction: column;
+    gap: var(--final-register-gap);
+}
+
+/* Билетик с email поверх */
+.login__ticket-email-wrapper {
+    position: relative;
+    width: fit-content;
+    margin: 0 auto;
+    line-height: 0; /* Убирает лишний отступ под SVG */
+}
+
+.login__ticket-email-image {
+    width: calc(var(--ticket-width) * 1.35);
+    height: auto;
+    display: block;
+}
+
+.login__ticket-email-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-slogan);
+    color: var(--color-accent-2);
+    font-weight: 400;
+    text-align: center;
+    width: 80%;
+    word-break: break-all;
+    line-height: 1.2; /* Восстанавливаем нормальный межстрочный интервал для текста */
+    pointer-events: none; /* Чтобы текст не мешал кликам по билетику */
+}
+
+/* Текст с ограничением по ширине */
+.login__thankyou-text {
+    max-width: var(--width-button);
+    margin-left: auto;
+    margin-right: auto;
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-annotation);
+    color: var(--color-accent-2);
+    font-weight: 400;
+    text-align: center;
+}
+
+/* Анимация появления */
+@keyframes ticketFloat {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login__ticket-email-wrapper {
+    animation: ticketFloat 0.6s ease-out forwards;
+}
+
+.login__thankyou-text {
+    animation: ticketFloat 0.6s ease-out 0.2s forwards;
+    opacity: 0;
 }
