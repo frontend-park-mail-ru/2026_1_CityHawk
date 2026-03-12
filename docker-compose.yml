@@ -5,11 +5,5 @@ services:
       - "80:8000"
     environment:
       - PORT=8000
-      - API_BASE_URL=http://cityhawk.ru:8080
-    depends_on:
-      - backend
-
-  backend:
-      image: 2026_1_cityhawk_backend-cityhawk-backend
-      ports:
-          - "8080:8080"
+      #  - API_BASE_URL=http://localhost:8080  # only for local development
+    restart: unless-stopped
