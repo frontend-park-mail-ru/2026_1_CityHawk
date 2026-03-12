@@ -46,10 +46,11 @@
     /* Размеры текста */
     --text-company-name: 70px;            /* Company name size */
     --text-slogan: 40px;                    /* Slogan size */
-    --text-input: 20px;                      /* Input text size */
+    --text-form-title: 40px;                    /* Form title size */
     --text-button: 24px;                     /* Buttons text size */
+    --text-input: 20px;                      /* Input text size */
     --text-annotation: 20px;                 /* Input annotation size */
     --text-links: 20px;                      /* Links size */
     --text-small-annotation: 16px;           /* Small annotation size */
-    --text-form-title: 40px;                    /* Form title size */
+    
 }

@@ -1,6 +1,14 @@
 import { API_BASE_URL } from './config.js';
 import { clearAccessToken, getAccessToken, setAccessToken } from './auth-store.js';
 
+/**
+ * Выполняет авторизованный API-запрос и при необходимости один раз повторяет его после refresh токена.
+ *
+ * @param {string} path Путь API относительно базового URL.
+ * @param {RequestInit & { body?: unknown }} [options] Параметры fetch-запроса.
+ * @param {boolean} [retry] Нужно ли повторять запрос после refresh.
+ * @returns {Promise<any>}
+ */
 async function request(path, options = {}, retry = true) {
   const headers = new Headers(options.headers || {});
   const token = getAccessToken();
@@ -36,7 +44,7 @@ async function request(path, options = {}, retry = true) {
         errorMessage = errorData.error;
       }
     } catch {
-      // Keep fallback message when response body is not JSON.
+      errorMessage = `HTTP ${response.status}`;
     }
 
     const error = new Error(errorMessage);
@@ -51,6 +59,12 @@ async function request(path, options = {}, retry = true) {
   return response.json();
 }
 
+/**
+ * Отправляет данные для входа и сохраняет полученный access token.
+ *
+ * @param {{ email: string, password: string }} payload Данные для авторизации.
+ * @returns {Promise<any>}
+ */
 export async function login(payload) {
   const data = await request('/auth/login', {
     method: 'POST',
@@ -61,6 +75,12 @@ export async function login(payload) {
   return data;
 }
 
+/**
+ * Отправляет данные регистрации и сохраняет полученный access token.
+ *
+ * @param {{ username: string, email: string, password: string }} payload Данные для регистрации.
+ * @returns {Promise<any>}
+ */
 export async function register(payload) {
   const data = await request('/auth/register', {
     method: 'POST',
@@ -71,6 +91,11 @@ export async function register(payload) {
   return data;
 }
 
+/**
+ * Пытается обновить access token с помощью refresh-cookie.
+ *
+ * @returns {Promise<boolean>}
+ */
 export async function refresh() {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
@@ -92,18 +117,38 @@ export async function refresh() {
   }
 }
 
+/**
+ * Загружает профиль текущего авторизованного пользователя.
+ *
+ * @returns {Promise<any>}
+ */
 export async function getMe() {
   return request('/me');
 }
 
+/**
+ * Загружает список мест.
+ *
+ * @returns {Promise<any>}
+ */
 export async function getPlaces() {
   return request('/places');
 }
 
+/**
+ * Загружает данные для главной страницы.
+ *
+ * @returns {Promise<any>}
+ */
 export async function getHome() {
   return request('/api/home');
 }
 
+/**
+ * Завершает текущую сессию и очищает локальный access token.
+ *
+ * @returns {Promise<void>}
+ */
 export async function logout() {
   await fetch(`${API_BASE_URL}/auth/logout`, {
     method: 'POST',

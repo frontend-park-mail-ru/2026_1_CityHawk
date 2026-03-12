@@ -2,6 +2,12 @@ import { login } from '../lib/api.js';
 import { attachPasswordToggles } from '../lib/password-toggle.js';
 import { renderTemplate } from '../templates/renderer.js';
 
+/**
+ * Запускает анимацию появления билетов на экране входа после монтирования.
+ *
+ * @param {ParentNode | null | undefined} root Корневой узел страницы.
+ * @returns {void}
+ */
 function animateLoginTickets(root) {
   if (!root) return;
   const loginEl = root.classList.contains('login') ? root : root.querySelector('.login');
@@ -9,6 +15,12 @@ function animateLoginTickets(root) {
   setTimeout(() => loginEl.classList.add('loaded'), 100);
 }
 
+/**
+ * Подключает клиентскую валидацию и обработку отправки формы входа.
+ *
+ * @param {ParentNode} root Корневой узел страницы.
+ * @returns {void}
+ */
 function setupValidation(root) {
   const submitBtn = root.querySelector('.login__submit');
   const emailInput = root.querySelector('#email');
@@ -17,12 +29,25 @@ function setupValidation(root) {
   let emailError = false;
   let passError = false;
 
+  /**
+   * Показывает ошибку валидации у поля.
+   *
+   * @param {Element} fieldWrapper Обёртка поля.
+   * @param {string} msg Текст ошибки.
+   * @returns {void}
+   */
   function showError(fieldWrapper, msg) {
     fieldWrapper.classList.add('login__field-error-wrapper--error');
     const errorMsg = fieldWrapper.querySelector('.login__error-message');
     if (errorMsg) errorMsg.textContent = msg;
   }
 
+  /**
+   * Скрывает ошибку валидации у поля.
+   *
+   * @param {Element} fieldWrapper Обёртка поля.
+   * @returns {void}
+   */
   function hideError(fieldWrapper) {
     fieldWrapper.classList.remove('login__field-error-wrapper--error');
     const errorMsg = fieldWrapper.querySelector('.login__error-message');
@@ -86,47 +111,59 @@ function setupValidation(root) {
 
     if (emailError || passError) return;
 
-    // ===== Отправка на сервер =====
     try {
       await login({ email: emailVal, password: passVal });
       window.history.pushState(null, '', '/');
       window.dispatchEvent(new PopStateEvent('popstate'));
-    } catch (error) {
-      // Если сервер вернул ошибку — подсветим оба поля и покажем сообщение
+    } catch {
       const emailWrapper = emailInput.closest('.login__field-error-wrapper');
       const passWrapper = passwordInput.closest('.login__field-error-wrapper');
 
-      // Подсветка обоих полей
       emailWrapper.classList.add('login__field-error-wrapper--error');
       passWrapper.classList.add('login__field-error-wrapper--error');
 
-      // Сообщение только под email
       const emailErrorMsg = emailWrapper.querySelector('.login__error-message');
       if (emailErrorMsg) emailErrorMsg.textContent = 'Пользователь не найден';
 
-      // Очистим ошибку под паролем (или оставим пустой)
       const passErrorMsg = passWrapper.querySelector('.login__error-message');
       if (passErrorMsg) passErrorMsg.textContent = '';
     }
   });
 }
 
+/**
+ * Инициализирует всё поведение страницы входа для уже смонтированного DOM.
+ *
+ * @param {HTMLElement} root Корневой элемент страницы.
+ * @returns {void}
+ */
 function mountLogin(root) {
   attachPasswordToggles(root);
   animateLoginTickets(root);
   setupValidation(root);
 }
 
+/**
+ * Создаёт объект представления для страницы входа.
+ *
+ * @param {Record<string, any>} [state] Состояние страницы.
+ * @returns {{ html: string, mount(root: HTMLElement): void }}
+ */
 function createLoginView(state = {}) {
   return {
     html: renderTemplate('login', state),
     mount(root) {
-      root.innerHTML = this.html; // вставляем HTML
-      mountLogin(root);            // монтируем обработку ошибок + анимацию
+      root.innerHTML = this.html;
+      mountLogin(root);
     },
   };
 }
 
+/**
+ * Возвращает представление страницы входа.
+ *
+ * @returns {{ html: string, mount(root: HTMLElement): void }}
+ */
 export function loginPage() {
   return createLoginView();
 }

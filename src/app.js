@@ -4,7 +4,7 @@ import { homePage } from './pages/home.js';
 import { loginPage } from './pages/login.js';
 import { registerPage } from './pages/register.js';
 import { notFoundPage } from './pages/not-found.js';
-import { loadTemplates } from './templates/renderer.js';
+import { loadTemplates, renderTemplate } from './templates/renderer.js';
 
 const root = document.getElementById('root');
 
@@ -12,6 +12,11 @@ if (!root) {
   throw new Error('Root element #root not found');
 }
 
+/**
+ * Инициализирует шаблоны, обновляет состояние авторизации и запускает роутер.
+ *
+ * @returns {Promise<void>}
+ */
 async function startApp() {
   await loadTemplates();
   await refresh().catch(() => {});
@@ -31,10 +36,5 @@ async function startApp() {
 
 startApp().catch((error) => {
   console.error(error);
-  root.innerHTML = `
-    <section class="card">
-      <h1>Ошибка загрузки</h1>
-      <p>Не удалось инициализировать приложение.</p>
-    </section>
-  `;
+  root.innerHTML = renderTemplate('app-error');
 });

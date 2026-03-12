@@ -4,6 +4,13 @@ import { renderTemplate } from '../templates/renderer.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Управляет состоянием анимации билетов между шагами регистрации.
+ *
+ * @param {ParentNode | null | undefined} root Корневой узел страницы.
+ * @param {{ step?: number }} state Состояние регистрации.
+ * @returns {void}
+ */
 function animateLoginTickets(root, state) {
   if (!root) return;
 
@@ -13,12 +20,8 @@ function animateLoginTickets(root, state) {
   if (!loginEl) return;
 
   if (state.step === 1) {
-    // remove class so we start from initial state (useful when coming back)
     loginEl.classList.remove('loaded');
 
-    // schedule addition on next frame; double rAF helps ensure browser
-    // has applied the removed state before we add it, triggering the CSS
-    // transition. using a timeout caused problems when user clicked fast.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (state.step === 1) {
@@ -29,15 +32,17 @@ function animateLoginTickets(root, state) {
     return;
   }
 
-  // on steps 2+ we want tickets already in final position and **no
-  // animation**, so just keep the class present (adding it if missing
-  // does not trigger a transition because the element is not
-  // transitioning at that moment).
   loginEl.classList.add('loaded');
 }
 
-/* ================= STEP 1 ================= */
-
+/**
+ * Подключает валидацию и переход к следующему шагу для первого шага регистрации.
+ *
+ * @param {ParentNode} root Корневой узел страницы.
+ * @param {{ name?: string, surname?: string, step?: number }} state Состояние регистрации.
+ * @param {() => void} rerender Функция перерендера.
+ * @returns {void}
+ */
 function setupStep1(root, state, rerender) {
 
   const nameInput = root.querySelector('#name');
@@ -47,12 +52,25 @@ function setupStep1(root, state, rerender) {
   let nameError = false;
   let surnameError = false;
 
+  /**
+   * Показывает ошибку у поля первого шага.
+   *
+   * @param {Element} wrapper Обёртка поля.
+   * @param {string} msg Текст ошибки.
+   * @returns {void}
+   */
   function showError(wrapper, msg) {
     wrapper.classList.add('login__field-error-wrapper--error');
     const err = wrapper.querySelector('.login__error-message');
     if (err) err.textContent = msg;
   }
 
+  /**
+   * Скрывает ошибку у поля первого шага.
+   *
+   * @param {Element} wrapper Обёртка поля.
+   * @returns {void}
+   */
   function hideError(wrapper) {
     wrapper.classList.remove('login__field-error-wrapper--error');
     const err = wrapper.querySelector('.login__error-message');
@@ -129,8 +147,14 @@ function setupStep1(root, state, rerender) {
 
 }
 
-/* ================= STEP 2 ================= */
-
+/**
+ * Подключает валидацию, проверку пароля и отправку формы на втором шаге регистрации.
+ *
+ * @param {ParentNode} root Корневой узел страницы.
+ * @param {{ name?: string, email?: string, password?: string, step?: number }} state Состояние регистрации.
+ * @param {() => void} rerender Функция перерендера.
+ * @returns {void}
+ */
 function setupStep2(root, state, rerender) {
 
   const emailInput = root.querySelector('#email');
@@ -147,6 +171,15 @@ function setupStep2(root, state, rerender) {
 
   emailInput.value = state.email || '';
 
+  /**
+   * Показывает сообщение под полем и при необходимости подсвечивает его.
+   *
+   * @param {Element} wrapper Обёртка поля.
+   * @param {string} msg Текст сообщения.
+   * @param {string} color Цвет текста сообщения.
+   * @param {boolean} [showBorder=true] Нужно ли показывать рамку ошибки.
+   * @returns {void}
+   */
   function showMessage(wrapper, msg, color, showBorder = true) {
 
     const errorMsg = wrapper.querySelector('.login__error-message');
@@ -164,6 +197,12 @@ function setupStep2(root, state, rerender) {
 
   }
 
+  /**
+   * Скрывает сообщение и состояние ошибки у поля.
+   *
+   * @param {Element} wrapper Обёртка поля.
+   * @returns {void}
+   */
   function hideMessage(wrapper) {
 
     const errorMsg = wrapper.querySelector('.login__error-message');
@@ -174,6 +213,12 @@ function setupStep2(root, state, rerender) {
 
   }
 
+  /**
+   * Проверяет надёжность пароля и возвращает описание результата.
+   *
+   * @param {string} pass Пароль для проверки.
+   * @returns {{ msg: string, color: string, isError: boolean }}
+   */
   function checkPasswordStrength(pass) {
 
     if (!pass)
@@ -192,6 +237,11 @@ function setupStep2(root, state, rerender) {
 
   }
 
+  /**
+   * Валидирует email на втором шаге регистрации.
+   *
+   * @returns {void}
+   */
   function validateEmail() {
 
     const wrapper = emailInput.closest('.login__field-error-wrapper');
@@ -220,6 +270,11 @@ function setupStep2(root, state, rerender) {
 
   emailInput.addEventListener('input', validateEmail);
 
+  /**
+   * Обновляет состояние поля пароля и сообщение о его надёжности.
+   *
+   * @returns {void}
+   */
   function updatePasswordField() {
 
     const wrapper = passwordInput.closest('.login__field-error-wrapper');
@@ -265,6 +320,11 @@ function setupStep2(root, state, rerender) {
 
   });
 
+  /**
+   * Обновляет состояние поля подтверждения пароля.
+   *
+   * @returns {void}
+   */
   function updateConfirmField() {
 
     const wrapper = confirmInput.closest('.login__field-error-wrapper');
@@ -355,7 +415,7 @@ function setupStep2(root, state, rerender) {
 
       rerender();
 
-    } catch (error) {
+    } catch {
 
       const wrapper = emailInput.closest('.login__field-error-wrapper');
 
@@ -367,8 +427,12 @@ function setupStep2(root, state, rerender) {
 
 }
 
-/* ================= VIEW ================= */
-
+/**
+ * Возвращает имя шаблона для текущего шага регистрации.
+ *
+ * @param {number} step Номер шага.
+ * @returns {string}
+ */
 function getStepTemplate(step) {
 
   switch (step) {
@@ -380,10 +444,16 @@ function getStepTemplate(step) {
 
 }
 
+/**
+ * Монтирует представление регистрации и подключает обработчики для активного шага.
+ *
+ * @param {HTMLElement} root Корневой элемент страницы.
+ * @param {{ step?: number }} state Состояние регистрации.
+ * @param {() => void} rerender Функция перерендера.
+ * @returns {void}
+ */
 function mountRegister(root, state, rerender) {
   attachPasswordToggles(root);
-
-  // animation always evaluated because it handles other steps itself
   animateLoginTickets(root, state);
 
   if (state.step === 1) {
@@ -395,6 +465,12 @@ function mountRegister(root, state, rerender) {
   }
 }
 
+/**
+ * Создаёт объект представления для многошаговой регистрации.
+ *
+ * @param {Record<string, any>} [state] Состояние страницы.
+ * @returns {{ html: string, mount(root: HTMLElement): void }}
+ */
 function createRegisterView(state = {}) {
 
   state.step = state.step || 1;
@@ -414,6 +490,11 @@ function createRegisterView(state = {}) {
 
       root.innerHTML = this.html;
 
+      /**
+       * Полностью перерисовывает текущее представление регистрации.
+       *
+       * @returns {void}
+       */
       const rerender = () => {
 
         const view = createRegisterView(state);
@@ -430,6 +511,11 @@ function createRegisterView(state = {}) {
 
 }
 
+/**
+ * Возвращает представление страницы регистрации.
+ *
+ * @returns {{ html: string, mount(root: HTMLElement): void }}
+ */
 export function registerPage() {
   return createRegisterView();
 }

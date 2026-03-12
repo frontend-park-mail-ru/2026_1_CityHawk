@@ -12,14 +12,21 @@ const partialNames = [
 ];
 
 const pageNames = [
+  'app-error',
   'home',
   'login',
+  'not-found',
   'register',
 ];
 
 const templateCache = new Map();
 let isLoaded = false;
 
+/**
+ * Возвращает глобальный runtime Handlebars или выбрасывает ошибку, если он не подключён.
+ *
+ * @returns {typeof Handlebars}
+ */
 function getHandlebars() {
   if (!window.Handlebars) {
     throw new Error('Handlebars runtime is not loaded');
@@ -28,6 +35,12 @@ function getHandlebars() {
   return window.Handlebars;
 }
 
+/**
+ * Загружает исходный текст шаблона по указанному пути.
+ *
+ * @param {string} path Путь к шаблону.
+ * @returns {Promise<string>}
+ */
 async function loadText(path) {
   const response = await fetch(path);
 
@@ -38,6 +51,11 @@ async function loadText(path) {
   return response.text();
 }
 
+/**
+ * Один раз за сессию загружает и компилирует все страницы и partial-шаблоны.
+ *
+ * @returns {Promise<void>}
+ */
 export async function loadTemplates() {
   if (isLoaded) {
     return;
@@ -65,6 +83,13 @@ export async function loadTemplates() {
   isLoaded = true;
 }
 
+/**
+ * Рендерит скомпилированный шаблон Handlebars по имени.
+ *
+ * @param {string} name Имя шаблона.
+ * @param {Record<string, any>} [context] Контекст для рендера.
+ * @returns {string}
+ */
 export function renderTemplate(name, context = {}) {
   const template = templateCache.get(name);
 
