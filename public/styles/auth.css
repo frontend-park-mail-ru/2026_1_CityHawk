@@ -1,66 +1,6 @@
 :root {
     /* 
      * ========================================
-     * COLORS
-     * ========================================
-     */
-    
-    /* Основные тона */
-    --color-background-tone-1: #244C87;  /* Background tone 1 */
-    --color-blank: #FEFEFE;               /* Blank */
-    --color-background: #EDEEEF;          /* background */
-    
-    /* Акценты */
-    --color-accent-1: #B7D5F5;            /* Accent 1 */
-    --color-accent-2: #003049;            /* Accent 2 */
-    --color-accent-3: #004366;            /* Accent 3 */
-    --color-accent-4: #5A8AF9;            /* Accent 4 */
-    --color-accent-5: #3C6A9C;            /* Accent 5 */
-    
-    /* Цвета для форм */
-    --color-input-midtone-1: rgba(120, 120, 128, 0.16); /* Input midtone 1 */
-    --color-placeholder: rgba(0, 0, 0, 0.5);            /* Placeholder */
-    --color-grey: rgba(120, 120, 128, 0.5);             /* grey */
-    --color-background-blur: rgba(0, 0, 0, 0.4);        /* Background blur */
-    
-    /* Соцсети */
-    --color-vk: #0079FF;                  /* VK color */
-    --color-yandex: #FF1B00;               /* Yandex color */
-    --color-google-blue: #4285F4;          /* Google blue color */
-    --color-google-red: #EB4335;           /* Google red color */
-    --color-google-yellow: #FBBC05;        /* Google yellow color */
-    --color-google-green: #34A853;         /* Google green color */
-    
-    /* Дополнительные */
-    --color-dark: #780000;                 /* Dark */
-    --color-mid: #E63034;                   /* Mid */
-    --color-base: #FDF0D5;                 /* Base */
-    
-    /* 
-     * ========================================
-     * TYPOGRAPHY (только параметры, без текста)
-     * ========================================
-     */
-    
-    /* Семейства шрифтов */
-    --font-primary: 'Inter', sans-serif;
-    --font-company: 'Lexend Giga', sans-serif;
-    --font-slogan: 'Nunito', sans-serif;
-    --font-links: 'Inter', sans-serif;
-    --font-annotation: 'Inter', sans-serif;
-    
-    /* Размеры текста */
-    --text-company-name: 70px;            /* Company name size */
-    --text-slogan: 40px;                    /* Slogan size */
-    --text-input: 20px;                      /* Input text size */
-    --text-button: 24px;                     /* Buttons text size */
-    --text-annotation: 20px;                 /* Input annotation size */
-    --text-links: 20px;                      /* Links size */
-    --text-small-annotation: 16px;           /* Small annotation size */
-    --text-form-title: 40px;                    /* Form title size */
-    
-    /* 
-     * ========================================
      * SPACING & SIZES
      * ========================================
      */
@@ -102,9 +42,8 @@
     --gap-buttons-half: 50px;                   /* Half buttons gap */
     
     /* Отступы */
-    --gap-annotation: 20px;                    /* Annotation gap */
-    --gap-password-forgot: 10px;                /* Password forgot gap */
-    --gap-fields: 50px;                         /* Fields gap */
+    --gap-annotation: 12px;                    /* Annotation gap */
+    --gap-fields: 35px;                         /* Fields gap */
     --gap-oauth-fields: 30px;                   /* Oauth fields gap */
     --gap-small-annotation: 10px;               /* Small annotation gap */
     --padding-bottom-field: 30px;                /* Bottom field padding above button */
@@ -291,9 +230,9 @@ main.login {
 }
 
 .login__field label {
-    font-family: var(--font-annotation, sans-serif);
+    font-family: var(--font-primary, sans-serif);
     font-size: var(--text-annotation);
-    color: var(--color-accent-2);
+    color: var(--color-accent-1);
     font-weight: 400;
     line-height: 100%;
 }
@@ -306,7 +245,7 @@ main.login {
     border-radius: var(--radius-input);
     font-family: var(--font-primary, sans-serif);
     font-size: var(--text-input);
-    color: var(--color-accent-2);
+    color: var(--color-accent-1);
     background: var(--color-input-midtone-1);
 }
 
@@ -317,9 +256,9 @@ main.login {
 }
 
 .login__forgot {
-    font-family: var(--font-links, sans-serif);
+    font-family: var(--font-primary, sans-serif);
     font-size: var(--text-links);
-    color: var(--color-accent-2);
+    color: var(--color-accent-1);
     text-decoration: underline;
     align-self: flex-end;
     line-height: 100%;
@@ -359,13 +298,13 @@ main.login {
     content: '';
     width: var(--width-or-lines);
     height: var(--stroke-oauth);
-    background: var(--color-accent-2, #003049);
+    background: var(--color-accent-1, #003049);
 }
 
 .login__divider-text {
-    font-family: var(--font-annotation, sans-serif);
+    font-family: var(--font-primary, sans-serif);
     font-size: var(--text-small-annotation);  
-    color: var(--color-accent-2);
+    color: var(--color-accent-1);
     line-height: 100%;
 }
 
@@ -408,7 +347,7 @@ main.login {
 .login__register {
     font-family: var(--font-primary, sans-serif);
     font-size: var(--text-links);
-    color: var(--color-accent-2, #003049);
+    color: var(--color-accent-1, #003049);
     text-decoration: underline;
     text-align: center;
 }
@@ -443,12 +382,12 @@ main.login {
 
 .login__forgot:hover,
 .login__register:hover {
-    color: var(--color-accent-5);
+    color: var(--color-accent-3);
 }
 
 .login__forgot:active,
 .login__register:active {
-    color: var(--color-accent-4);
+    color: var(--color-accent-2);
 }
 
 .login__submit {
@@ -456,11 +395,11 @@ main.login {
 }
 
 .login__submit:hover {  
-    background: var(--color-accent-5);
+    background: var(--color-accent-3);
 }
 
 .login__submit:active {
-    background: var(--color-accent-4);
+    background: var(--color-accent-2);
     transform: scale(0.98);
     transition: all 0.1s ease-out;
 }
@@ -484,11 +423,11 @@ main.login {
 }
 
 .login__field input:hover {
-    border-color: var(--color-accent-5);
+    border-color: var(--color-accent-3);
 }
 
 .login__field input:focus {
-    border-color: var(--color-accent-2);
+    border-color: var(--color-accent-1);
 }
 
 /* ========================================
@@ -528,12 +467,12 @@ main.login {
 }
 
 .login__field-icon-wrapper input:hover {
-    border-color: var(--color-accent-5);
+    border-color: var(--color-accent-3);
 }
 
 .login__field-icon-wrapper input:active,
 .login__field-icon-wrapper input:focus {
-    border-color: var(--color-accent-2);
+    border-color: var(--color-accent-1);
 }
 
 .login__field-icon-wrapper-noicon input {
@@ -586,7 +525,7 @@ main.login {
 
 .login__error-message {
     color: var(--color-mid);
-    font-family: var(--font-annotation);
+    font-family: var(--font-primary);
     font-size: var(--text-small-annotation);
 }
 
@@ -645,8 +584,8 @@ main.login {
     left: 50%;
     transform: translate(-50%, -50%);
     font-family: var(--font-primary, sans-serif);
-    font-size: var(--text-slogan);
-    color: var(--color-accent-2);
+    font-size: var(--text-input);
+    color: var(--color-accent-1);
     font-weight: 400;
     text-align: center;
     width: 80%;
@@ -662,7 +601,7 @@ main.login {
     margin-right: auto;
     font-family: var(--font-primary, sans-serif);
     font-size: var(--text-annotation);
-    color: var(--color-accent-2);
+    color: var(--color-accent-1);
     font-weight: 400;
     text-align: center;
 }
@@ -686,4 +625,443 @@ main.login {
 .login__thankyou-text {
     animation: ticketFloat 0.6s ease-out 0.2s forwards;
     opacity: 0;
+}
+/* ========================================
+RESPONSIVE SYSTEM
+======================================== */
+
+.login__aside {
+  justify-content: space-between;
+}
+
+.login__branding {
+  margin: auto 0;
+}
+
+.login__tickets {
+  margin-top: auto;
+}
+
+/* ========================================
+LAPTOP / TABLET / PHONE / DESKTOP / BIG / ULTRA / MINI-MINI
+======================================== */
+
+/* -----------------------------
+LAPTOP (max-width:1600px)
+----------------------------- */
+@media (max-width:1600px) {
+  :root {
+    --width-input: 620px;
+    --width-button: 620px;
+    --width-button-half: 290px;
+
+    --height-input: 54px;
+    --height-button: 54px;
+
+    --ticket-width: 270px;
+    --shift-ticket-group-2: 210px;
+
+    --gap-fields: 42px;
+    --gap-oauth-fields: 26px;
+    --gap-oauth-logos: 38px;
+
+    --text-input: 16px;
+    --text-button: 16px;
+    --text-links: 15px;
+  }
+
+  .login__aside {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .login__branding {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+  }
+}
+
+/* -----------------------------
+TABLET (max-width:1350px)
+----------------------------- */
+@media (max-width:1350px) {
+  :root {
+    --ticket-width: 210px;
+    --shift-ticket-group-2: 150px;
+
+    --width-input: 440px;
+    --width-button: 440px;
+    --width-button-half: 200px;
+
+    --height-input: 50px;
+    --height-button: 50px;
+
+    --gap-buttons-half: 20px;
+
+    --gap-fields: 34px;
+    --gap-oauth-fields: 22px;
+    --gap-oauth-logos: 30px;
+
+    --height-logo: 70px;
+
+    --text-company-name: 42px;
+    --text-slogan: 18px;
+
+    --text-input: 15px;
+    --text-button: 15px;
+    --text-links: 14px;
+    --text-annotation: 14px;
+    --text-small-annotation: 13px;
+
+    --sidebar-gap: 60px;
+  }
+
+  .login__aside {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    height: 100%;
+  }
+
+  .login__form {
+    flex: 0 0 60%;
+  }
+
+  .login__logo {
+    display: none;
+  }
+
+  .login__slogan {
+    display: block;
+  }
+
+  .login__branding {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+/* -----------------------------
+PHONE (max-width:1000px)
+----------------------------- */
+@media (max-width:1000px) {
+  :root {
+    --width-input: 100%;
+    --width-button: 100%;
+    --width-button-half: 48%;
+
+    --height-input: 52px;
+    --height-button: 52px;
+
+    --padding-input: 18px;
+
+    --gap-fields: 25px;
+    --gap-annotation: 10px;
+    --gap-oauth-fields: 24px;
+    --gap-oauth-logos: 26px;
+
+    --padding-bottom-field: 25px;
+
+    --text-company-name: 34px;
+    --text-form-title: 26px;
+
+    --text-input: 15px;
+    --text-button: 15px;
+    --text-links: 13px;
+
+    --text-annotation: 14px;
+    --text-small-annotation: 13px;
+
+    --sidebar-gap: 30px;
+    --gap-logo-section: 6px;
+
+    --wrapper-gap: 36px;
+    --fields-gap: 38px;
+  }
+
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  main.login {
+    box-sizing: border-box;
+    padding: 0;
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .login {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .login__aside {
+    width: 100%;
+    flex: none;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 60px;
+    border-bottom-left-radius: 60px;
+    padding: 50px 40px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .login__logo {
+    display: none;
+  }
+
+  .login__slogan {
+    display: block;
+  }
+
+  .login__tickets {
+    display: none;
+  }
+
+  .login__branding {
+    margin: 0;
+    justify-content: center;
+  }
+
+  .login__naming {
+    align-items: center;
+    gap: 6px;
+  }
+
+  .login__title {
+    text-align: center;
+  }
+
+  .login__form {
+    padding: 65px 45px;
+    align-items: flex-start;
+  }
+
+  .login__wrapper {
+    width: 100%;
+    max-width: 540px;
+    gap: var(--wrapper-gap);
+  }
+
+  .login__fields {
+    width: 100%;
+    gap: var(--fields-gap);
+  }
+
+  .login__field input,
+  .login__submit,
+  .login__buttons {
+    width: 100%;
+  }
+
+  .login__thankyou-text {
+    max-width: 100%;
+  }
+}
+
+/* -----------------------------
+DESKTOP (min-width:1600px)
+----------------------------- */
+@media (min-width:1600px) {
+  :root {
+    --width-input: min(760px, 34vw);
+    --width-button: min(760px, 34vw);
+    --width-button-half: min(350px, 16vw);
+
+    --height-input: 60px;
+    --height-button: 60px;
+
+    --ticket-width: 340px;
+    --shift-ticket-group-2: 280px;
+
+    --gap-fields: 55px;
+    --gap-oauth-fields: 32px;
+    --gap-oauth-logos: 48px;
+
+    --text-company-name: 56px;
+    --text-slogan: 24px;
+
+    --text-form-title: 34px;
+
+    --text-input: 17px;
+    --text-button: 17px;
+    --text-links: 16px;
+
+    --text-annotation: 16px;
+  }
+
+  .login__aside {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    height: 100%;
+  }
+
+  .login__branding {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+  }
+}
+
+/* -----------------------------
+BIG SCREENS (min-width:2000px)
+----------------------------- */
+@media (min-width:2000px) {
+  :root {
+    --width-input: min(900px, 30vw);
+    --width-button: min(900px, 30vw);
+    --width-button-half: min(420px, 14vw);
+
+    --height-input: 70px;
+    --height-button: 70px;
+
+    --ticket-width: 420px;
+    --shift-ticket-group-2: 340px;
+
+    --gap-fields: 75px;
+    --gap-oauth-fields: 44px;
+    --gap-oauth-logos: 60px;
+
+    --text-company-name: 78px;
+    --text-slogan: 32px;
+
+    --text-form-title: 44px;
+
+    --text-input: 20px;
+    --text-button: 20px;
+    --text-links: 18px;
+
+    --text-annotation: 18px;
+    --text-small-annotation: 16px;
+
+    --padding-input: 26px;
+
+    --sidebar-gap: 110px;
+  }
+}
+
+/* -----------------------------
+ULTRA SCREENS (min-width:3000px)
+----------------------------- */
+@media (min-width:3000px) {
+  :root {
+    --width-input: min(1100px, 26vw);
+    --width-button: min(1100px, 26vw);
+    --width-button-half: min(520px, 13vw);
+
+    --height-input: 84px;
+    --height-button: 84px;
+
+    --ticket-width: 540px;
+    --shift-ticket-group-2: 440px;
+
+    --gap-fields: 95px;
+
+    --text-company-name: 110px;
+    --text-slogan: 44px;
+
+    --text-form-title: 60px;
+
+    --text-input: 24px;
+    --text-button: 24px;
+    --text-links: 22px;
+
+    --text-annotation: 22px;
+
+    --padding-input: 32px;
+
+    --sidebar-gap: 150px;
+  }
+}
+
+/* -----------------------------
+MINI-MINI SCREENS (max-width:300px)
+----------------------------- */
+@media (max-width:300px) {
+  :root {
+    --width-input: 95%;
+    --width-button: 95%;
+    --width-button-half: 90px;
+
+    --height-input: 25px;
+    --height-button: 28px;
+
+    --gap-fields: 2px;
+    --gap-annotation: 3px;
+    --padding-bottom-field: 6px;
+
+    --radius-input: 2px;
+    --radius-button: 3px;
+
+    --text-company-name: 18px;
+    --text-slogan: 14px;
+    --text-form-title: 16px;
+    --text-input: 12px;
+    --text-button: 14px;
+    --text-links: 12px;
+    --text-annotation: 10px;
+    --text-small-annotation: 8px;
+
+    --size-oauth: 15px;
+    --icon-height-input: 7px;
+    --padding-input: 2px;
+
+    --sidebar-gap: 10px;
+  }
+
+  .login__wrapper {
+    width: 100%;
+    max-width: 540px;
+    gap: 20px;
+  }
+
+  .login__fields {
+    width: 100%;
+    gap: 20px;
+  }
+
+  html, body, main.login {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  .login {
+    flex-direction: column;
+    width: 100%;
+    min-height: 100%;
+    padding-top: 20px;
+  }
+
+  .login__form {
+    padding: 5px;
+  }
+
+  .login__aside {
+    display: none;
+  }
+
+  .login__oauth-buttons {
+    flex-direction: column;
+  }
 }

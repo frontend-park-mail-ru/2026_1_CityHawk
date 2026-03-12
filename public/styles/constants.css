@@ -1,0 +1,55 @@
+:root {
+    /* 
+     * ========================================
+     * COLORS
+     * ========================================
+     */
+    
+    /* Основные тона */
+    --color-background-tone-1: #244C87;  /* Background tone 1 */
+    --color-blank: #FEFEFE;               /* Blank */
+    
+    /* Акценты */
+    --color-accent-1: #003049;            /* Accent 2 */
+    --color-accent-2: #5A8AF9;            /* Accent 4 */
+    --color-accent-3: #3C6A9C;            /* Accent 5 */
+    
+    /* Цвета для форм */
+    --color-input-midtone-1: rgba(120, 120, 128, 0.16); /* Input midtone 1 */
+    --color-placeholder: rgba(0, 0, 0, 0.5);            /* Placeholder */
+    --color-background-blur: rgba(0, 0, 0, 0.4);        /* Background blur */
+    
+    /* Соцсети */
+    --color-vk: #0079FF;                  /* VK color */
+    --color-yandex: #FF1B00;               /* Yandex color */
+    --color-google-blue: #4285F4;          /* Google blue color */
+    --color-google-red: #EB4335;           /* Google red color */
+    --color-google-yellow: #FBBC05;        /* Google yellow color */
+    --color-google-green: #34A853;         /* Google green color */
+    
+    /* Дополнительные */
+    --color-dark: #780000;                 /* Dark */
+    --color-mid: #E63034;                   /* Mid */
+    --color-base: #FDF0D5;                 /* Base */
+    
+    /* 
+     * ========================================
+     * TYPOGRAPHY
+     * ========================================
+     */
+    
+    /* Семейства шрифтов */
+    --font-primary: 'Inter', sans-serif;
+    --font-company: 'Lexend Giga', sans-serif;
+    --font-slogan: 'Nunito', sans-serif;
+    
+    /* Размеры текста */
+    --text-company-name: 70px;            /* Company name size */
+    --text-slogan: 40px;                    /* Slogan size */
+    --text-input: 20px;                      /* Input text size */
+    --text-button: 24px;                     /* Buttons text size */
+    --text-annotation: 20px;                 /* Input annotation size */
+    --text-links: 20px;                      /* Links size */
+    --text-small-annotation: 16px;           /* Small annotation size */
+    --text-form-title: 40px;                    /* Form title size */
+}
