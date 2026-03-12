@@ -1,7 +1,26 @@
-<section class="card">
-  <h1>404</h1>
-  <p>Страница <strong>{{path}}</strong> не найдена.</p>
-  <nav class="nav">
-    <a href="/">На главную</a>
-  </nav>
-</section>
+<style>
+  .login__form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+  background-color: var(--color-blank);
+}
+
+.login__wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+</style>
+<div class="login__form">
+  <div class="login__wrapper">
+    <img src="/public/static/assets/bad_ticket.svg" class="login__ticket-email-image" alt="Грустный билет">
+
+    <h1 class="login__form-title">404</h1>
+    <p class="login__thankyou-text">Страница <strong>{{path}}</strong> не найдена.</p>
+
+    <button type="button" class="login__submit" onclick="window.location.href='/'">На главную</button>
+  </div>
+</div>
