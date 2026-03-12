@@ -10,9 +10,10 @@
     --color-blank: #FEFEFE;               /* Blank */
     
     /* Акценты */
-    --color-accent-1: #003049;            /* Accent 2 */
-    --color-accent-2: #5A8AF9;            /* Accent 4 */
-    --color-accent-3: #3C6A9C;            /* Accent 5 */
+    --color-accent-1: #003049;
+    --color-accent-2: #5A8AF9;
+    --color-accent-3: #3C6A9C;
+    --color-accent-4: #B7D5F5;
     
     /* Цвета для форм */
     --color-input-midtone-1: rgba(120, 120, 128, 0.16); /* Input midtone 1 */

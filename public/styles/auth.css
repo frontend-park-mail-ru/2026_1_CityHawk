@@ -1070,11 +1070,12 @@ MINI-MINI SCREENS (max-width:300px)
 RETURN BUTTON
 ======================================== */
 
-.login__form{
+.login__form {
     position: relative;
 }
 
-.login__close{
+/* Ссылка-крестик */
+.login__close {
     position: absolute;
     top: 30px;
     right: 30px;
@@ -1090,22 +1091,22 @@ RETURN BUTTON
     border: none;
     cursor: pointer;
 
-    opacity: 0.5;
-    transition: all 0.2s ease;
+    color: var(--color-placeholder);
+    transition: all 0.3s ease;
     z-index: 5;
 }
 
-.login__close img{
+.login__close svg {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    display: block;
 }
 
-.login__close:hover{
-    opacity: 1;
+.login__close:hover {
+    color: var(--color-accent-1);
 }
 
-.login__close:active{
-    opacity: 1;
+.login__close:active {
     transform: scale(0.95);
 }
