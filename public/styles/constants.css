@@ -53,7 +53,32 @@
     --text-annotation: 20px;                 /* Input annotation size */
     --text-links: 20px;                      /* Links size */
     --text-small-annotation: 16px;           /* Small annotation size */
-    
+
+    /*
+     * ========================================
+     * HOME TOKENS
+     * ========================================
+     */
+
+    --home-color-background: #D9D9D9;
+    --home-color-surface: #F2F2F2;
+    --home-color-text: #1F2D3D;
+    --home-color-text-muted: #314662;
+    --home-color-border: #8EA0B0;
+    --home-color-brand: #2F5E9F;
+    --home-color-brand-light: #D7E6FF;
+    --home-color-overlay: rgba(243, 243, 243, 0.3);
+    --home-color-shadow: rgba(17, 34, 58, 0.18);
+
+    --home-text-1: 72px;
+    --home-text-2: 32px;
+    --home-text-3: 24px;
+    --home-text-4: 20px;
+    --home-text-5: 16px;
+
+    --home-content-width: 1200px;
+    --home-side-padding: 24px;
+    --home-side-padding-mobile: 16px;
 }
 
 /* 
