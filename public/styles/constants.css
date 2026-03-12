@@ -55,3 +55,35 @@
     --text-small-annotation: 16px;           /* Small annotation size */
     
 }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Основные тона */
+    --color-background-tone-1: #2E6CB0;  /* Темный фон: темно-синий, мягкий для глаз */
+    --color-blank: #1E1E2F;               /* Основной блок: чуть светлее фона */
+
+    /* Акценты */
+    --color-accent-1: #4D90FE;  /* Синий для кнопок и важных элементов */
+    --color-accent-2: #2E6CB0;  /* Более глубокий синий для hover и вторичных акцентов */
+    --color-accent-3: #6EA8D6;  /* Светлый синий для фонов элементов и интерактивных состояний */
+    --color-accent-4: #8BBCE9;  /* Самый светлый акцент, для подсветок и градиентов */
+
+    /* Цвета для форм */
+    --color-input-midtone-1: rgba(255, 255, 255, 0.08); /* Полупрозрачный светлый для input */
+    --color-placeholder: rgba(255, 255, 255, 0.5);      /* Лёгкая подсказка в input */
+    --color-background-blur: rgba(0, 0, 0, 0.5);        /* Мягкий полупрозрачный blur */
+
+    /* Соцсети */
+    --color-vk: #66B0FF;                  /* ВК — мягкий синий */
+    --color-yandex: #FF6F61;               /* Яндекс — тёплый красный */
+    --color-google-blue: #8AB4F8;          /* Google blue — светлый, не резкий */
+    --color-google-red: #F28B82;           /* Google red — мягкий */
+    --color-google-yellow: #FDD663;        /* Google yellow — тёплый */
+    --color-google-green: #81C995;         /* Google green — мягкий зеленый */
+
+    /* Дополнительные */
+    --color-dark: #FF6B6B;                 /* Темно-красный для предупреждений */
+    --color-mid: #FF8F87;                  /* Средний акцент для кнопок и выделений */
+    --color-base: #2C2C3A;                 /* Основной цвет текста и блоков */
+  }
+}
