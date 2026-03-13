@@ -1,9 +1,9 @@
 /**
- * Attaches click handlers to password visibility toggle buttons within a root node.
- * Each toggle controls only its own password input, allowing multiple independent fields
- * (e.g., password and password confirmation) to work without interfering with each other.
+ * Подключает обработчики клика для кнопок показа/скрытия пароля внутри указанного корневого узла.
+ * Каждая кнопка управляет только своим полем пароля, что позволяет нескольким независимым
+ * полям (например, пароль и подтверждение пароля) работать без перекрытия.
  *
- * @param {ParentNode} [root=document] - The root element within which to search for password toggles.
+ * @param {ParentNode} [root=document] - Корневой элемент, в котором выполняется поиск переключателей пароля.
  * @returns {void}
  */
 export function attachPasswordToggles(root = document) {
