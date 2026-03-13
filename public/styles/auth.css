@@ -123,11 +123,11 @@ main.login {
     align-items: center;
 }
 
-.login__tickets-first img {
+.login__tickets-first svg {
     transform: rotate(180deg);
 }
 
-.login__tickets-third img {
+.login__tickets-third svg {
     transform: rotate(180deg);
 }
 
@@ -174,6 +174,8 @@ main.login {
 
 .login__ticket {
     width: var(--ticket-width);
+    height: auto;
+    aspect-ratio: 394 / 178;
     object-fit: cover;
     flex-shrink: 0;
 }
@@ -188,6 +190,15 @@ main.login {
 
 .login__tickets-third {
     padding-left: var(--shift-ticket-group-3);
+}
+
+
+.login__ticket-color1{
+  color: var(--color-accent-4);
+}
+
+.login__ticket-color2{
+  color: var(--color-accent-2);
 }
 
 /* ========================================
