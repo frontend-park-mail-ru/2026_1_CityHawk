@@ -1,234 +1,520 @@
 import { register } from '../lib/api.js';
 import { attachPasswordToggles } from '../lib/password-toggle.js';
 import { renderTemplate } from '../templates/renderer.js';
+import { EMAIL_REGEX } from '../templates/renderer.js';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/**
+ * Управляет состоянием анимации билетов между шагами регистрации.
+ *
+ * @param {ParentNode | null | undefined} root Корневой узел страницы.
+ * @param {{ step?: number }} state Состояние регистрации.
+ * @returns {void}
+ */
+function animateLoginTickets(root, state) {
+  if (!root) return;
 
-function getRegisterErrorState(error, nextState) {
-  if (error?.status === 409) {
-    return {
-      ...nextState,
-      emailError: 'Пользователь с таким email уже существует.',
-    };
-  }
+  const loginEl = root.classList.contains('login')
+    ? root
+    : root.querySelector('.login');
+  if (!loginEl) return;
 
-  if (error?.status === 400) {
-    return {
-      ...nextState,
-      formError: 'Проверьте корректность данных регистрации.',
-    };
-  }
+  if (state.step === 1) {
+    loginEl.classList.remove('loaded');
 
-  return {
-    ...nextState,
-    formError: 'Не удалось выполнить регистрацию.',
-  };
-}
-
-function setFieldError(field, message) {
-  if (!field) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (state.step === 1) {
+          loginEl.classList.add('loaded');
+        }
+      });
+    });
     return;
   }
 
-  const wrapper = field.querySelector('.login__input-wrapper');
-  const input = field.querySelector('input');
-  if (!wrapper || !input) {
-    return;
-  }
-
-  input.classList.add('is-error');
-
-  let errorNode = wrapper.querySelector('.login__error-message');
-  if (!errorNode) {
-    errorNode = document.createElement('p');
-    errorNode.className = 'login__error-message';
-    wrapper.append(errorNode);
-  }
-
-  errorNode.textContent = message;
+  loginEl.classList.add('loaded');
 }
 
-function clearFieldError(field) {
-  if (!field) {
-    return;
+/**
+ * Подключает валидацию и переход к следующему шагу для первого шага регистрации.
+ *
+ * @param {ParentNode} root Корневой узел страницы.
+ * @param {{ name?: string, surname?: string, step?: number }} state Состояние регистрации.
+ * @param {() => void} rerender Функция перерендера.
+ * @returns {void}
+ */
+function setupStep1(root, state, rerender) {
+
+  const nameInput = root.querySelector('#name');
+  const surnameInput = root.querySelector('#surname');
+  const submitBtn = root.querySelector('.login__submit');
+
+  let nameError = false;
+  let surnameError = false;
+
+  /**
+   * Показывает ошибку у поля первого шага.
+   *
+   * @param {Element} wrapper Обёртка поля.
+   * @param {string} msg Текст ошибки.
+   * @returns {void}
+   */
+  function showError(wrapper, msg) {
+    wrapper.classList.add('login__field-error-wrapper--error');
+    const err = wrapper.querySelector('.login__error-message');
+    if (err) err.textContent = msg;
   }
 
-  const input = field.querySelector('input');
-  const errorNode = field.querySelector('.login__error-message');
+  /**
+   * Скрывает ошибку у поля первого шага.
+   *
+   * @param {Element} wrapper Обёртка поля.
+   * @returns {void}
+   */
+  function hideError(wrapper) {
+    wrapper.classList.remove('login__field-error-wrapper--error');
+    const err = wrapper.querySelector('.login__error-message');
+    if (err) err.textContent = '';
+  }
 
-  input?.classList.remove('is-error');
-  errorNode?.remove();
+  nameInput.value = state.name || '';
+  surnameInput.value = state.surname || '';
+
+  nameInput.addEventListener('input', function () {
+
+    if (!nameError) return;
+
+    const wrapper = this.closest('.login__field-error-wrapper');
+
+    if (!this.value.trim()) {
+      showError(wrapper, 'Имя не должно быть пустым');
+    } else {
+      hideError(wrapper);
+      nameError = false;
+    }
+
+  });
+
+  surnameInput.addEventListener('input', function () {
+
+    if (!surnameError) return;
+
+    const wrapper = this.closest('.login__field-error-wrapper');
+
+    if (!this.value.trim()) {
+      showError(wrapper, 'Фамилия не должна быть пустой');
+    } else {
+      hideError(wrapper);
+      surnameError = false;
+    }
+
+  });
+
+  submitBtn.addEventListener('click', function (e) {
+
+    e.preventDefault();
+
+    const nameWrapper = nameInput.closest('.login__field-error-wrapper');
+    const surnameWrapper = surnameInput.closest('.login__field-error-wrapper');
+
+    nameError = false;
+    surnameError = false;
+
+    if (!nameInput.value.trim()) {
+      showError(nameWrapper, 'Имя не должно быть пустым');
+      nameError = true;
+    } else {
+      hideError(nameWrapper);
+    }
+
+    if (!surnameInput.value.trim()) {
+      showError(surnameWrapper, 'Фамилия не должна быть пустой');
+      surnameError = true;
+    } else {
+      hideError(surnameWrapper);
+    }
+
+    if (nameError || surnameError) return;
+
+    state.name = nameInput.value.trim();
+    state.surname = surnameInput.value.trim();
+
+    state.step = 2;
+
+    rerender();
+
+  });
+
 }
 
-function clearFormError(form) {
-  form?.querySelector('.login__error-message--form')?.remove();
+/**
+ * Подключает валидацию, проверку пароля и отправку формы на втором шаге регистрации.
+ *
+ * @param {ParentNode} root Корневой узел страницы.
+ * @param {{ name?: string, email?: string, password?: string, step?: number }} state Состояние регистрации.
+ * @param {() => void} rerender Функция перерендера.
+ * @returns {void}
+ */
+function setupStep2(root, state, rerender) {
+
+  const emailInput = root.querySelector('#email');
+  const passwordInput = root.querySelector('#password');
+  const confirmInput = root.querySelector('#password-confirm');
+
+  const nextBtn = root.querySelector('.login__next');
+  const prevBtn = root.querySelector('.login__prev');
+
+  let emailError = false;
+  let passError = false;
+  let confirmError = false;
+  let submitAttempted = false;
+
+  emailInput.value = state.email || '';
+
+  /**
+   * Показывает сообщение под полем и при необходимости подсвечивает его.
+   *
+   * @param {Element} wrapper Обёртка поля.
+   * @param {string} msg Текст сообщения.
+   * @param {string} color Цвет текста сообщения.
+   * @param {boolean} [showBorder=true] Нужно ли показывать рамку ошибки.
+   * @returns {void}
+   */
+  function showMessage(wrapper, msg, color, showBorder = true) {
+
+    const errorMsg = wrapper.querySelector('.login__error-message');
+
+    if (errorMsg) {
+      errorMsg.textContent = msg;
+      errorMsg.style.color = color || 'var(--color-mid)';
+    }
+
+    if (showBorder) {
+      wrapper.classList.add('login__field-error-wrapper--error');
+    } else {
+      wrapper.classList.remove('login__field-error-wrapper--error');
+    }
+
+  }
+
+  /**
+   * Скрывает сообщение и состояние ошибки у поля.
+   *
+   * @param {Element} wrapper Обёртка поля.
+   * @returns {void}
+   */
+  function hideMessage(wrapper) {
+
+    const errorMsg = wrapper.querySelector('.login__error-message');
+
+    if (errorMsg) errorMsg.textContent = '';
+
+    wrapper.classList.remove('login__field-error-wrapper--error');
+
+  }
+
+  /**
+   * Проверяет надёжность пароля и возвращает описание результата.
+   *
+   * @param {string} pass Пароль для проверки.
+   * @returns {{ msg: string, color: string, isError: boolean }}
+   */
+  function checkPasswordStrength(pass) {
+
+    if (!pass)
+      return { msg: 'Пароль не должен быть пустым!', color: 'var(--color-mid)', isError: true };
+
+    if (pass.length < 8)
+      return { msg: 'Пароль должен содержать не менее 8 символов!', color: 'var(--color-mid)', isError: true };
+
+    if (!/[a-z]/.test(pass) || !/[A-Z]/.test(pass))
+      return { msg: 'Пароль должен содержать буквы в разном регистре!', color: 'orange', isError: true };
+
+    if (!/[!@#$%^&*]/.test(pass))
+      return { msg: 'Пароль должен содержать спецсимволы!', color: 'gold', isError: true };
+
+    return { msg: 'Ваш пароль достаточно надежный!', color: 'green', isError: false };
+
+  }
+
+  /**
+   * Валидирует email на втором шаге регистрации.
+   *
+   * @returns {void}
+   */
+  function validateEmail() {
+
+    const wrapper = emailInput.closest('.login__field-error-wrapper');
+    const value = emailInput.value.trim();
+
+    if (!submitAttempted && !emailError) return;
+
+    if (!value) {
+
+      showMessage(wrapper, 'Поле email не должно быть пустым!', 'var(--color-mid)', true);
+      emailError = true;
+
+    } else if (!EMAIL_REGEX.test(value)) {
+
+      showMessage(wrapper, 'Введите email в формате address@service.com!', 'var(--color-mid)', true);
+      emailError = true;
+
+    } else {
+
+      hideMessage(wrapper);
+      emailError = false;
+
+    }
+
+  }
+
+  emailInput.addEventListener('input', validateEmail);
+
+  /**
+   * Обновляет состояние поля пароля и сообщение о его надёжности.
+   *
+   * @returns {void}
+   */
+  function updatePasswordField() {
+
+    const wrapper = passwordInput.closest('.login__field-error-wrapper');
+    const pass = passwordInput.value.trim();
+    const result = checkPasswordStrength(pass);
+
+    let showText = true;
+
+    if (!result.isError && submitAttempted && (emailError || confirmError)) {
+      showText = false;
+    }
+
+    const showBorder = result.isError && (submitAttempted || passError);
+
+    if (showText) {
+
+      showMessage(wrapper, result.msg, result.color, result.isError ? showBorder : false);
+
+    } else {
+
+      const errorMsg = wrapper.querySelector('.login__error-message');
+
+      if (errorMsg) errorMsg.textContent = '';
+
+      wrapper.classList.toggle('login__field-error-wrapper--error', showBorder);
+
+    }
+
+    passError = result.isError && (submitAttempted || passError);
+
+  }
+
+  passwordInput.addEventListener('input', updatePasswordField);
+  passwordInput.addEventListener('focus', updatePasswordField);
+
+  passwordInput.addEventListener('blur', () => {
+
+    const wrapper = passwordInput.closest('.login__field-error-wrapper');
+    const pass = passwordInput.value.trim();
+    const result = checkPasswordStrength(pass);
+
+    if (!result.isError) hideMessage(wrapper);
+
+  });
+
+  /**
+   * Обновляет состояние поля подтверждения пароля.
+   *
+   * @returns {void}
+   */
+  function updateConfirmField() {
+
+    const wrapper = confirmInput.closest('.login__field-error-wrapper');
+    const pass = passwordInput.value.trim();
+    const confirm = confirmInput.value.trim();
+
+    let isError = false;
+    let msg = '';
+    let color = '';
+
+    if (!confirm) {
+
+      msg = 'Пароль не должен быть пустым!';
+      color = 'var(--color-mid)';
+      isError = true;
+
+    } else if (confirm !== pass) {
+
+      msg = 'Пароли должны совпадать!';
+      color = 'var(--color-mid)';
+      isError = true;
+
+    }
+
+    const showBorder = isError && (submitAttempted || confirmError);
+
+    if (isError) {
+
+      showMessage(wrapper, msg, color, showBorder);
+
+    } else {
+
+      hideMessage(wrapper);
+
+    }
+
+    confirmError = isError && (submitAttempted || confirmError);
+
+  }
+
+  confirmInput.addEventListener('input', updateConfirmField);
+  confirmInput.addEventListener('focus', updateConfirmField);
+
+  confirmInput.addEventListener('blur', () => {
+
+    const wrapper = confirmInput.closest('.login__field-error-wrapper');
+
+    if (!confirmError) hideMessage(wrapper);
+
+  });
+
+  prevBtn.addEventListener('click', function (e) {
+
+    e.preventDefault();
+
+    state.email = emailInput.value;
+
+    state.step = 1;
+
+    rerender();
+
+  });
+
+  nextBtn.addEventListener('click', async function (e) {
+
+    e.preventDefault();
+
+    submitAttempted = true;
+
+    validateEmail();
+    updatePasswordField();
+    updateConfirmField();
+
+    if (emailError || passError || confirmError) return;
+
+    state.email = emailInput.value.trim();
+    state.password = passwordInput.value.trim();
+
+    try {
+
+      await register({
+        username: state.name,
+        email: state.email,
+        password: state.password
+      });
+
+      state.step = 3;
+
+      rerender();
+
+    } catch {
+
+      const wrapper = emailInput.closest('.login__field-error-wrapper');
+
+      showMessage(wrapper, 'Пользователь уже существует', 'var(--color-mid)', true);
+
+    }
+
+  });
+
 }
 
+/**
+ * Возвращает имя шаблона для текущего шага регистрации.
+ *
+ * @param {number} step Номер шага.
+ * @returns {string}
+ */
+function getStepTemplate(step) {
+
+  switch (step) {
+    case 1: return 'register-form-step1';
+    case 2: return 'register-form-step2';
+    case 3: return 'register-form-step3';
+    default: return 'register-form-step1';
+  }
+
+}
+
+/**
+ * Монтирует представление регистрации и подключает обработчики для активного шага.
+ *
+ * @param {HTMLElement} root Корневой элемент страницы.
+ * @param {{ step?: number }} state Состояние регистрации.
+ * @param {() => void} rerender Функция перерендера.
+ * @returns {void}
+ */
+function mountRegister(root, state, rerender) {
+  attachPasswordToggles(root);
+  animateLoginTickets(root, state);
+
+  if (state.step === 1) {
+    setupStep1(root, state, rerender);
+  }
+
+  if (state.step === 2) {
+    setupStep2(root, state, rerender);
+  }
+}
+
+/**
+ * Создаёт объект представления для многошаговой регистрации.
+ *
+ * @param {Record<string, any>} [state] Состояние страницы.
+ * @returns {{ html: string, mount(root: HTMLElement): void }}
+ */
 function createRegisterView(state = {}) {
+
+  state.step = state.step || 1;
+
+  const html = `
+    <main class="login">
+      ${renderTemplate('login-aside')}
+      ${renderTemplate(getStepTemplate(state.step), state)}
+    </main>
+  `;
+
   return {
-    html: renderTemplate('register', state),
+
+    html,
+
     mount(root) {
-      attachPasswordToggles(root);
 
-      const form = root.querySelector('#register-form');
-      if (!form) {
-        return;
-      }
+      root.innerHTML = this.html;
 
-      const nameInput = root.querySelector('#name');
-      const emailInput = root.querySelector('#register-email');
-      const passwordInput = root.querySelector('#register-password');
-      const passwordRepeatInput = root.querySelector('#register-password-repeat');
-      const nameField = nameInput?.closest('.login__field');
-      const emailField = emailInput?.closest('.login__field');
-      const passwordField = passwordInput?.closest('.login__field');
-      const passwordRepeatField = passwordRepeatInput?.closest('.login__field');
+      /**
+       * Полностью перерисовывает текущее представление регистрации.
+       *
+       * @returns {void}
+       */
+      const rerender = () => {
 
-      nameInput?.addEventListener('input', () => {
-        clearFormError(form);
+        const view = createRegisterView(state);
 
-        if (!nameInput.classList.contains('is-error')) {
-          return;
-        }
+        view.mount(root);
 
-        if (!nameInput.value.trim()) {
-          setFieldError(nameField, 'Имя не должно быть пустым.');
-          return;
-        }
+      };
 
-        clearFieldError(nameField);
-      });
+      mountRegister(root, state, rerender);
 
-      emailInput?.addEventListener('input', () => {
-        clearFormError(form);
+    }
 
-        if (!emailInput.classList.contains('is-error')) {
-          return;
-        }
-
-        const email = emailInput.value.trim();
-        if (!email) {
-          setFieldError(emailField, 'Поле email не должно быть пустым.');
-          return;
-        }
-
-        if (!EMAIL_PATTERN.test(email)) {
-          setFieldError(emailField, 'Введите email в формате address@service.com.');
-          return;
-        }
-
-        clearFieldError(emailField);
-      });
-
-      passwordInput?.addEventListener('input', () => {
-        clearFormError(form);
-
-        if (passwordInput.classList.contains('is-error')) {
-          if (!passwordInput.value) {
-            setFieldError(passwordField, 'Пароль не должен быть пустым.');
-          } else {
-            clearFieldError(passwordField);
-          }
-        }
-
-        if (passwordRepeatInput?.classList.contains('is-error')) {
-          if (!passwordRepeatInput.value) {
-            setFieldError(passwordRepeatField, 'Повторите пароль.');
-          } else if (passwordRepeatInput.value !== passwordInput.value) {
-            setFieldError(passwordRepeatField, 'Пароли не совпадают.');
-          } else {
-            clearFieldError(passwordRepeatField);
-          }
-        }
-      });
-
-      passwordRepeatInput?.addEventListener('input', () => {
-        clearFormError(form);
-
-        if (!passwordRepeatInput.classList.contains('is-error')) {
-          return;
-        }
-
-        if (!passwordRepeatInput.value) {
-          setFieldError(passwordRepeatField, 'Повторите пароль.');
-          return;
-        }
-
-        if (passwordRepeatInput.value !== passwordInput?.value) {
-          setFieldError(passwordRepeatField, 'Пароли не совпадают.');
-          return;
-        }
-
-        clearFieldError(passwordRepeatField);
-      });
-
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const formData = new FormData(form);
-        const name = String(formData.get('name') || '').trim();
-        const email = String(formData.get('email') || '').trim();
-        const password = String(formData.get('password') || '');
-        const passwordRepeat = String(formData.get('passwordRepeat') || '');
-
-        const nextState = {
-          name,
-          email,
-          nameError: '',
-          emailError: '',
-          passwordError: '',
-          passwordRepeatError: '',
-          formError: '',
-        };
-
-        if (!name) {
-          nextState.nameError = 'Имя не должно быть пустым.';
-        }
-
-        if (!email) {
-          nextState.emailError = 'Поле email не должно быть пустым.';
-        } else if (!EMAIL_PATTERN.test(email)) {
-          nextState.emailError = 'Введите email в формате address@service.com.';
-        }
-
-        if (!password) {
-          nextState.passwordError = 'Пароль не должен быть пустым.';
-        }
-
-        if (!passwordRepeat) {
-          nextState.passwordRepeatError = 'Повторите пароль.';
-        } else if (password !== passwordRepeat) {
-          nextState.passwordRepeatError = 'Пароли не совпадают.';
-        }
-
-        if (
-          nextState.nameError ||
-          nextState.emailError ||
-          nextState.passwordError ||
-          nextState.passwordRepeatError
-        ) {
-          const nextView = createRegisterView(nextState);
-          root.innerHTML = nextView.html;
-          nextView.mount(root);
-          return;
-        }
-
-        try {
-          await register({ email, password });
-        } catch (error) {
-          const nextView = createRegisterView(getRegisterErrorState(error, nextState));
-          root.innerHTML = nextView.html;
-          nextView.mount(root);
-          return;
-        }
-
-        window.history.pushState(null, '', '/');
-        window.dispatchEvent(new PopStateEvent('popstate'));
-      });
-    },
   };
+
 }
 
+/**
+ * Возвращает представление страницы регистрации.
+ *
+ * @returns {{ html: string, mount(root: HTMLElement): void }}
+ */
 export function registerPage() {
   return createRegisterView();
 }

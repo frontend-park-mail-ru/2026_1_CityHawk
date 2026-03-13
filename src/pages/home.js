@@ -2,6 +2,12 @@ import { getHome, getMe, logout } from '../lib/api.js';
 import { getAccessToken } from '../lib/auth-store.js';
 import { renderTemplate } from '../templates/renderer.js';
 
+/**
+ * Формирует короткое имя пользователя из email.
+ *
+ * @param {{ email?: string } | null | undefined} user Данные пользователя.
+ * @returns {string}
+ */
 function getUserDisplayName(user) {
   if (!user?.email) {
     return '';
@@ -10,6 +16,12 @@ function getUserDisplayName(user) {
   return user.email.split('@')[0];
 }
 
+/**
+ * Создаёт представление главной страницы, загружает данные и подключает выход из аккаунта.
+ *
+ * @param {{ navigate: (path: string, options?: { replace?: boolean }) => void }} options Параметры маршрута.
+ * @returns {Promise<{ html: string, mount(root: HTMLElement): (() => void) }>}
+ */
 export async function homePage({ navigate }) {
   let user = null;
   let homeData = {

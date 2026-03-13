@@ -1,25 +1,30 @@
-const OPEN_EYE_ICON = '/public/static/assets/eye.svg';
-const CLOSED_EYE_ICON = '/public/static/assets/eye-closed.svg';
-
+/**
+ * Подключает обработчики клика для кнопок показа/скрытия пароля внутри указанного корневого узла.
+ * Каждая кнопка управляет только своим полем пароля, что позволяет нескольким независимым
+ * полям (например, пароль и подтверждение пароля) работать без перекрытия.
+ *
+ * @param {ParentNode} [root=document] - Корневой элемент, в котором выполняется поиск переключателей пароля.
+ * @returns {void}
+ */
 export function attachPasswordToggles(root = document) {
-  const passwordFields = root.querySelectorAll('.login__password');
+  const toggles = root.querySelectorAll('.login__password-toggle');
 
-  passwordFields.forEach((field) => {
-    const input = field.querySelector('input');
-    const button = field.querySelector('.login__password-toggle');
-    const icon = button?.querySelector('img');
+  toggles.forEach((button) => {
+    const field = button.closest('.login__field');
+    const input = field?.querySelector('input');
+    const useEl = button.querySelector('svg use');
 
-    if (!input || !button) {
-      return;
-    }
+    if (!input || !useEl) return;
 
     button.addEventListener('click', () => {
       const isHidden = input.type === 'password';
+
       input.type = isHidden ? 'text' : 'password';
 
-      if (icon) {
-        icon.src = isHidden ? CLOSED_EYE_ICON : OPEN_EYE_ICON;
-      }
+      useEl.setAttribute(
+        'href',
+        isHidden ? '#eye-closed' : '#eye-open'
+      );
     });
   });
 }

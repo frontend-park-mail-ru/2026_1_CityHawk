@@ -1,0 +1,9 @@
+services:
+  frontend:
+    build: .
+    ports:
+      - "80:8000"
+    environment:
+      - PORT=8000
+      #  - API_BASE_URL=http://localhost:8080  # only for local development
+    restart: unless-stopped

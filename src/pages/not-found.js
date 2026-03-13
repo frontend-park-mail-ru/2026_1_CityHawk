@@ -1,11 +1,11 @@
+import { renderTemplate } from '../templates/renderer.js';
+
+/**
+ * Рендерит страницу 404 для неизвестного маршрута.
+ *
+ * @param {{ path: string }} options Параметры маршрута.
+ * @returns {string}
+ */
 export function notFoundPage({ path }) {
-  return `
-    <section class="card">
-      <h1>404</h1>
-      <p>Страница <strong>${path}</strong> не найдена.</p>
-      <nav class="nav">
-        <a href="/">На главную</a>
-      </nav>
-    </section>
-  `;
+  return renderTemplate('not-found', { path });
 }
