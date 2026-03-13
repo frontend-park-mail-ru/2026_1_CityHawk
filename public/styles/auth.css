@@ -116,6 +116,7 @@ main.login {
 }
 
 .login__branding {
+    color: var(--color-blank);
     display: flex;
     flex-direction: row;
     gap: var(--gap-logo);
@@ -567,6 +568,7 @@ main.login {
 
 /* Билетик с email поверх */
 .login__ticket-email-wrapper {
+    color: var(--color-accent-4);
     position: relative;
     width: fit-content;
     margin: 0 auto;
