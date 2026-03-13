@@ -103,7 +103,7 @@ function setupValidation(root) {
     if (!emailVal) {
       showError(emailWrapper, 'Поле email не должно быть пустым!');
       emailError = true;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+    } else if (!EMAIL_PATTERN.test(emailVal)) {
       showError(emailWrapper, 'Введите email в формате address@service.com!');
       emailError = true;
     } else {
