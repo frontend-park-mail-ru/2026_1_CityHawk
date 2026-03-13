@@ -454,9 +454,10 @@ main.login {
     border: none;
     cursor: pointer;
     z-index: 2;
+    color: var(--color-accent-1);
 }
 
-.login__password-toggle img {
+.login__password-toggle svg {
     width: 100%;
     height: 100%;
     object-fit: contain;
