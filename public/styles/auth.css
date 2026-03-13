@@ -112,7 +112,13 @@ main.login {
 
 .login__logo {
     height: var(--height-logo);
-    width: auto;
+    width: calc(var(--height-logo) * 213 / 120);
+    aspect-ratio: 213 / 120;
+    display: block;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: url("/public/static/assets/logo.svg") center / contain no-repeat;
+    mask: url("/public/static/assets/logo.svg") center / contain no-repeat;
 }
 
 .login__branding {

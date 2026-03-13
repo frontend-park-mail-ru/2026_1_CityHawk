@@ -75,8 +75,16 @@
     --home-text-3: 24px;
     --home-text-4: 20px;
     --home-text-5: 16px;
+    --home-text-logo: 40px;
+    --home-text-hero-title-tablet: 58px;
+    --home-text-logo-mobile: 40px;
+    --home-text-hero-title-mobile: 42px;
+    --home-text-hero-subtitle-mobile: 18px;
+    --home-text-input-mobile: 16px;
+    --home-text-search-button-mobile: 24px;
+    --home-text-section-title-mobile: 26px;
 
-    --home-content-width: 1200px;
+    --home-content-width: 1240px;
     --home-side-padding: 24px;
     --home-side-padding-mobile: 16px;
 }
@@ -115,5 +123,34 @@
     --color-dark: #FF6B6B;                 /* Темно-красный для предупреждений */
     --color-mid: #FF8F87;                  /* Средний акцент для кнопок и выделений */
     --color-base: #2C2C3A;                 /* Основной цвет текста и блоков */
+
+    /*
+     * ========================================
+     * HOME TOKENS (Dark Scheme)
+     * ========================================
+     */
+
+    --home-color-background: #101928;
+    --home-color-surface: #162235;
+    --home-color-surface-soft: #1C2B40;
+    --home-color-text: #F2F6FD;
+    --home-color-text-muted: #B7C7DD;
+    --home-color-border: rgba(139, 188, 233, 0.22);
+    --home-color-brand: #4D90FE;
+    --home-color-brand-light: #D7E6FF;
+    --home-color-overlay: rgba(16, 25, 40, 0.72);
+    --home-color-shadow: rgba(0, 0, 0, 0.42);
+    --home-color-card-gradient: linear-gradient(
+        180deg,
+        rgba(22, 34, 53, 0.96) 0%,
+        rgba(28, 43, 64, 0.92) 100%
+    );
+    --home-color-main-top: linear-gradient(
+        to bottom,
+        #050B1B 0%,
+        #0F1B2D 30%,
+        #162235 70%,
+        #101928 100%
+    );
   }
 }

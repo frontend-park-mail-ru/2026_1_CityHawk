@@ -12,10 +12,8 @@ export function attachPasswordToggles(root = document) {
       const isHidden = input.type === 'password';
       input.type = isHidden ? 'text' : 'password';
 
-      // Переключаем иконку глаза
       useEl.setAttribute('href', isHidden ? '#eye-closed' : '#eye-open');
 
-      // Если есть поле confirm password в том же блоке (например, рядом)
       const confirmField = root.querySelector('.login__field.confirm input');
       const confirmUse = root.querySelector('.login__field.confirm svg use');
 
