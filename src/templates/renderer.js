@@ -11,6 +11,8 @@ const partialNames = [
   'register-form-step3',
 ];
 
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const pageNames = [
   'app-error',
   'home',

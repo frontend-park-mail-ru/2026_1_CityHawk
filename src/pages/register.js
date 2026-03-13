@@ -1,8 +1,7 @@
 import { register } from '../lib/api.js';
 import { attachPasswordToggles } from '../lib/password-toggle.js';
 import { renderTemplate } from '../templates/renderer.js';
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { EMAIL_REGEX } from '../templates/renderer.js';
 
 /**
  * Управляет состоянием анимации билетов между шагами регистрации.
@@ -254,7 +253,7 @@ function setupStep2(root, state, rerender) {
       showMessage(wrapper, 'Поле email не должно быть пустым!', 'var(--color-mid)', true);
       emailError = true;
 
-    } else if (!EMAIL_PATTERN.test(value)) {
+    } else if (!EMAIL_REGEX.test(value)) {
 
       showMessage(wrapper, 'Введите email в формате address@service.com!', 'var(--color-mid)', true);
       emailError = true;

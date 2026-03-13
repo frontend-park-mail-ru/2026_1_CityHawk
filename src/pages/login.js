@@ -1,6 +1,7 @@
 import { login } from '../lib/api.js';
 import { attachPasswordToggles } from '../lib/password-toggle.js';
 import { renderTemplate } from '../templates/renderer.js';
+import { EMAIL_REGEX } from '../templates/renderer.js';
 
 /**
  * Запускает анимацию появления билетов на экране входа после монтирования.
@@ -10,9 +11,16 @@ import { renderTemplate } from '../templates/renderer.js';
  */
 function animateLoginTickets(root) {
   if (!root) return;
-  const loginEl = root.classList.contains('login') ? root : root.querySelector('.login');
+
+  const loginEl = root.classList.contains('login') 
+    ? root 
+    : root.querySelector('.login');
+
   if (!loginEl) return;
-  setTimeout(() => loginEl.classList.add('loaded'), 100);
+
+  requestAnimationFrame(() => {
+    loginEl.classList.add('loaded');
+  });
 }
 
 /**
@@ -60,7 +68,7 @@ function setupValidation(root) {
     const val = this.value.trim();
     if (!val) {
       showError(wrapper, 'Поле email не должно быть пустым!');
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+    } else if (!EMAIL_REGEX.test(val)) {
       showError(wrapper, 'Введите email в формате address@service.com!');
     } else {
       hideError(wrapper);
