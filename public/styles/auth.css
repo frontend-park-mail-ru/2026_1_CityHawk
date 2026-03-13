@@ -408,15 +408,21 @@ main.login {
     color: var(--color-accent-2);
 }
 
-.login__submit {
+.login__submit,
+.login__prev,
+.login__next {
     transition: background-color 0.3s ease-out;
 }
 
-.login__submit:hover {  
+.login__submit:hover,
+.login__prev:hover,
+.login__next:hover {  
     background: var(--color-accent-3);
 }
 
-.login__submit:active {
+.login__submit:active,
+.login__prev:active,
+.login__next:active {
     background: var(--color-accent-2);
     transform: scale(0.98);
     transition: all 0.1s ease-out;
