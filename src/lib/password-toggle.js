@@ -1,3 +1,10 @@
+/**
+ * Attaches click handlers to password visibility toggle buttons within a root node.
+ * Also keeps the confirmation password field in sync when it exists.
+ *
+ * @param {ParentNode} [root=document] Root element used to search for toggle controls.
+ * @returns {void}
+ */
 export function attachPasswordToggles(root = document) {
   const toggles = root.querySelectorAll('.login__password-toggle');
 
