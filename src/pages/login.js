@@ -2,6 +2,8 @@ import { login } from '../lib/api.js';
 import { attachPasswordToggles } from '../lib/password-toggle.js';
 import { renderTemplate } from '../templates/renderer.js';
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 /**
  * Запускает анимацию появления билетов на экране входа после монтирования.
  *
@@ -60,7 +62,7 @@ function setupValidation(root) {
     const val = this.value.trim();
     if (!val) {
       showError(wrapper, 'Поле email не должно быть пустым!');
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+    } else if (!EMAIL_PATTERN.test(val)) {
       showError(wrapper, 'Введите email в формате address@service.com!');
     } else {
       hideError(wrapper);
@@ -95,7 +97,7 @@ function setupValidation(root) {
     if (!emailVal) {
       showError(emailWrapper, 'Поле email не должно быть пустым!');
       emailError = true;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+    } else if (!EMAIL_PATTERN.test(emailVal)) {
       showError(emailWrapper, 'Введите email в формате address@service.com!');
       emailError = true;
     } else {
