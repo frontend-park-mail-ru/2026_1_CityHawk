@@ -1,7 +1,7 @@
 const partialNames = [
   'footer',
   'header',
-  'hero',
+  'hero-search',
   'login-aside',
   'login-form',
   'mood',
@@ -21,6 +21,27 @@ const pageNames = [
 
 const templateCache = new Map();
 let isLoaded = false;
+
+const partialPaths = {
+  footer: '/src/components/footer/footer.hbs',
+  header: '/src/components/header/header.hbs',
+  'hero-search': '/src/modules/home/hero-search.hbs',
+  'login-aside': '/src/modules/auth/shared/login-aside.hbs',
+  'login-form': '/src/modules/auth/login/login-form.hbs',
+  mood: '/src/modules/collections/mood-section.hbs',
+  places: '/src/modules/events/list/events-list.hbs',
+  'register-form-step1': '/src/modules/auth/register/register-step1.hbs',
+  'register-form-step2': '/src/modules/auth/register/register-step2.hbs',
+  'register-form-step3': '/src/modules/auth/register/register-step3.hbs',
+};
+
+const pagePaths = {
+  'app-error': '/src/app/app-error.hbs',
+  home: '/src/pages/home/home.hbs',
+  login: '/src/pages/login/login.hbs',
+  'not-found': '/src/pages/not-found/not-found.hbs',
+  register: '/src/pages/register/register.hbs',
+};
 
 /**
  * Возвращает глобальный runtime Handlebars или выбрасывает ошибку, если он не подключён.
@@ -64,7 +85,7 @@ export async function loadTemplates() {
   const Handlebars = getHandlebars();
 
   const partials = await Promise.all(
-    partialNames.map(async (name) => [name, await loadText(`/src/templates/partials/${name}.hbs`)]),
+    partialNames.map(async (name) => [name, await loadText(partialPaths[name])]),
   );
 
   partials.forEach(([name, source]) => {
@@ -73,7 +94,7 @@ export async function loadTemplates() {
   });
 
   const pages = await Promise.all(
-    pageNames.map(async (name) => [name, await loadText(`/src/templates/pages/${name}.hbs`)]),
+    pageNames.map(async (name) => [name, await loadText(pagePaths[name])]),
   );
 
   pages.forEach(([name, source]) => {

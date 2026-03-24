@@ -1,9 +1,9 @@
 import { Router } from './router/router.js';
-import { refresh } from './lib/api.js';
-import { homePage } from './pages/home.js';
-import { loginPage } from './pages/login.js';
-import { registerPage } from './pages/register.js';
-import { notFoundPage } from './pages/not-found.js';
+import { refresh } from '../api/auth.api.js';
+import { homePage } from '../pages/home/home-page.js';
+import { loginPage } from '../pages/login/login-page.js';
+import { registerPage } from '../pages/register/register-page.js';
+import { notFoundPage } from '../pages/not-found/not-found-page.js';
 import { loadTemplates, renderTemplate } from './templates/renderer.js';
 
 const root = document.getElementById('root');

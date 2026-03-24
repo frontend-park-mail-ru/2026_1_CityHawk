@@ -1,6 +1,7 @@
-import { login } from '../lib/api.js';
-import { attachPasswordToggles } from '../lib/password-toggle.js';
-import { renderTemplate } from '../templates/renderer.js';
+import { login } from '../../api/auth.api.js';
+import { attachOAuthButtons } from '../../modules/auth/oauth.js';
+import { attachPasswordToggles } from '../../components/password-toggle/password-toggle.js';
+import { renderTemplate } from '../../app/templates/renderer.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -141,6 +142,7 @@ function setupValidation(root) {
  */
 function mountLogin(root) {
   attachPasswordToggles(root);
+  attachOAuthButtons(root);
   animateLoginTickets(root);
   setupValidation(root);
 }

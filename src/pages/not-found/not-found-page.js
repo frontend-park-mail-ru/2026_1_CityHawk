@@ -1,4 +1,4 @@
-import { renderTemplate } from '../templates/renderer.js';
+import { renderTemplate } from '../../app/templates/renderer.js';
 
 /**
  * Рендерит страницу 404 для неизвестного маршрута.

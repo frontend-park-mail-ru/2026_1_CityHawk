@@ -1,6 +1,7 @@
-import { register } from '../lib/api.js';
-import { attachPasswordToggles } from '../lib/password-toggle.js';
-import { renderTemplate } from '../templates/renderer.js';
+import { register } from '../../api/auth.api.js';
+import { attachOAuthButtons } from '../../modules/auth/oauth.js';
+import { attachPasswordToggles } from '../../components/password-toggle/password-toggle.js';
+import { renderTemplate } from '../../app/templates/renderer.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -454,6 +455,7 @@ function getStepTemplate(step) {
  */
 function mountRegister(root, state, rerender) {
   attachPasswordToggles(root);
+  attachOAuthButtons(root);
   animateLoginTickets(root, state);
 
   if (state.step === 1) {
