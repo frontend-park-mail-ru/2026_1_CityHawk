@@ -45,13 +45,13 @@
     --font-slogan: 'Nunito', sans-serif;
     
     /* Размеры текста */
-    --text-company-name: 70px;            /* Company name size */
-    --text-slogan: 40px;                    /* Slogan size */
-    --text-form-title: 40px;                    /* Form title size */
-    --text-button: 24px;                     /* Buttons text size */
-    --text-input: 20px;                      /* Input text size */
-    --text-annotation: 20px;                 /* Input annotation size */
-    --text-links: 20px;                      /* Links size */
+    --text-company-name: 50px;            /* Company name size */
+    --text-slogan: 24px;                    /* Slogan size */
+    --text-form-title: 32px;                    /* Form title size */
+    --text-button: 16px;                     /* Buttons text size */
+    --text-input: 16px;                      /* Input text size */
+    --text-annotation: 16px;                 /* Input annotation size */
+    --text-links: 16px;                      /* Links size */
     --text-small-annotation: 16px;           /* Small annotation size */
 
     /*
@@ -91,38 +91,39 @@
 
 /* 
 * ========================================
-* COLORS (Dark Scheme)
+* COLORS (Dark Theme)
 * ========================================
 */
 @media (prefers-color-scheme: dark) {
   :root {
     /* Основные тона */
-    --color-background-tone-1: #2E6CB0;  /* Темный фон: темно-синий, мягкий для глаз */
-    --color-blank: #1E1E2F;               /* Основной блок: чуть светлее фона */
+    --color-background-tone-1: #244C87;  /* Background tone 1 */
+    --color-blank: #FEFEFE;              /* Основной блок: чуть светлее фона */            
 
     /* Акценты */
-    --color-accent-1: #4D90FE;  /* Синий для кнопок и важных элементов */
-    --color-accent-2: #6EA8D6;  /* Более глубокий синий для hover и вторичных акцентов */
-    --color-accent-3: #5AA0D0;  /* Средний синий для фонов элементов и интерактивных состояний */
-    --color-accent-4: #8BBCE9;  /* Светлый синий для подсветок */
+    --color-accent-1: #003049;
+    --color-accent-2: #5A8AF9;
+    --color-accent-3: #3C6A9C;
+    --color-accent-4: #B7D5F5;
 
     /* Цвета для форм */
-    --color-input-midtone-1: rgba(255, 255, 255, 0.08); /* Полупрозрачный светлый для input */
-    --color-placeholder: rgba(255, 255, 255, 0.5);      /* Лёгкая подсказка в input */
+    --color-input-midtone-1: #1A283E; /* Полупрозрачный светлый для input */
+    --color-placeholder: rgba(217, 217, 217, 0.8);      /* Лёгкая подсказка в input */
     --color-background-blur: rgba(0, 0, 0, 0.5);        /* Мягкий полупрозрачный blur */
 
-    /* Соцсети */
-    --color-vk: #66B0FF;                  /* ВК — мягкий синий */
-    --color-yandex: #FF6F61;               /* Яндекс — тёплый красный */
-    --color-google-blue: #8AB4F8;          /* Google blue — светлый, не резкий */
-    --color-google-red: #F28B82;           /* Google red — мягкий */
-    --color-google-yellow: #FDD663;        /* Google yellow — тёплый */
-    --color-google-green: #81C995;         /* Google green — мягкий зеленый */
-
     /* Дополнительные */
-    --color-dark: #FF6B6B;                 /* Темно-красный для предупреждений */
-    --color-mid: #FF8F87;                  /* Средний акцент для кнопок и выделений */
-    --color-base: #2C2C3A;                 /* Основной цвет текста и блоков */
+    --color-vk: #0079FF;                  /* VK color */
+    --color-yandex: #FF1B00;               /* Yandex color */
+    --color-google-blue: #4285F4;          /* Google blue color */
+    --color-google-red: #EB4335;           /* Google red color */
+    --color-google-yellow: #FBBC05;        /* Google yellow color */
+    --color-google-green: #34A853;         /* Google green color */
+    
+    /* Дополнительные */
+    --color-dark: #780000;                 /* Dark */
+    --color-mid: #E63034;                   /* Mid */
+    --color-base: #121F31;
+    --color-dark-stroke: #30455D;
 
     /*
      * ========================================
