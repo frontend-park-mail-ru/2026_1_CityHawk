@@ -229,6 +229,7 @@ main.login {
 }
 
 .login__form-title {
+    text-align: center;
     font-family: var(--font-slogan, sans-serif);
     font-size: var(--text-form-title);
     color: var(--color-background-tone-1);
@@ -646,6 +647,17 @@ main.login {
 .login__thankyou-text {
     animation: ticketFloat 0.6s ease-out 0.2s forwards;
     opacity: 0;
+}
+
+.login__pass-reset-text {
+    max-width: var(--width-button);
+    margin-left: auto;
+    margin-right: auto;
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-annotation);
+    color: var(--color-accent-1);
+    font-weight: 400;
+    text-align: center;
 }
 
 /* ========================================
@@ -1180,6 +1192,10 @@ DARK THEME ADDITIONS
     }
 
     .login__thankyou-text {
+        color: var(--color-blank);
+    }
+
+    .login__pass-reset-text {
         color: var(--color-blank);
     }
 

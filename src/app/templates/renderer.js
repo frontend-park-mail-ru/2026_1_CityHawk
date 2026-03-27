@@ -9,6 +9,8 @@ const partialNames = [
   'register-form-step1',
   'register-form-step2',
   'register-form-step3',
+  'reset_password-step1',
+  'reset_password-step2'
 ];
 
 const pageNames = [
@@ -17,6 +19,7 @@ const pageNames = [
   'login',
   'not-found',
   'register',
+  'password_reset'
 ];
 
 const templateCache = new Map();
@@ -33,6 +36,8 @@ const partialPaths = {
   'register-form-step1': '/src/modules/auth/register/register-step1.hbs',
   'register-form-step2': '/src/modules/auth/register/register-step2.hbs',
   'register-form-step3': '/src/modules/auth/register/register-step3.hbs',
+  'reset_password-step1': '/src/modules/auth/password_reset/reset_password-step1.hbs',
+  'reset_password-step2': '/src/modules/auth/password_reset/reset_password-step2.hbs',
 };
 
 const pagePaths = {
@@ -41,6 +46,7 @@ const pagePaths = {
   login: '/src/pages/login/login.hbs',
   'not-found': '/src/pages/not-found/not-found.hbs',
   register: '/src/pages/register/register.hbs',
+  'password_reset': '/src/pages/password_reset/password_reset.hbs',
 };
 
 /**
