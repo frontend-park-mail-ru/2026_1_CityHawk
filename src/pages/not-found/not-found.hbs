@@ -13,6 +13,16 @@
   flex-direction: column;
   align-items: center;
 }
+
+@media (prefers-color-scheme: dark) {
+  .login__form {
+    background-color: var(--color-base);
+  }
+
+  .login__ticket-email-image {
+      color: var(--color-background-tone-1);
+  }
+}
 </style>
 <div class="login__form">
   <div class="login__wrapper">
