@@ -740,6 +740,32 @@ GET /api/events?query=rock&categoryId=uuid&sort=dateAsc&limit=12&offset=0
 
 ---
 
+# Places API
+
+## GET /api/places
+
+Получение списка доступных мест проведения мероприятий.
+
+### Успешный ответ
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "name": "ВДНХ",
+      "addressLine": "2-я Останкинская улица, 3"
+    }
+  ]
+}
+```
+
+### Примечание
+
+`GET /api/places` используется формой создания мероприятия, чтобы пользователь выбирал существующее место и frontend отправлял `placeId` в `sessions`.
+
+---
+
 # Search API
 
 ## GET /api/search

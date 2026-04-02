@@ -27,23 +27,41 @@
 
         <label class="event-create-form__field">
           <span class="event-create-form__label">Место</span>
-          <input
-            type="text"
-            class="event-create-form__input"
-            name="place"
-            data-role="event-create-place"
-            placeholder="Например, ВДНХ"
-          />
+          <select class="event-create-form__input" name="placeId" data-role="event-create-place">
+            <option value="">Выбери место</option>
+            {{#each places}}
+              <option value="{{this.value}}">{{this.label}}</option>
+            {{/each}}
+          </select>
           <span class="event-create-form__error" data-role="event-create-place-error" hidden></span>
         </label>
       </div>
     </div>
 
     <div class="event-create-form__poster">
-      <div class="event-create-upload event-create-upload--poster">
+      <div
+        class="event-create-upload event-create-upload--poster"
+        data-role="event-create-poster-trigger"
+      >
+        <button
+          type="button"
+          class="event-create-upload__remove"
+          data-role="event-create-poster-remove"
+          hidden
+          aria-label="Убрать обложку"
+        >
+          ×
+        </button>
         <span class="event-create-upload__plus">+</span>
         <span class="event-create-upload__text">Загрузить обложку</span>
       </div>
+      <input
+        type="file"
+        name="poster"
+        accept="image/*"
+        hidden
+        data-role="event-create-poster-input"
+      />
     </div>
   </div>
 
@@ -98,22 +116,97 @@
     </div>
 
     <div class="event-create-form__gallery-grid">
-      <div class="event-create-upload">
+      <div class="event-create-upload" data-role="event-create-gallery-trigger" data-index="0">
+        <button
+          type="button"
+          class="event-create-upload__remove"
+          data-role="event-create-gallery-remove"
+          data-index="0"
+          hidden
+          aria-label="Убрать фото"
+        >
+          ×
+        </button>
         <span class="event-create-upload__plus">+</span>
         <span class="event-create-upload__text">Загрузить фото</span>
       </div>
-      <div class="event-create-upload">
+      <input
+        type="file"
+        name="gallery-0"
+        accept="image/*"
+        hidden
+        data-role="event-create-gallery-input"
+        data-index="0"
+      />
+
+      <div class="event-create-upload" data-role="event-create-gallery-trigger" data-index="1">
+        <button
+          type="button"
+          class="event-create-upload__remove"
+          data-role="event-create-gallery-remove"
+          data-index="1"
+          hidden
+          aria-label="Убрать фото"
+        >
+          ×
+        </button>
         <span class="event-create-upload__plus">+</span>
         <span class="event-create-upload__text">Загрузить фото</span>
       </div>
-      <div class="event-create-upload">
+      <input
+        type="file"
+        name="gallery-1"
+        accept="image/*"
+        hidden
+        data-role="event-create-gallery-input"
+        data-index="1"
+      />
+
+      <div class="event-create-upload" data-role="event-create-gallery-trigger" data-index="2">
+        <button
+          type="button"
+          class="event-create-upload__remove"
+          data-role="event-create-gallery-remove"
+          data-index="2"
+          hidden
+          aria-label="Убрать фото"
+        >
+          ×
+        </button>
         <span class="event-create-upload__plus">+</span>
         <span class="event-create-upload__text">Загрузить фото</span>
       </div>
-      <div class="event-create-upload">
+      <input
+        type="file"
+        name="gallery-2"
+        accept="image/*"
+        hidden
+        data-role="event-create-gallery-input"
+        data-index="2"
+      />
+
+      <div class="event-create-upload" data-role="event-create-gallery-trigger" data-index="3">
+        <button
+          type="button"
+          class="event-create-upload__remove"
+          data-role="event-create-gallery-remove"
+          data-index="3"
+          hidden
+          aria-label="Убрать фото"
+        >
+          ×
+        </button>
         <span class="event-create-upload__plus">+</span>
         <span class="event-create-upload__text">Загрузить фото</span>
       </div>
+      <input
+        type="file"
+        name="gallery-3"
+        accept="image/*"
+        hidden
+        data-role="event-create-gallery-input"
+        data-index="3"
+      />
     </div>
   </section>
 

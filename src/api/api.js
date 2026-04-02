@@ -6,4 +6,5 @@ export {
 } from './auth.api.js';
 
 export { getHome } from './home.api.js';
+export { getPlaces } from './places.api.js';
 export { getMe } from './profile.api.js';

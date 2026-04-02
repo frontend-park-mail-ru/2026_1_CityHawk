@@ -139,7 +139,7 @@
     border: none;
     outline: none;
     background: var(--color-input-midtone-1);
-    color: var(--color-accent-1);
+    color: var(--home-color-text);
     font-size: var(--home-text-5);
 }
 

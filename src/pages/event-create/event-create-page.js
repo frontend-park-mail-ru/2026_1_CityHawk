@@ -1,3 +1,4 @@
+import { getPlaces } from '../../api/places.api.js';
 import { getMe } from '../../api/profile.api.js';
 import { getAccessToken } from '../../modules/session/session.store.js';
 import { attachEventCreateForm, renderEventCreateForm } from '../../modules/events/event-create-form.js';
@@ -26,6 +27,7 @@ function getUserDisplayName(user) {
 export async function eventCreatePage({ navigate }) {
   const headerQuery = new URLSearchParams(window.location.search).get('query') || '';
   let user = null;
+  let places = [];
 
   if (getAccessToken()) {
     try {
@@ -39,7 +41,19 @@ export async function eventCreatePage({ navigate }) {
     }
   }
 
-  const eventCreateForm = renderEventCreateForm();
+  try {
+    const response = await getPlaces();
+    places = Array.isArray(response?.items)
+      ? response.items.map((place) => ({
+        value: String(place?.id || ''),
+        label: [place?.name, place?.addressLine].filter(Boolean).join(' · ') || 'Без названия',
+      }))
+      : [];
+  } catch {
+    places = [];
+  }
+
+  const eventCreateForm = renderEventCreateForm({ places });
 
   const html = renderTemplate('event-create', {
     eventCreateForm,
