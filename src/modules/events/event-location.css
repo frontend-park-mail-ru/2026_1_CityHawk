@@ -1,0 +1,97 @@
+.event-location__container {
+    width: 100%;
+    max-width: var(--home-content-width);
+    margin: 0 auto;
+    padding: 0 var(--home-side-padding);
+}
+
+.event-location {
+    padding: 18px 0 46px;
+}
+
+.event-location__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) 420px;
+    gap: 34px;
+    align-items: start;
+}
+
+.event-location__title {
+    margin: 0 0 22px;
+    font-family: var(--font-display, serif);
+    font-size: 36px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--home-color-text);
+}
+
+.event-location__paragraph {
+    margin: 0 0 18px;
+    color: var(--home-color-text-muted);
+    font-size: 16px;
+    line-height: 1.82;
+}
+
+.event-location__map {
+    position: relative;
+    overflow: hidden;
+    min-height: 320px;
+    padding: 0;
+    border: 1px solid rgba(139, 188, 233, 0.16);
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(24, 44, 69, 0.72), rgba(10, 23, 41, 0.9));
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.event-location__map-image {
+    width: 100%;
+    height: 100%;
+    min-height: 320px;
+    object-fit: cover;
+    filter: brightness(0.55) saturate(0.9);
+}
+
+.event-location__map-pin {
+    position: absolute;
+    top: 47%;
+    left: 54%;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--home-color-brand);
+    box-shadow:
+        0 0 0 8px rgba(47, 124, 255, 0.18),
+        0 0 22px rgba(47, 124, 255, 0.6);
+    transform: translate(-50%, -50%);
+}
+
+.event-location__map:hover {
+    transform: translateY(-4px);
+    border-color: rgba(139, 188, 233, 0.3);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.42);
+}
+
+@media (max-width: 1100px) {
+    .event-location__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .event-location__container {
+        padding: 0 var(--home-side-padding-mobile);
+    }
+
+    .event-location__title {
+        font-size: 28px;
+    }
+
+    .event-location__paragraph {
+        font-size: 15px;
+    }
+}

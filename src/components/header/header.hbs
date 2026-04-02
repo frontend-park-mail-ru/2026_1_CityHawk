@@ -1,31 +1,41 @@
 <div class="site-header">
-  <div class="container">
-    <div class="header-top">
-      <a href="/" class="logo" aria-label="CityHawk">
-        <span class="logo-mark" aria-hidden="true"></span>
-        <span class="logo-text">CityHawk</span>
+  <div class="site-header__container">
+    <div class="site-header__row">
+      <a href="/" class="site-header__brand" aria-label="CityHawk">
+        <span class="site-header__brand-mark" aria-hidden="true"></span>
+        <span class="site-header__brand-text">CityHawk</span>
       </a>
 
-      <div class="header-main">
-        <a href="#" class="header-link header-link--with-icon">
-          <img src="/public/static/icons/location.svg" alt="" class="header-link-icon" aria-hidden="true" />
+      <div class="site-header__main">
+        <a href="#" class="site-header__link site-header__link--with-icon">
+          <img src="/public/static/icons/location.svg" alt="" class="site-header__link-icon" aria-hidden="true" />
           <span>Москва</span>
         </a>
+
+        {{#if headerSearch}}
+          <form class="site-header__search" data-role="header-search-form">
+            <input
+              type="text"
+              name="query"
+              class="site-header__search-input"
+              placeholder="Найти события"
+              value="{{headerSearch.query}}"
+            />
+            <button class="site-header__search-button" type="submit" aria-label="Поиск">
+              <img src="/public/static/icons/search.svg" alt="" class="site-header__search-icon" aria-hidden="true" />
+            </button>
+          </form>
+        {{/if}}
       </div>
 
-      <div class="header-actions">
+      <div class="site-header__actions">
         {{#if user}}
-          <span class="header-link header-link--with-icon header-user">
-            <img src="/public/static/icons/person.svg" alt="" class="header-link-icon" aria-hidden="true" />
+          <a href="#" class="site-header__link site-header__link--with-icon site-header__user">
+            <img src="/public/static/icons/person.svg" alt="" class="site-header__link-icon" aria-hidden="true" />
             <span>{{user.displayName}}</span>
-          </span>
-          <button type="button" class="header-link header-link--button header-link--with-icon" data-action="logout">
-            <img src="/public/static/icons/logout.svg" alt="" class="header-link-icon" aria-hidden="true" />
-          </button>
-        {{else}}
-          <a href="/login" class="header-link header-link--with-icon">
-            <img src="/public/static/icons/login.svg" alt="" class="header-link-icon" aria-hidden="true" />
           </a>
+        {{else}}
+          <a href="/login" class="site-header__signin">Войти</a>
         {{/if}}
       </div>
     </div>

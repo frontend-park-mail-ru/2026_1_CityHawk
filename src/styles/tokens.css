@@ -40,9 +40,10 @@
      */
     
     /* Семейства шрифтов */
-    --font-primary: 'Inter', sans-serif;
+    --font-primary: 'Manrope', sans-serif;
     --font-company: 'Lexend Giga', sans-serif;
-    --font-slogan: 'Nunito', sans-serif;
+    --font-slogan: 'Manrope', sans-serif;
+    --font-display: 'Space Grotesk', sans-serif;
     
     /* Размеры текста */
     --text-company-name: 70px;            /* Company name size */

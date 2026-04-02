@@ -7,6 +7,6 @@ import { request } from './client.js';
  * @returns {Promise<any>}
  */
 export async function searchAll(query) {
-  const params = new URLSearchParams({ q: query });
-  return request(`/search?${params.toString()}`);
+  const params = new URLSearchParams({ query });
+  return request(`/api/search?${params.toString()}`);
 }

@@ -1,13 +1,11 @@
-<div class="page">
-  <header class="hero">
+<div class="home-page">
+  <header class="home-page__hero">
     {{> header}}
     {{{heroSearch}}}
   </header>
 
-  <main>
-    {{> places}}
-    {{> mood}}
+  <main class="home-page__content">
+    {{{homeEventsSection}}}
+    {{{homeMoodSection}}}
   </main>
-
-  {{> footer}}
 </div>

@@ -1,0 +1,41 @@
+<form class="event-list-filters" data-role="event-list-filter-form">
+  <div class="event-list-filters__grid">
+    <div class="event-list-filters__lead" aria-hidden="true">
+      <img src="/public/static/icons/for_filters.svg" alt="" class="event-list-filters__lead-icon" />
+    </div>
+
+    <label class="event-list-filters__field">
+      <select name="categoryId" class="event-list-filters__input">
+        <option value="">Все категории</option>
+        {{#each categories}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>
+            {{name}}
+          </option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label class="event-list-filters__field">
+      <select name="datePreset" class="event-list-filters__input">
+        <option value="">Любая дата</option>
+        {{#each datePresetOptions}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label class="event-list-filters__field">
+      <select name="sort" class="event-list-filters__input">
+        <option value="">По умолчанию</option>
+        {{#each sortOptions}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <div class="event-list-filters__actions">
+      <button type="submit" class="event-list-filters__submit">Показать</button>
+      <a href="/events" class="event-list-filters__reset">Сбросить</a>
+    </div>
+  </div>
+</form>

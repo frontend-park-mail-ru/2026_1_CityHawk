@@ -1,15 +1,6 @@
 import { request } from './client.js';
 
 /**
- * Загружает список мест.
- *
- * @returns {Promise<any>}
- */
-export async function getPlaces() {
-  return request('/places');
-}
-
-/**
  * Загружает список мероприятий.
  *
  * @param {Record<string, string | number | boolean | undefined>} [params]
@@ -25,7 +16,7 @@ export async function getEvents(params = {}) {
   });
 
   const suffix = query.toString() ? `?${query.toString()}` : '';
-  return request(`/events${suffix}`);
+  return request(`/api/events${suffix}`);
 }
 
 /**
@@ -35,7 +26,7 @@ export async function getEvents(params = {}) {
  * @returns {Promise<any>}
  */
 export async function getEventById(eventId) {
-  return request(`/events/${eventId}`);
+  return request(`/api/events/${eventId}`);
 }
 
 /**
@@ -45,7 +36,7 @@ export async function getEventById(eventId) {
  * @returns {Promise<any>}
  */
 export async function createEvent(payload) {
-  return request('/events', {
+  return request('/api/events', {
     method: 'POST',
     body: payload,
   });
@@ -59,7 +50,7 @@ export async function createEvent(payload) {
  * @returns {Promise<any>}
  */
 export async function updateEvent(eventId, payload) {
-  return request(`/events/${eventId}`, {
+  return request(`/api/events/${eventId}`, {
     method: 'PATCH',
     body: payload,
   });
@@ -72,7 +63,7 @@ export async function updateEvent(eventId, payload) {
  * @returns {Promise<any>}
  */
 export async function deleteEvent(eventId) {
-  return request(`/events/${eventId}`, {
+  return request(`/api/events/${eventId}`, {
     method: 'DELETE',
   });
 }

@@ -1,6 +1,7 @@
 /**
  * @typedef {Object} RouteContext
  * @property {string} path Текущий путь.
+ * @property {Record<string, string>} params Параметры маршрута.
  * @property {(path: string, options?: { replace?: boolean }) => void} navigate Функция перехода по маршруту.
  */
 
@@ -114,8 +115,13 @@ export class Router {
       this.cleanup = null;
     }
 
-    const renderer = this.routes[path] || this.notFound;
-    const view = await renderer({ path, navigate: this.navigate.bind(this) });
+    const match = this.matchRoute(path);
+    const renderer = match?.renderer || this.notFound;
+    const view = await renderer({
+      path,
+      params: match?.params || {},
+      navigate: this.navigate.bind(this),
+    });
     const html = typeof view === 'string' ? view : view?.html || '';
 
     this.root.innerHTML = html;
@@ -126,5 +132,55 @@ export class Router {
         this.cleanup = cleanup;
       }
     }
+  }
+
+  /**
+   * Возвращает подходящий обработчик маршрута и параметры из path-style шаблона.
+   *
+   * @param {string} path
+   * @returns {{ renderer: RouteRenderer, params: Record<string, string> } | null}
+   */
+  matchRoute(path) {
+    if (this.routes[path]) {
+      return {
+        renderer: this.routes[path],
+        params: {},
+      };
+    }
+
+    const pathnameParts = path.split('/').filter(Boolean);
+
+    for (const [routePath, renderer] of Object.entries(this.routes)) {
+      const routeParts = routePath.split('/').filter(Boolean);
+
+      if (routeParts.length !== pathnameParts.length) {
+        continue;
+      }
+
+      const params = {};
+      let isMatch = true;
+
+      routeParts.forEach((part, index) => {
+        const currentPart = pathnameParts[index];
+
+        if (part.startsWith(':')) {
+          params[part.slice(1)] = currentPart;
+          return;
+        }
+
+        if (part !== currentPart) {
+          isMatch = false;
+        }
+      });
+
+      if (isMatch) {
+        return {
+          renderer,
+          params,
+        };
+      }
+    }
+
+    return null;
   }
 }
