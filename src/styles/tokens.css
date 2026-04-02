@@ -1,0 +1,157 @@
+:root {
+    /* 
+     * ========================================
+     * COLORS
+     * ========================================
+     */
+    
+    /* Основные тона */
+    --color-background-tone-1: #244C87;  /* Background tone 1 */
+    --color-blank: #FEFEFE;               /* Blank */
+    
+    /* Акценты */
+    --color-accent-1: #003049;
+    --color-accent-2: #5A8AF9;
+    --color-accent-3: #3C6A9C;
+    --color-accent-4: #B7D5F5;
+    
+    /* Цвета для форм */
+    --color-input-midtone-1: rgba(120, 120, 128, 0.16); /* Input midtone 1 */
+    --color-placeholder: rgba(0, 0, 0, 0.5);            /* Placeholder */
+    --color-background-blur: rgba(0, 0, 0, 0.4);        /* Background blur */
+    
+    /* Соцсети */
+    --color-vk: #0079FF;                  /* VK color */
+    --color-yandex: #FF1B00;               /* Yandex color */
+    --color-google-blue: #4285F4;          /* Google blue color */
+    --color-google-red: #EB4335;           /* Google red color */
+    --color-google-yellow: #FBBC05;        /* Google yellow color */
+    --color-google-green: #34A853;         /* Google green color */
+    
+    /* Дополнительные */
+    --color-dark: #780000;                 /* Dark */
+    --color-mid: #E63034;                   /* Mid */
+    --color-base: #FDF0D5;                 /* Base */
+    
+    /* 
+     * ========================================
+     * TYPOGRAPHY
+     * ========================================
+     */
+    
+    /* Семейства шрифтов */
+    --font-primary: 'Inter', sans-serif;
+    --font-company: 'Lexend Giga', sans-serif;
+    --font-slogan: 'Nunito', sans-serif;
+    
+    /* Размеры текста */
+    --text-company-name: 50px;            /* Company name size */
+    --text-slogan: 24px;                    /* Slogan size */
+    --text-form-title: 32px;                    /* Form title size */
+    --text-button: 16px;                     /* Buttons text size */
+    --text-input: 16px;                      /* Input text size */
+    --text-annotation: 16px;                 /* Input annotation size */
+    --text-links: 16px;                      /* Links size */
+    --text-small-annotation: 16px;           /* Small annotation size */
+
+    /*
+     * ========================================
+     * HOME TOKENS
+     * ========================================
+     */
+
+    --home-color-background: #D9D9D9;
+    --home-color-surface: #F2F2F2;
+    --home-color-text: #1F2D3D;
+    --home-color-text-muted: #314662;
+    --home-color-border: #8EA0B0;
+    --home-color-brand: #2F5E9F;
+    --home-color-brand-light: #D7E6FF;
+    --home-color-overlay: rgba(243, 243, 243, 0.3);
+    --home-color-shadow: rgba(17, 34, 58, 0.18);
+
+    --home-text-1: 72px;
+    --home-text-2: 32px;
+    --home-text-3: 24px;
+    --home-text-4: 20px;
+    --home-text-5: 16px;
+    --home-text-logo: 40px;
+    --home-text-hero-title-tablet: 58px;
+    --home-text-logo-mobile: 40px;
+    --home-text-hero-title-mobile: 42px;
+    --home-text-hero-subtitle-mobile: 18px;
+    --home-text-input-mobile: 16px;
+    --home-text-search-button-mobile: 24px;
+    --home-text-section-title-mobile: 26px;
+
+    --home-content-width: 1240px;
+    --home-side-padding: 24px;
+    --home-side-padding-mobile: 16px;
+}
+
+/* 
+* ========================================
+* COLORS (Dark Theme)
+* ========================================
+*/
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Основные тона */
+    --color-background-tone-1: #244C87;  /* Background tone 1 */
+    --color-blank: #FEFEFE;              /* Основной блок: чуть светлее фона */            
+
+    /* Акценты */
+    --color-accent-1: #003049;
+    --color-accent-2: #5A8AF9;
+    --color-accent-3: #3C6A9C;
+    --color-accent-4: #B7D5F5;
+
+    /* Цвета для форм */
+    --color-input-midtone-1: #1A283E; /* Полупрозрачный светлый для input */
+    --color-placeholder: rgba(217, 217, 217, 0.8);      /* Лёгкая подсказка в input */
+    --color-background-blur: rgba(0, 0, 0, 0.5);        /* Мягкий полупрозрачный blur */
+
+    /* Дополнительные */
+    --color-vk: #0079FF;                  /* VK color */
+    --color-yandex: #FF1B00;               /* Yandex color */
+    --color-google-blue: #4285F4;          /* Google blue color */
+    --color-google-red: #EB4335;           /* Google red color */
+    --color-google-yellow: #FBBC05;        /* Google yellow color */
+    --color-google-green: #34A853;         /* Google green color */
+    
+    /* Дополнительные */
+    --color-dark: #780000;                 /* Dark */
+    --color-mid: #E63034;                   /* Mid */
+    --color-base: #121F31;
+    --color-dark-stroke: #30455D;
+
+    /*
+     * ========================================
+     * HOME TOKENS (Dark Scheme)
+     * ========================================
+     */
+
+    --home-color-background: #101928;
+    --home-color-surface: #162235;
+    --home-color-surface-soft: #1C2B40;
+    --home-color-text: #F2F6FD;
+    --home-color-text-muted: #B7C7DD;
+    --home-color-border: rgba(139, 188, 233, 0.22);
+    --home-color-brand: #4D90FE;
+    --home-color-brand-light: #D7E6FF;
+    --home-color-overlay: rgba(16, 25, 40, 0.72);
+    --home-color-shadow: rgba(0, 0, 0, 0.42);
+    --home-color-card-gradient: linear-gradient(
+        180deg,
+        rgba(22, 34, 53, 0.96) 0%,
+        rgba(28, 43, 64, 0.92) 100%
+    );
+    --home-color-main-top: linear-gradient(
+        to bottom,
+        #050B1B 0%,
+        #0F1B2D 30%,
+        #162235 70%,
+        #101928 100%
+    );
+  }
+}

@@ -1,0 +1,1224 @@
+:root {
+    /* 
+     * ========================================
+     * SPACING & SIZES
+     * ========================================
+     */
+    
+    /* Логотип */
+    --radius-logo: 100px;                   /* Logo frame (corner radius) */
+    --height-logo: 50px;                    /* PC logo height */
+    --gap-logo: 10px;                        /* PC logo gap */
+    
+    /* Билетики */
+    --ticket-width: 270px;                    /* PC ticket width */
+    --gap-tickets: 25px;                     /* PC tickets gap */
+    --gap-ticket-groups: 20px;                /* PC ticket groups gap */
+    --shift-ticket-group-1: 0;                /* PC ticket group 1 shift */
+    --shift-ticket-group-2: 200px;            /* PC ticket group 2 shift */
+    --shift-ticket-group-3: 0;                /* PC ticket group 3 shift */
+    --shift-ticket-group-1-before: 0;         /* PC ticket group 1 shift before animation */
+    --shift-ticket-group-2-before: 1900px;    /* PC ticket group 2 shift before animation */
+    --shift-ticket-group-3-before: 0;         /* PC ticket group 3 shift before animation*/
+    --stroke-ticket: 10px;                    /* Ticket stroke */
+    
+    /* Секции */
+    --gap-logo-section: 10px;                 /* PC logo section gap */
+    
+    /* Инпуты */
+    --width-input: 500px;                     /* PC input width */
+    --height-input: 54px;                      /* PC input height */
+    --padding-input: 20px;                     /* Input padding */
+    --radius-input: 10px;                      /* Input corner radius */
+    --stroke-input-active: 2px;                /* Input active stroke */
+    --width-input-half: 230px;                 /* PC half input width */
+    --icon-height-input: 30px;                    /* PC input icon height */
+    
+    /* Кнопки */
+    --radius-button: 40px;                    /* Buttons corner radius */
+    --height-button: 54px;                     /* PC buttons height */
+    --width-button: 500px;                     /* PC buttons width */
+    --width-button-half: 230px;                 /* PC half button width */
+    --gap-buttons-half: 40px;                   /* Half buttons gap */
+    
+    /* Отступы */
+    --gap-annotation: 10px;                    /* Annotation gap */
+    --gap-fields: 25px;                         /* Fields gap */
+    --gap-oauth-fields: 25px;                   /* Oauth fields gap */
+    --gap-small-annotation: 10px;               /* Small annotation gap */
+    --padding-bottom-field: 30px;                /* Bottom field padding above button */
+    --paddings-sidebar: 65px;                 /* PC sidebar top and bottom padding */
+    --sidebar-gap: auto;                      /* PC sidebar gap between logo and tickets */
+    --final-register-gap: 30px;                    /* Gap between final register message and button */
+    
+    /* OAuth */
+    --size-oauth: 50px;                         /* PC oauth size */
+    --stroke-oauth: 1px;                        /* PC oauth stroke */
+    --width-or-lines: 130px;                     /* PC or lines width */
+    --gap-or-lines: 40px;                        /* PC or lines gap */
+    --gap-oauth-logos: 40px;                     /* PC oauth logos gap */
+    --jump--oauth-logos: 5px;                     /* PC oauth logos jump on hover */
+    
+    /* Сообщения */
+    --radius-messages: 20px;                    /* Messages corner radius */
+}
+
+/* ========================================
+   ASIDE STYLES (левая часть)
+   ======================================== */
+
+main.login {
+  height: 100vh;
+  width: 100vw;
+}
+
+.login__aside {
+    display: flex;
+    flex: 0 0 40%;
+    flex-direction: column;
+    gap: var(--sidebar-gap);
+    justify-content: center;
+
+    padding-top: var(--paddings-sidebar);
+    padding-bottom: var(--paddings-sidebar);
+    gap: var(--sidebar-gap); 
+}
+
+.login__title {
+    font-family: var(--font-company, sans-serif);
+    font-size: var(--text-company-name);
+    color: var(--color-blank);
+    
+    letter-spacing: -0.07em;
+    
+    line-height: 100%;
+    font-weight: 400;
+}
+
+.login__slogan {
+    font-family: var(--font-slogan, sans-serif);
+    font-size: var(--text-slogan);
+    color: var(--color-blank);
+    
+    line-height: 100%;
+    font-weight: 400;
+}
+
+.login__naming {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-logo-section);
+    align-items: flex-end;
+}
+
+.login__logo {
+    height: var(--height-logo);
+    width: calc(var(--height-logo) * 213 / 120);
+    aspect-ratio: 213 / 120;
+    display: block;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: url("/public/static/assets/logo.svg") center / contain no-repeat;
+    mask: url("/public/static/assets/logo.svg") center / contain no-repeat;
+}
+
+.login__branding {
+    color: var(--color-blank);
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap-logo);
+    align-items: center;
+}
+
+.login__tickets-first svg {
+    transform: rotate(180deg);
+}
+
+.login__tickets-third svg {
+    transform: rotate(180deg);
+}
+
+.login {
+    display: flex;
+    background-color: var(--color-blank);
+    height: 100%;
+    width: 100%;
+}
+
+.login__aside, .login__form {
+    flex: 1;
+    flex-shrink: 0;
+}
+
+.login__aside {
+    flex: 1 1 0;
+    min-width: 0;
+    background-color: var(--color-background-tone-1);
+    border-top-right-radius: var(--radius-logo);
+    border-bottom-right-radius: var(--radius-logo);
+    
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.login__tickets {
+    width: max-content;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-ticket-groups);
+}
+
+.login__tickets-group {
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap-tickets);    
+    width: max-content;
+}
+
+.login__ticket {
+    width: var(--ticket-width);
+    height: auto;
+    aspect-ratio: 394 / 178;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.login__tickets-first {
+    padding-left: var(--shift-ticket-group-1);
+}
+
+.login__tickets-second {
+    padding-left: var(--shift-ticket-group-2);
+}
+
+.login__tickets-third {
+    padding-left: var(--shift-ticket-group-3);
+}
+
+
+.login__ticket-color1{
+  color: var(--color-accent-4);
+}
+
+.login__ticket-color2{
+  color: var(--color-accent-2);
+}
+
+/* ========================================
+   FORM STYLES (правая часть)
+   ======================================== */
+
+.login__form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.login__wrapper {
+    width: max-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-logo);    
+}
+
+.login__form-title {
+    text-align: center;
+    font-family: var(--font-slogan, sans-serif);
+    font-size: var(--text-form-title);
+    color: var(--color-background-tone-1);
+    font-weight: 700;
+    line-height: 100%;
+}
+
+.login__fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-fields);
+}
+
+.login__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-annotation);
+}
+
+.login__field label {
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-annotation);
+    color: var(--color-accent-1);
+    font-weight: 400;
+    line-height: 100%;
+}
+
+.login__field input {
+    width: var(--width-input);
+    height: var(--height-input);
+    padding: 0 var(--padding-input);
+    border: none;
+    border-radius: var(--radius-input);
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-input);
+    color: var(--color-accent-1);
+    background: var(--color-input-midtone-1);
+}
+
+.login__field input::placeholder {
+    color: var(--color-placeholder);
+    font-size: var(--text-input);
+    opacity: 1;
+}
+
+.login__forgot {
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-links);
+    color: var(--color-accent-1);
+    text-decoration: underline;
+    align-self: flex-end;
+    line-height: 100%;
+}
+
+.login__submit {
+    width: var(--width-button);
+    height: var(--height-button);
+    background: var(--color-background-tone-1);
+    color: var(--color-blank);
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-button);
+    font-weight: 400;
+    border: none;
+    border-radius: var(--radius-button);
+    cursor: pointer;
+}
+
+.login__oauth {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-oauth-fields);
+    align-items: center;
+}
+
+.login__divider {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: var(--gap-or-lines);
+    width: 100%;
+}
+
+.login__divider::before,
+.login__divider::after {
+    content: '';
+    width: var(--width-or-lines);
+    height: var(--stroke-oauth);
+    background: var(--color-accent-1, #003049);
+}
+
+.login__divider-text {
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-small-annotation);  
+    color: var(--color-accent-1);
+    line-height: 100%;
+}
+
+.login__oauth-buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--gap-oauth-logos);
+}
+
+.login__oauth-wrapper {
+    width: var(--size-oauth);
+    height: calc(var(--size-oauth) + var(--jump--oauth-logos));
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.login__oauth-btn {
+    width: var(--size-oauth);
+    height: var(--size-oauth);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+}
+
+.login__oauth-btn--yandex {
+    background-image: url('/public/static/assets/yandex.svg');
+}
+
+.login__oauth-btn--google {
+    background-image: url('/public/static/assets/google.svg');
+}
+
+.login__oauth-btn--vk {
+    background-image: url('/public/static/assets/vk.svg');
+}
+
+.login__register {
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-links);
+    color: var(--color-accent-1, #003049);
+    text-decoration: underline;
+    text-align: center;
+}
+
+.login__bottomfield {
+    padding-bottom: var(--padding-bottom-field);
+}
+
+.login__buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--gap-buttons-half);
+}
+
+.login__next,
+.login__prev {
+    width: var(--width-button-half);
+    height: var(--height-button);
+    background: var(--color-background-tone-1);
+    color: var(--color-blank);
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-button);
+    font-weight: 400;
+    border: none;
+    border-radius: var(--radius-button);
+    cursor: pointer;
+}
+
+/* ========================================
+   HOVER & ACTIVE STATES
+   ======================================== */
+
+.login__forgot:hover,
+.login__register:hover {
+    color: var(--color-accent-3);
+}
+
+.login__forgot:active,
+.login__register:active {
+    color: var(--color-accent-2);
+}
+
+.login__submit {
+    transition: background-color 0.3s ease-out;
+}
+
+.login__submit:hover {  
+    background: var(--color-accent-3);
+}
+
+.login__submit:active {
+    background: var(--color-accent-2);
+    transform: scale(0.98);
+    transition: all 0.1s ease-out;
+}
+
+.login__oauth-btn {
+    transition: transform 0.3s ease-out;
+}
+
+.login__oauth-btn:hover {
+    transform: translateY(calc(var(--jump--oauth-logos) * -1));
+}
+
+.login__oauth-btn:active {
+    transform: scale(0.95) translateY(calc(var(--jump--oauth-logos) * -1));
+    transition: transform 0.1s ease-out;
+}
+
+.login__field input {
+    transition: border-color 0.3s ease-out;
+    border: var(--stroke-input-active) solid transparent;
+}
+
+.login__field input:hover {
+    border-color: var(--color-accent-3);
+}
+
+.login__field input:focus {
+    border-color: var(--color-accent-1);
+}
+
+/* ========================================
+   PASSWORD TOGGLE BUTTON
+   ======================================== */
+
+.login__field-icon-wrapper {
+    position: relative;
+}
+
+.login__field-icon-wrapper input {
+    padding-right: calc(var(--padding-input) * 2 + var(--icon-height-input));
+}
+
+.login__password-toggle {
+    position: absolute;
+    right: var(--padding-input);
+    top: 50%;
+    transform: translateY(-50%);
+    width: var(--icon-height-input);
+    height: var(--icon-height-input);
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 2;
+    color: var(--color-accent-1);
+}
+
+.login__password-toggle svg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.login__password-toggle:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.login__field-icon-wrapper input:hover {
+    border-color: var(--color-accent-3);
+}
+
+.login__field-icon-wrapper input:active,
+.login__field-icon-wrapper input:focus {
+    border-color: var(--color-accent-1);
+}
+
+.login__field-icon-wrapper-noicon input {
+    padding-right: var(--padding-input);
+}
+
+/* ========================================
+   TICKETS LOAD ANIMATION
+   ======================================== */
+
+.login__tickets-group {
+    transition: padding-left 0.8s cubic-bezier(0.34, 1.3, 0.5, 1);  /* пружинистая анимация */
+}
+
+/* Начальное состояние */
+.login__tickets-first {
+    padding-left: var(--shift-ticket-group-1-before);
+}
+
+.login__tickets-second {
+    padding-left: var(--shift-ticket-group-2-before);
+}
+
+.login__tickets-third {
+    padding-left: var(--shift-ticket-group-3-before);
+}
+
+/* Конечное состояние */
+.login.loaded .login__tickets-first {
+    padding-left: var(--shift-ticket-group-1);
+}
+
+.login.loaded .login__tickets-second {
+    padding-left: var(--shift-ticket-group-2);
+}
+
+.login.loaded .login__tickets-third {
+    padding-left: var(--shift-ticket-group-3);
+}
+
+/* ========================================
+   ERROR MESSAGES
+   ======================================== */
+
+.login__field-error-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-small-annotation);
+}
+
+.login__error-message {
+    color: var(--color-mid);
+    font-family: var(--font-primary);
+    font-size: var(--text-small-annotation);
+}
+
+.login__error-message:empty {
+    display: none;
+}
+
+.login__field-error-wrapper--error input,
+.login__field-error-wrapper--error input:hover,
+.login__field-error-wrapper--error input:focus,
+.login__field-error-wrapper--error input:active {
+    border-color: var(--color-mid);
+}
+
+/* ========================================
+   THANK YOU PAGE STYLES
+   ======================================== */
+
+.login__form--thankyou .login__wrapper {
+    text-align: center;
+}
+
+.login__form--thankyou .login__form-title {
+    color: var(--color-background-tone-1);
+    text-align: center;
+}
+
+.login__form--thankyou .login__fields {
+    width: 100%;
+    align-items: center;
+}
+
+.login__fields-thankyou {
+    display: flex;
+    flex-direction: column;
+    gap: var(--final-register-gap);
+}
+
+/* Билетик с email поверх */
+.login__ticket-email-wrapper {
+    color: var(--color-accent-4);
+    position: relative;
+    width: fit-content;
+    margin: 0 auto;
+    line-height: 0; /* Убирает лишний отступ под SVG */
+}
+
+.login__ticket-email-image {
+    width: calc(var(--ticket-width) * 1.35);
+    height: auto;
+    display: block;
+}
+
+.login__ticket-email-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-input);
+    color: var(--color-accent-1);
+    font-weight: 400;
+    text-align: center;
+    width: 80%;
+    word-break: break-all;
+    line-height: 1.2; /* Восстанавливаем нормальный межстрочный интервал для текста */
+    pointer-events: none; /* Чтобы текст не мешал кликам по билетику */
+}
+
+/* Текст с ограничением по ширине */
+.login__thankyou-text {
+    max-width: var(--width-button);
+    margin-left: auto;
+    margin-right: auto;
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-annotation);
+    color: var(--color-accent-1);
+    font-weight: 400;
+    text-align: center;
+}
+
+/* Анимация появления */
+@keyframes ticketFloat {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login__ticket-email-wrapper {
+    animation: ticketFloat 0.6s ease-out forwards;
+}
+
+.login__thankyou-text {
+    animation: ticketFloat 0.6s ease-out 0.2s forwards;
+    opacity: 0;
+}
+
+.login__pass-reset-text {
+    max-width: var(--width-button);
+    margin-left: auto;
+    margin-right: auto;
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-annotation);
+    color: var(--color-accent-1);
+    font-weight: 400;
+    text-align: center;
+}
+
+/* ========================================
+RESPONSIVE SYSTEM
+======================================== */
+
+.login__aside {
+  justify-content: space-between;
+}
+
+.login__branding {
+  margin: auto 0;
+}
+
+.login__tickets {
+  margin-top: auto;
+}
+
+/* ========================================
+MINI PHONES (max-width:300px)
+======================================== */
+
+@media (max-width:300px) {
+
+:root {
+
+--width-input:95%;
+--width-button:95%;
+--width-button-half:90px;
+
+--height-input:28px;
+--height-button:30px;
+
+--gap-fields:8px;
+--gap-annotation:4px;
+
+--radius-input:4px;
+--radius-button:8px;
+
+--text-company-name:18px;
+--text-slogan:14px;
+--text-form-title:16px;
+
+--text-input:12px;
+--text-button:13px;
+--text-links:12px;
+
+--text-annotation:11px;
+--text-small-annotation:10px;
+
+--size-oauth:18px;
+
+--padding-input:6px;
+
+--sidebar-gap:10px;
+
+}
+
+.login__aside {
+display:none;
+}
+
+.login__oauth-buttons {
+flex-direction:column;
+}
+
+}
+
+
+/* ========================================
+PHONES (301px–900px)
+======================================== */
+
+@media (min-width:301px) and (max-width:900px){
+
+:root{
+
+--width-input:100%;
+--width-button:100%;
+--width-button-half:48%;
+
+--height-input:50px;
+--height-button:50px;
+
+--padding-input:18px;
+
+--gap-fields:26px;
+--gap-oauth-fields:24px;
+--gap-oauth-logos:26px;
+
+--text-company-name:34px;
+--text-slogan: 16px;
+--text-form-title:26px;
+
+--text-input:14px;
+--text-button:14px;
+--text-links:14px;
+--text-annotation:14px;
+--text-small-annotation:14px;
+
+--sidebar-gap:30px;
+
+}
+
+html,body{
+
+overflow-x:hidden;
+width:100%;
+
+}
+
+.login{
+
+flex-direction:column;
+width:100%;
+
+}
+
+.login__aside{
+
+width:100%;
+flex:none;
+
+border-top-right-radius:0;
+
+border-bottom-right-radius:60px;
+border-bottom-left-radius:60px;
+
+padding:50px 40px;
+
+justify-content:center;
+align-items:center;
+
+}
+
+.login__logo{
+display:none;
+}
+
+.login__tickets{
+display:none;
+}
+
+.login__branding{
+
+margin:0;
+justify-content:center;
+
+}
+
+.login__form{
+
+padding:65px 45px;
+align-items:flex-start;
+
+}
+
+.login__wrapper{
+
+width:100%;
+max-width:540px;
+
+}
+
+.login__fields{
+
+width:100%;
+
+}
+
+.login__field input,
+.login__submit,
+.login__buttons{
+
+width:100%;
+
+}
+
+}
+
+
+/* ========================================
+TABLETS (901px–1350px)
+======================================== */
+
+@media (min-width:901px) and (max-width:1350px){
+
+:root{
+
+--ticket-width:210px;
+--shift-ticket-group-2:150px;
+
+--width-input:440px;
+--width-button:440px;
+--width-button-half:200px;
+
+--height-input:50px;
+--height-button:50px;
+
+--gap-buttons-half:20px;
+
+--gap-fields:34px;
+
+--height-logo:70px;
+
+--text-company-name:42px;
+--text-slogan:18px;
+
+--text-input:15px;
+--text-button:15px;
+--text-annotation:15px;
+--text-small-annotation:15px;
+
+--sidebar-gap:60px;
+
+}
+
+.login__aside{
+
+flex:0 0 40%;
+
+display:flex;
+flex-direction:column;
+
+justify-content:center;
+align-items:center;
+
+}
+
+.login__form{
+flex:0 0 60%;
+}
+
+.login__logo{
+display:none;
+}
+
+.login__slogan{
+display:block;
+}
+
+}
+
+
+/* ========================================
+LAPTOPS (1351px–1900px) BASE
+======================================== */
+
+@media (min-width:1351px) and (max-width:1900px){
+
+:root{
+
+--width-input:500px;
+--width-button:500px;
+--width-button-half:230px;
+
+--height-input:54px;
+--height-button:54px;
+
+--ticket-width:270px;
+
+--gap-fields:25px;
+
+--text-input:16px;
+--text-button:16px;
+
+}
+
+.login__aside{
+
+display:flex;
+
+flex:0 0 40%;
+
+flex-direction:column;
+
+justify-content:center;
+align-items:center;
+
+}
+
+.login__branding{
+
+flex:1;
+
+display:flex;
+
+justify-content:center;
+align-items:center;
+
+}
+
+}
+
+
+/* ========================================
+BIG SCREENS (1901px+)
+======================================== */
+
+@media (min-width:1901px){
+
+:root{
+
+/* INPUTS */
+
+--width-input:min(34vw,820px);
+--width-button:min(34vw,820px);
+
+--width-button-half:min(16vw,380px);
+
+--height-input:clamp(60px,3.2vw,90px);
+--height-button:clamp(60px,3.2vw,90px);
+
+--padding-input:clamp(20px,1.2vw,34px);
+
+--radius-input:clamp(10px,0.6vw,18px);
+--radius-button:clamp(40px,2vw,70px);
+
+
+/* TICKETS */
+
+--ticket-width:min(15vw,460px);
+
+--gap-tickets:clamp(25px,1.5vw,60px);
+
+--gap-ticket-groups:clamp(20px,1.2vw,50px);
+
+--shift-ticket-group-2:clamp(200px,10vw,440px);
+
+
+/* TYPOGRAPHY */
+
+--text-company-name:clamp(56px,3.5vw,120px);
+
+--text-slogan:clamp(24px,1.4vw,40px);
+
+--text-form-title:clamp(34px,2vw,64px);
+
+--text-input:clamp(17px,1vw,24px);
+
+--text-button:clamp(17px,1vw,24px);
+
+--text-links:clamp(16px,0.9vw,22px);
+
+--text-annotation:clamp(16px,0.9vw,22px);
+
+--text-small-annotation:clamp(14px,0.8vw,20px);
+
+
+/* GAPS */
+
+--gap-fields:clamp(30px,2.2vw,95px);
+
+--gap-oauth-fields:clamp(30px,1.8vw,60px);
+
+--gap-oauth-logos:clamp(40px,2vw,80px);
+
+--gap-buttons-half:clamp(40px,2vw,80px);
+
+--gap-annotation:clamp(10px,0.8vw,24px);
+
+--padding-bottom-field:clamp(30px,1.8vw,70px);
+
+--final-register-gap:clamp(30px,1.8vw,70px);
+
+
+/* SIDEBAR */
+
+--sidebar-gap:clamp(80px,6vw,180px);
+
+--paddings-sidebar:clamp(65px,4vw,140px);
+
+
+/* LOGO */
+
+--height-logo:clamp(50px,2.5vw,110px);
+
+--gap-logo:clamp(10px,1vw,30px);
+
+
+/* OAUTH */
+
+--size-oauth:clamp(50px,2.6vw,90px);
+
+--stroke-oauth:clamp(1px,0.08vw,2px);
+
+--width-or-lines:clamp(130px,7vw,260px);
+
+--gap-or-lines:clamp(40px,2vw,90px);
+
+
+/* ICONS */
+
+--icon-height-input:clamp(30px,1.6vw,50px);
+
+
+/* MESSAGES */
+
+--radius-messages:clamp(20px,1.2vw,40px);
+
+}
+
+.login__aside{
+
+display:flex;
+
+flex:0 0 40%;
+
+}
+
+}
+
+/* ========================================
+RETURN BUTTON
+======================================== */
+
+.login__form {
+    position: relative;
+}
+
+/* Ссылка-крестик */
+.login__close {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+
+    width: 20px;
+    height: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    color: var(--color-placeholder);
+    transition: all 0.3s ease;
+    z-index: 5;
+}
+
+.login__close svg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.login__close:hover {
+    color: var(--color-accent-1);
+}
+
+.login__close:active {
+    transform: scale(0.95);
+}
+
+/* ========================================
+DARK THEME ADDITIONS
+======================================== */
+@media (prefers-color-scheme: dark) {
+
+    .login {
+        background-color: var(--color-base);
+    }
+
+    .login__form-title {
+        color: var(--color-blank);
+    }
+
+    .login__field label {
+        color: var(--color-blank);
+    }
+
+    .login__field input {
+        color: var(--color-blank);
+    }
+
+    .login__forgot {
+        color: var(--color-blank);
+    }
+
+    .login__submit {
+        color: var(--color-blank);
+    }
+
+    .login__divider::before,
+    .login__divider::after {
+        background: var(--color-blank);
+    }
+
+    .login__divider-text {
+        color: var(--color-blank);
+    }
+
+    .login__register {
+        color: var(--color-blank);
+    }
+
+    .login__next,
+    .login__prev {
+        color: var(--color-blank);
+    }
+
+    .login__close {
+        color: var(--color-blank);
+    }
+
+    .login__close:hover {
+        color: var(--color-blank);
+    }
+
+    .login__password-toggle {
+        color: var(--color-blank);
+    }
+
+
+    .login {
+        background-color: var(--color-base);
+    }
+
+    .login__form--thankyou .login__form-title {
+        color: var(--color-blank);
+    }
+
+    .login__ticket-email-wrapper {
+        color: var(--color-accent-4);
+    }
+
+    .login__ticket-email-text {
+        color: var(--color-accent-1);
+    }
+
+    .login__thankyou-text {
+        color: var(--color-blank);
+    }
+
+    .login__pass-reset-text {
+        color: var(--color-blank);
+    }
+
+
+    .login__field input {
+        border: var(--stroke-input-active) solid;
+        border-color: var(--color-dark-stroke);
+    }
+
+    .login__field input:active {
+        border-color: var(--color-background-tone-1);
+    }
+
+    .login__field input:focus {
+        border-color: var(--color-background-tone-1);
+    }
+
+    .login__field-icon-wrapper input:active,
+    .login__field-icon-wrapper input:focus {
+        border-color: var(--color-background-tone-1);
+    }
+
+    body {
+        background-color: var(--color-base);
+    }
+}

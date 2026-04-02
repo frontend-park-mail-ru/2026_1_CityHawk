@@ -1,0 +1,45 @@
+<div class="login__form">
+    <a href="/" class="login__close" aria-label="На главную">
+        <svg width="454" height="453" viewBox="0 0 454 453" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M441.304 385.652C456.956 401.304 456.956 425.652 441.304 441.304C433.478 449.13 423.913 452.609 413.478 452.609C403.043 452.609 393.478 449.13 385.652 441.304L226.522 282.174L67.3913 441.304C59.5652 449.13 50 452.609 39.5652 452.609C29.1304 452.609 19.5652 449.13 11.7391 441.304C-3.91304 425.652 -3.91304 401.304 11.7391 385.652L170.87 226.522L11.7391 67.3913C-3.91304 51.7391 -3.91304 27.3913 11.7391 11.7391C27.3913 -3.91304 51.7391 -3.91304 67.3913 11.7391L226.522 170.87L385.652 11.7391C401.304 -3.91304 425.652 -3.91304 441.304 11.7391C456.956 27.3913 456.956 51.7391 441.304 67.3913L282.174 226.522L441.304 385.652Z" fill="currentColor"/>
+        </svg>
+    </a>
+    <div class="login__wrapper">
+        <h2 class="login__form-title">Регистрация</h2>
+        <div class="login__fields">
+            <div class="login__field login__name">
+                <label for="name">Имя</label>
+                <div class="login__field-error-wrapper">
+                    <input type="text" id="name" name="name" placeholder="Введите имя">
+                    <p class="login__error-message"></p>
+                </div>
+            </div>
+
+            <div class="login__field login__surname login__bottomfield">
+                <label for="surname">Фамилия</label>
+                <div class="login__field-error-wrapper">
+                    <input type="text" id="surname" name="surname" placeholder="Введите фамилию">
+                    <p class="login__error-message"></p>
+                </div>
+            </div>
+            <button class="login__submit" type="submit">Далее</button>
+            <div class="login__oauth">
+                <div class="login__divider">
+                    <p class="login__divider-text">или</p>
+                </div>
+                <div class="login__oauth-buttons">
+                    <div class="login__oauth-wrapper login__oauth-wrapper--yandex">
+                        <button class="login__oauth-btn login__oauth-btn--yandex" aria-label="Войти через Яндекс"></button>
+                    </div>
+                    <div class="login__oauth-wrapper login__oauth-wrapper--vk">
+                        <button class="login__oauth-btn login__oauth-btn--vk" aria-label="Войти через VK"></button>
+                    </div>
+                    <div class="login__oauth-wrapper login__oauth-wrapper--google">
+                        <button class="login__oauth-btn login__oauth-btn--google" aria-label="Войти через Google"></button>
+                    </div>
+                </div>
+                <a href="/login" class="login__register">Уже есть аккаунт? Войти</a>
+            </div>
+        </div>
+    </div>
+</div>
