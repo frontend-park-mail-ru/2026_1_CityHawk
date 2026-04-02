@@ -13,8 +13,6 @@ const partialNames = [
   'reset_password-step2'
 ];
 
-export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 const pageNames = [
   'app-error',
   'home',
