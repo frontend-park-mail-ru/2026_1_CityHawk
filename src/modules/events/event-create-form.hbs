@@ -7,14 +7,22 @@
           type="text"
           class="event-create-form__input"
           name="title"
+          data-role="event-create-title"
           placeholder="Например, Futurione"
         />
+        <span class="event-create-form__error" data-role="event-create-title-error" hidden></span>
       </label>
 
       <div class="event-create-form__row">
         <label class="event-create-form__field">
           <span class="event-create-form__label">Дата</span>
-          <input type="date" class="event-create-form__input" name="date" />
+          <input
+            type="date"
+            class="event-create-form__input"
+            name="date"
+            data-role="event-create-date"
+          />
+          <span class="event-create-form__error" data-role="event-create-date-error" hidden></span>
         </label>
 
         <label class="event-create-form__field">
@@ -23,8 +31,10 @@
             type="text"
             class="event-create-form__input"
             name="place"
+            data-role="event-create-place"
             placeholder="Например, ВДНХ"
           />
+          <span class="event-create-form__error" data-role="event-create-place-error" hidden></span>
         </label>
       </div>
     </div>
@@ -40,12 +50,13 @@
   <div class="event-create-form__grid">
     <label class="event-create-form__field">
       <span class="event-create-form__label">Категория</span>
-      <select class="event-create-form__input" name="category">
+      <select class="event-create-form__input" name="category" data-role="event-create-category">
         <option value="">Выбери категорию</option>
         {{#each categories}}
           <option value="{{this.value}}">{{this.label}}</option>
         {{/each}}
       </select>
+      <span class="event-create-form__error" data-role="event-create-category-error" hidden></span>
     </label>
 
     <label class="event-create-form__field">
@@ -63,8 +74,10 @@
       <textarea
         class="event-create-form__textarea event-create-form__textarea--large"
         name="description"
+        data-role="event-create-description"
         placeholder="Расскажи о событии подробнее"
       ></textarea>
+      <span class="event-create-form__error" data-role="event-create-description-error" hidden></span>
     </label>
 
     <label class="event-create-form__field event-create-form__field--full">
@@ -72,8 +85,10 @@
       <textarea
         class="event-create-form__textarea"
         name="locationDescription"
+        data-role="event-create-location-description"
         placeholder="Укажи ориентиры, вход, этаж или другие детали, которые помогут пользователю добраться"
       ></textarea>
+      <span class="event-create-form__error" data-role="event-create-location-description-error" hidden></span>
     </label>
   </div>
 

@@ -43,6 +43,12 @@
     color: var(--home-color-text);
 }
 
+.event-create-form__error {
+    font-size: 13px;
+    line-height: 1.35;
+    color: #ffb3b3;
+}
+
 .event-create-form__input,
 .event-create-form__textarea {
     width: 100%;
@@ -59,6 +65,13 @@
 
 .event-create-form__input {
     min-height: 54px;
+}
+
+.event-create-form__input--error,
+.event-create-form__textarea--error {
+    border-color: rgba(255, 122, 122, 0.72);
+    background: rgba(255, 122, 122, 0.08);
+    box-shadow: 0 0 0 3px rgba(255, 122, 122, 0.14);
 }
 
 .event-create-form__textarea {
