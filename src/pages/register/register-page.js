@@ -266,7 +266,7 @@ function setupStep2(root, state, rerender) {
       showMessage(wrapper, 'Поле email не должно быть пустым!', 'var(--color-mid)', true);
       emailError = true;
 
-    } else if (!EMAIL_PATTERN.test(value)) {
+    } else if (!EMAIL_REGEX.test(value)) {
 
       showMessage(wrapper, 'Введите email в формате address@service.com!', 'var(--color-mid)', true);
       emailError = true;

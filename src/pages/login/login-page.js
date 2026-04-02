@@ -13,9 +13,16 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 function animateLoginTickets(root) {
   if (!root) return;
-  const loginEl = root.classList.contains('login') ? root : root.querySelector('.login');
+
+  const loginEl = root.classList.contains('login') 
+    ? root 
+    : root.querySelector('.login');
+
   if (!loginEl) return;
-  setTimeout(() => loginEl.classList.add('loaded'), 100);
+
+  requestAnimationFrame(() => {
+    loginEl.classList.add('loaded');
+  });
 }
 
 /**
@@ -63,7 +70,7 @@ function setupValidation(root) {
     const val = this.value.trim();
     if (!val) {
       showError(wrapper, 'Поле email не должно быть пустым!');
-    } else if (!EMAIL_PATTERN.test(val)) {
+    } else if (!EMAIL_REGEX.test(val)) {
       showError(wrapper, 'Введите email в формате address@service.com!');
     } else {
       hideError(wrapper);
@@ -98,7 +105,7 @@ function setupValidation(root) {
     if (!emailVal) {
       showError(emailWrapper, 'Поле email не должно быть пустым!');
       emailError = true;
-    } else if (!EMAIL_PATTERN.test(emailVal)) {
+    } else if (!EMAIL_REGEX.test(emailVal)) {
       showError(emailWrapper, 'Введите email в формате address@service.com!');
       emailError = true;
     } else {
