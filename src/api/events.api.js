@@ -24,8 +24,8 @@ export async function getEvents(params = {}) {
     }
   });
 
-  const suffix = query.toString() ? `?${query.toString()}` : '';
-  return request(`/events${suffix}`);
+  const suffix = query.toString();
+  return request(`/events${suffix ? '?' + suffix: ''}`);
 }
 
 /**
