@@ -1,6 +1,31 @@
 import { request } from './client.js';
 
 /**
+ * Сессия мероприятия для создания или обновления.
+ *
+ * @typedef {object} EventSessionPayload
+ * @property {string} placeId
+ * @property {string} startAt
+ * @property {string} endAt
+ * @property {number} price
+ */
+
+/**
+ * Данные мероприятия для создания или обновления.
+ *
+ * @typedef {object} EventPayload
+ * @property {string} title
+ * @property {string} shortDescription
+ * @property {string} fullDescription
+ * @property {number} ageLimit
+ * @property {string} sourceUrl
+ * @property {string[]} categoryIds
+ * @property {string[]} tagIds
+ * @property {string[]} imageUrls
+ * @property {EventSessionPayload[]} sessions
+ */
+
+/**
  * Загружает список мест.
  *
  * @returns {Promise<any>}
@@ -41,7 +66,7 @@ export async function getEventById(eventId) {
 /**
  * Создаёт мероприятие.
  *
- * @param {Record<string, unknown>} payload
+ * @param {EventPayload} payload
  * @returns {Promise<any>}
  */
 export async function createEvent(payload) {
@@ -55,7 +80,7 @@ export async function createEvent(payload) {
  * Обновляет мероприятие.
  *
  * @param {string | number} eventId
- * @param {Record<string, unknown>} payload
+ * @param {Partial<EventPayload>} payload
  * @returns {Promise<any>}
  */
 export async function updateEvent(eventId, payload) {
