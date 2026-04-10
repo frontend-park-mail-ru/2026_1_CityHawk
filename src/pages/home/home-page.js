@@ -1,25 +1,14 @@
 import { getHome } from '../../api/home.api.js';
-import { getMe } from '../../api/profile.api.js';
+import { getMeOrNull } from '../../api/profile.api.js';
 import { logout } from '../../api/auth.api.js';
+import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { renderHomeEventsSection } from '../../modules/home/home-events-section.js';
 import { renderHomeMoodSection } from '../../modules/home/home-mood-section.js';
 import { attachHeroSearch, renderHeroSearch } from '../../modules/home/hero-search.js';
-import { getAccessToken } from '../../modules/session/session.store.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 
-/**
- * Формирует короткое имя пользователя из email.
- *
- * @param {{ email?: string } | null | undefined} user Данные пользователя.
- * @returns {string}
- */
-function getUserDisplayName(user) {
-  if (!user?.email) {
-    return '';
-  }
-
-  return user.email.split('@')[0];
-}
+/** @typedef {import('../../types/router.js').RouteContext} RouteContext */
+/** @typedef {import('../../types/router.js').RouteView} RouteView */
 
 /**
  * Форматирует ISO-дату в короткий текст для карточки события.
@@ -179,8 +168,8 @@ function getFallbackHomeData() {
 /**
  * Создаёт представление главной страницы, загружает данные и подключает выход из аккаунта.
  *
- * @param {{ navigate: (path: string, options?: { replace?: boolean }) => void }} options Параметры маршрута.
- * @returns {Promise<{ html: string, mount(root: HTMLElement): (() => void) }>}
+ * @param {RouteContext} options Параметры маршрута.
+ * @returns {Promise<RouteView>}
  */
 export async function homePage({ navigate }) {
   // 1. Получить query из URL.
@@ -201,18 +190,13 @@ export async function homePage({ navigate }) {
   }
 
   // Отдельный блок авторизации пока оставляем как есть, так как им занимается другая часть команды.
-  let user = null;
-  if (getAccessToken()) {
-    try {
-      const me = await getMe();
-      user = {
-        ...me,
-        displayName: getUserDisplayName(me),
-      };
-    } catch {
-      user = null;
+  const me = await getMeOrNull();
+  const user = me
+    ? {
+      ...me,
+      displayName: getHeaderUserDisplayName(me),
     }
-  }
+    : null;
 
   // 3. Получить eventCards для модуля карточек.
   const eventCards = homeData.featuredEvents.map(mapFeaturedEventToCardViewModel);

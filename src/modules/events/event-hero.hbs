@@ -16,6 +16,17 @@
             <p class="event-hero__meta-text">{{placeText}}</p>
           {{/if}}
         </div>
+
+        {{#if canManage}}
+          <div class="event-hero__actions">
+            <a class="event-hero__action event-hero__action--primary" href="/events/{{eventId}}/edit">
+              Редактировать
+            </a>
+            <a class="event-hero__action" href="/events/{{eventId}}/delete">
+              Удалить
+            </a>
+          </div>
+        {{/if}}
       </div>
 
       <div class="event-hero__poster">

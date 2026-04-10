@@ -1,9 +1,5 @@
 <form class="event-list-filters" data-role="event-list-filter-form">
   <div class="event-list-filters__grid">
-    <div class="event-list-filters__lead" aria-hidden="true">
-      <img src="/public/static/icons/for_filters.svg" alt="" class="event-list-filters__lead-icon" />
-    </div>
-
     <label class="event-list-filters__field">
       <select name="categoryId" class="event-list-filters__input">
         <option value="">Все категории</option>
@@ -13,6 +9,12 @@
           </option>
         {{/each}}
       </select>
+      <img
+        src="/public/static/icons/for_filters.svg"
+        alt=""
+        class="event-list-filters__field-icon"
+        aria-hidden="true"
+      />
     </label>
 
     <label class="event-list-filters__field">
@@ -22,6 +24,12 @@
           <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
         {{/each}}
       </select>
+      <img
+        src="/public/static/icons/for_filters.svg"
+        alt=""
+        class="event-list-filters__field-icon"
+        aria-hidden="true"
+      />
     </label>
 
     <label class="event-list-filters__field">
@@ -31,6 +39,12 @@
           <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
         {{/each}}
       </select>
+      <img
+        src="/public/static/icons/for_filters.svg"
+        alt=""
+        class="event-list-filters__field-icon"
+        aria-hidden="true"
+      />
     </label>
 
     <div class="event-list-filters__actions">

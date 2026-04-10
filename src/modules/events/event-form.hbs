@@ -1,0 +1,333 @@
+<form class="event-create-form" data-role="event-create-form">
+  <div class="event-create-form__hero">
+    <div class="event-create-form__fields">
+      <label class="event-create-form__field">
+        <span class="event-create-form__label">Название события</span>
+        <input
+          type="text"
+          class="event-create-form__input"
+          name="title"
+          data-role="event-create-title"
+          placeholder="Например, Futurione"
+          value="{{initialValues.title}}"
+        />
+        <span class="event-create-form__error" data-role="event-create-title-error" hidden></span>
+      </label>
+
+      <div class="event-create-form__row event-create-form__row--start">
+        <div class="event-create-form__field">
+          <span class="event-create-form__label">Когда проходит событие</span>
+
+          <div class="event-create-form__mode-list" data-role="event-create-schedule-modes">
+            <label class="event-create-form__mode-option">
+              <input
+                type="radio"
+                name="scheduleMode"
+                value="single"
+                class="event-create-form__mode-input"
+                data-role="event-create-schedule-mode"
+                {{#if initialValues.isSingleSchedule}}checked{{/if}}
+              />
+              <span class="event-create-form__mode-text">Одна дата</span>
+            </label>
+
+            <label class="event-create-form__mode-option">
+              <input
+                type="radio"
+                name="scheduleMode"
+                value="multiple"
+                class="event-create-form__mode-input"
+                data-role="event-create-schedule-mode"
+                {{#if initialValues.isMultipleSchedule}}checked{{/if}}
+              />
+              <span class="event-create-form__mode-text">Несколько дат</span>
+            </label>
+
+            <label class="event-create-form__mode-option">
+              <input
+                type="radio"
+                name="scheduleMode"
+                value="period"
+                class="event-create-form__mode-input"
+                data-role="event-create-schedule-mode"
+                {{#if initialValues.isPeriodSchedule}}checked{{/if}}
+              />
+              <span class="event-create-form__mode-text">Период</span>
+            </label>
+          </div>
+
+          <div
+            class="event-create-form__schedule-panel event-create-form__single-grid"
+            data-role="event-create-schedule-panel"
+            data-mode="single"
+            {{#unless initialValues.isSingleSchedule}}hidden{{/unless}}
+          >
+            <label class="event-create-form__field">
+              <span class="event-create-form__label event-create-form__label--small">Дата</span>
+              <input
+                type="date"
+                class="event-create-form__input"
+                name="singleDate"
+                data-role="event-create-date"
+                value="{{initialValues.singleDate}}"
+              />
+            </label>
+
+            <label class="event-create-form__field">
+              <span class="event-create-form__label event-create-form__label--small">Время начала</span>
+              <input
+                type="time"
+                class="event-create-form__input"
+                name="singleStartTime"
+                data-role="event-create-start-time"
+                value="{{initialValues.singleStartTime}}"
+              />
+            </label>
+
+            <label class="event-create-form__field">
+              <span class="event-create-form__label event-create-form__label--small">Время конца</span>
+              <input
+                type="time"
+                class="event-create-form__input"
+                name="singleEndTime"
+                data-role="event-create-end-time"
+                value="{{initialValues.singleEndTime}}"
+              />
+            </label>
+          </div>
+
+          <div
+            class="event-create-form__schedule-panel"
+            data-role="event-create-schedule-panel"
+            data-mode="multiple"
+            {{#unless initialValues.isMultipleSchedule}}hidden{{/unless}}
+          >
+            <div class="event-create-form__dates-list" data-role="event-create-multiple-dates-list">
+              {{#each initialValues.multipleRows}}
+                <div class="event-create-form__dates-item">
+                  <label class="event-create-form__field event-create-form__field--compact">
+                    <span class="event-create-form__label event-create-form__label--small">Дата</span>
+                    <input
+                      type="date"
+                      class="event-create-form__input"
+                      name="multipleDates"
+                      data-role="event-create-multiple-date-input"
+                      value="{{this.date}}"
+                    />
+                  </label>
+                  <label class="event-create-form__field event-create-form__field--compact">
+                    <span class="event-create-form__label event-create-form__label--small">Начало</span>
+                    <input
+                      type="time"
+                      class="event-create-form__input"
+                      name="multipleStartTimes"
+                      data-role="event-create-multiple-time-input"
+                      value="{{this.startTime}}"
+                    />
+                  </label>
+                  <label class="event-create-form__field event-create-form__field--compact">
+                    <span class="event-create-form__label event-create-form__label--small">Конец</span>
+                    <input
+                      type="time"
+                      class="event-create-form__input"
+                      name="multipleEndTimes"
+                      data-role="event-create-multiple-time-input"
+                      value="{{this.endTime}}"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    class="event-create-form__dates-remove"
+                    data-action="event-create-remove-date"
+                    aria-label="Убрать дату"
+                  >
+                    ×
+                  </button>
+                </div>
+              {{/each}}
+            </div>
+
+            <button
+              type="button"
+              class="event-create-form__dates-add"
+              data-action="event-create-add-date"
+            >
+              Добавить дату
+            </button>
+          </div>
+
+          <div
+            class="event-create-form__schedule-panel event-create-form__period-grid"
+            data-role="event-create-schedule-panel"
+            data-mode="period"
+            {{#unless initialValues.isPeriodSchedule}}hidden{{/unless}}
+          >
+            <label class="event-create-form__field">
+              <span class="event-create-form__label event-create-form__label--small">Дата начала</span>
+              <input
+                type="date"
+                class="event-create-form__input"
+                name="periodStart"
+                data-role="event-create-period-start"
+                value="{{initialValues.periodStart}}"
+              />
+            </label>
+
+            <label class="event-create-form__field">
+              <span class="event-create-form__label event-create-form__label--small">Дата окончания</span>
+              <input
+                type="date"
+                class="event-create-form__input"
+                name="periodEnd"
+                data-role="event-create-period-end"
+                value="{{initialValues.periodEnd}}"
+              />
+            </label>
+          </div>
+
+          <label class="event-create-form__checkbox" data-role="event-create-anytime-label">
+            <input
+              type="checkbox"
+              name="isAnytime"
+              class="event-create-form__checkbox-input"
+              data-role="event-create-anytime"
+              {{#if initialValues.isAnytime}}checked{{/if}}
+            />
+            <span class="event-create-form__checkbox-text">Без даты / в любое время</span>
+          </label>
+          <span class="event-create-form__error" data-role="event-create-date-error" hidden></span>
+        </div>
+
+        <label class="event-create-form__field">
+          <span class="event-create-form__label">Место</span>
+          <select class="event-create-form__input" name="placeId" data-role="event-create-place">
+            <option value="">Выбери место</option>
+            {{#each places}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+          <span class="event-create-form__error" data-role="event-create-place-error" hidden></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="event-create-form__poster">
+      <div
+        class="event-create-upload event-create-upload--poster{{#if initialValues.posterPreviewUrl}} event-create-upload--has-image{{/if}}"
+        data-role="event-create-poster-trigger"
+        data-preview-url="{{initialValues.posterPreviewUrl}}"
+      >
+        <button
+          type="button"
+          class="event-create-upload__remove"
+          data-role="event-create-poster-remove"
+          {{#unless initialValues.posterPreviewUrl}}hidden{{/unless}}
+          aria-label="Убрать обложку"
+        >
+          ×
+        </button>
+        <span class="event-create-upload__plus">+</span>
+        <span class="event-create-upload__text">Загрузить обложку</span>
+      </div>
+      <input
+        type="file"
+        name="poster"
+        accept="image/*"
+        hidden
+        data-role="event-create-poster-input"
+      />
+    </div>
+  </div>
+
+  <div class="event-create-form__grid">
+    <label class="event-create-form__field">
+      <span class="event-create-form__label">Категория</span>
+      <select class="event-create-form__input" name="category" data-role="event-create-category">
+        <option value="">Выбери категорию</option>
+        {{#each categories}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+        {{/each}}
+      </select>
+      <span class="event-create-form__error" data-role="event-create-category-error" hidden></span>
+    </label>
+
+    <label class="event-create-form__field">
+      <span class="event-create-form__label">Теги</span>
+      <input
+        type="text"
+        class="event-create-form__input"
+        name="tags"
+        placeholder="Например, Art, Digital, Family"
+        value="{{initialValues.tags}}"
+      />
+    </label>
+
+    <label class="event-create-form__field event-create-form__field--full">
+      <span class="event-create-form__label">Описание события</span>
+      <textarea
+        class="event-create-form__textarea event-create-form__textarea--large"
+        name="description"
+        data-role="event-create-description"
+        placeholder="Расскажи о событии подробнее"
+      >{{initialValues.description}}</textarea>
+      <span class="event-create-form__error" data-role="event-create-description-error" hidden></span>
+    </label>
+
+    <label class="event-create-form__field event-create-form__field--full">
+      <span class="event-create-form__label">Описание местоположения</span>
+      <textarea
+        class="event-create-form__textarea"
+        name="locationDescription"
+        data-role="event-create-location-description"
+        placeholder="Укажи ориентиры, вход, этаж или другие детали, которые помогут пользователю добраться"
+      >{{initialValues.locationDescription}}</textarea>
+      <span class="event-create-form__error" data-role="event-create-location-description-error" hidden></span>
+    </label>
+  </div>
+
+  <section class="event-create-form__gallery">
+    <div class="event-create-form__gallery-head">
+      <h2 class="event-create-form__gallery-title">Дополнительные фото</h2>
+    </div>
+
+    <div class="event-create-form__gallery-grid">
+      {{#each initialValues.galleryPreviewUrls}}
+        <div
+          class="event-create-upload{{#if this}} event-create-upload--has-image{{/if}}"
+          data-role="event-create-gallery-trigger"
+          data-index="{{@index}}"
+          data-preview-url="{{this}}"
+        >
+          <button
+            type="button"
+            class="event-create-upload__remove"
+            data-role="event-create-gallery-remove"
+            data-index="{{@index}}"
+            {{#unless this}}hidden{{/unless}}
+            aria-label="Убрать фото"
+          >
+            ×
+          </button>
+          <span class="event-create-upload__plus">+</span>
+          <span class="event-create-upload__text">Загрузить фото</span>
+        </div>
+        <input
+          type="file"
+          name="gallery-{{@index}}"
+          accept="image/*"
+          hidden
+          data-role="event-create-gallery-input"
+          data-index="{{@index}}"
+        />
+      {{/each}}
+    </div>
+  </section>
+
+  <div class="event-create-form__actions">
+    <button type="submit" class="event-create-form__submit">{{submitLabel}}</button>
+    <button type="button" class="event-create-form__cancel" data-action="event-create-cancel">Отмена</button>
+    {{#if deleteHref}}
+      <a class="event-create-form__danger-link" href="{{deleteHref}}">Удалить событие</a>
+    {{/if}}
+  </div>
+</form>

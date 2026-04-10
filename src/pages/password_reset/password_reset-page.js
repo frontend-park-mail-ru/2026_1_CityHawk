@@ -1,6 +1,9 @@
 import { renderTemplate } from '../../app/templates/renderer.js';
+import { hideFieldError, showFieldError } from '../../modules/auth/shared/field-messages.js';
+import { isValidEmail } from '../../modules/auth/shared/validators.js';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** @typedef {import('../../types/router.js').RouteContext} RouteContext */
+/** @typedef {import('../../types/router.js').RouteView} RouteView */
 
 /**
  * Выставляет финальное состояние билетов без анимации.
@@ -53,24 +56,6 @@ function setupStep1(root, state, rerender) {
 	 * @param {string} msg Текст ошибки.
 	 * @returns {void}
 	 */
-	function showError(wrapper, msg) {
-		wrapper.classList.add('login__field-error-wrapper--error');
-		const err = wrapper.querySelector('.login__error-message');
-		if (err) err.textContent = msg;
-	}
-
-	/**
-	 * Скрывает ошибку у поля email.
-	 *
-	 * @param {Element} wrapper Обертка поля.
-	 * @returns {void}
-	 */
-	function hideError(wrapper) {
-		wrapper.classList.remove('login__field-error-wrapper--error');
-		const err = wrapper.querySelector('.login__error-message');
-		if (err) err.textContent = '';
-	}
-
 	emailInput.value = state.email || '';
 
 	emailInput.addEventListener('input', function () {
@@ -80,11 +65,11 @@ function setupStep1(root, state, rerender) {
 		const value = this.value.trim();
 
 		if (!value) {
-			showError(wrapper, 'Поле email не должно быть пустым!');
-		} else if (!EMAIL_PATTERN.test(value)) {
-			showError(wrapper, 'Введите email в формате address@service.com!');
+			showFieldError(wrapper, 'Поле email не должно быть пустым!');
+		} else if (!isValidEmail(value)) {
+			showFieldError(wrapper, 'Введите email в формате address@service.com!');
 		} else {
-			hideError(wrapper);
+			hideFieldError(wrapper);
 			emailError = false;
 		}
 	});
@@ -98,15 +83,15 @@ function setupStep1(root, state, rerender) {
 		emailError = false;
 
 		if (!value) {
-			showError(wrapper, 'Поле email не должно быть пустым!');
+			showFieldError(wrapper, 'Поле email не должно быть пустым!');
 			emailError = true;
-		} else if (!EMAIL_PATTERN.test(value)) {
-			showError(wrapper, 'Введите email в формате address@service.com!');
+		} else if (!isValidEmail(value)) {
+			showFieldError(wrapper, 'Введите email в формате address@service.com!');
 			emailError = true;
 		} else {
-			hideError(wrapper);
+			hideFieldError(wrapper);
 		}
-
+		
 		if (emailError) return;
 
 		state.email = value;
@@ -212,6 +197,10 @@ function createPasswordResetView(state = {}) {
  * Возвращает представление страницы сброса пароля.
  *
  * @returns {{ html: string, mount(root: HTMLElement): void }}
+ */
+/**
+ * @param {RouteContext} [_context]
+ * @returns {RouteView}
  */
 export function passwordResetPage() {
 	return createPasswordResetView();

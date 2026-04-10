@@ -1,24 +1,13 @@
 import { getEvents } from '../../api/events.api.js';
 import { getCategories } from '../../api/categories.api.js';
-import { getMe } from '../../api/profile.api.js';
+import { getMeOrNull } from '../../api/profile.api.js';
+import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { renderEventListCatalog } from '../../modules/events/event-list-catalog.js';
 import { attachEventListFilters, renderEventListFilters } from '../../modules/events/event-list-filters.js';
-import { getAccessToken } from '../../modules/session/session.store.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 
-/**
- * Формирует короткое имя пользователя из email.
- *
- * @param {{ email?: string } | null | undefined} user
- * @returns {string}
- */
-function getUserDisplayName(user) {
-  if (!user?.email) {
-    return '';
-  }
-
-  return user.email.split('@')[0];
-}
+/** @typedef {import('../../types/router.js').RouteContext} RouteContext */
+/** @typedef {import('../../types/router.js').RouteView} RouteView */
 
 /**
  * Форматирует дату мероприятия в короткий текст.
@@ -79,7 +68,7 @@ function getFallbackCatalogData() {
   return {
     items: [
       {
-        id: 'futurione',
+        id: '',
         title: 'Futurione',
         coverImageUrl: '/public/static/img/futurione.jpeg',
         tags: [{ name: 'Digital' }, { name: 'Art' }],
@@ -92,7 +81,7 @@ function getFallbackCatalogData() {
         },
       },
       {
-        id: 'standup',
+        id: '',
         title: 'Женский стендап',
         coverImageUrl: '/public/static/img/standup.png',
         tags: [{ name: 'Comedy' }],
@@ -105,7 +94,7 @@ function getFallbackCatalogData() {
         },
       },
       {
-        id: 'navka',
+        id: '',
         title: 'Ледовое шоу Татьяны Навки',
         coverImageUrl: '/public/static/img/navka.jpeg',
         tags: [{ name: 'Show' }, { name: 'Ice' }],
@@ -118,7 +107,7 @@ function getFallbackCatalogData() {
         },
       },
       {
-        id: 'balet',
+        id: '',
         title: 'Балет Щелкунчик',
         coverImageUrl: '/public/static/img/balet.jpg',
         tags: [{ name: 'Ballet' }],
@@ -182,24 +171,18 @@ function getDateRangeFromPreset(preset) {
 /**
  * Страница списка событий.
  *
- * @param {{ navigate: (path: string, options?: { replace?: boolean }) => void }} options
- * @returns {Promise<{ html: string, mount(root: HTMLElement): (() => void) }>}
+ * @param {RouteContext} options
+ * @returns {Promise<RouteView>}
  */
 export async function eventListPage({ navigate }) {
   const filters = getFilterStateFromLocation();
-  let user = null;
-
-  if (getAccessToken()) {
-    try {
-      const me = await getMe();
-      user = {
-        ...me,
-        displayName: getUserDisplayName(me),
-      };
-    } catch {
-      user = null;
+  const me = await getMeOrNull();
+  const user = me
+    ? {
+      ...me,
+      displayName: getHeaderUserDisplayName(me),
     }
-  }
+    : null;
 
   let catalogData = getFallbackCatalogData();
 

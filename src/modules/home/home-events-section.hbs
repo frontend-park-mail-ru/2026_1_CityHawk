@@ -9,18 +9,8 @@
       </div>
 
       <div class="home-events__grid">
-        {{#each events}}
-          <a href="/events/{{id}}" class="event-card event-card--home">
-            <img src="{{imageUrl}}" alt="{{title}}" class="event-card__image" />
-            <h3 class="event-card__title">{{title}}</h3>
-            <p class="event-card__text">{{dateText}}</p>
-            <p class="event-card__text">{{placeText}}</p>
-            <div class="event-card__meta">
-              {{#each tags}}
-                <span class="event-card__tag">{{this}}</span>
-              {{/each}}
-            </div>
-          </a>
+        {{#each cardsHtml}}
+          {{{this}}}
         {{/each}}
       </div>
     </section>

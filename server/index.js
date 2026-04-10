@@ -11,7 +11,7 @@ const FRONTEND_PORT = Number(process.env.PORT || 3000);
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8080';
 
 app.use(morgan('dev'));
-app.get('/public/runtime-config.js', (_req, res) => {
+app.get('/runtime-config.js', (_req, res) => {
   res.type('application/javascript');
   res.send(`window.__APP_CONFIG__ = ${JSON.stringify({ API_BASE_URL })};`);
 });

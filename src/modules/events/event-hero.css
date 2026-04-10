@@ -82,6 +82,42 @@
     line-height: 1.45;
 }
 
+.event-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 28px;
+}
+
+.event-hero__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 20px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    color: var(--home-color-text);
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.event-hero__action:hover,
+.event-hero__action:focus-visible {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.event-hero__action--primary {
+    background: rgba(122, 173, 247, 0.16);
+    border-color: rgba(139, 188, 233, 0.26);
+}
+
 .event-hero__poster {
     overflow: hidden;
     border: 1px solid rgba(139, 188, 233, 0.16);

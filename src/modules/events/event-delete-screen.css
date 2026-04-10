@@ -1,0 +1,27 @@
+.event-delete-screen {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top, rgba(93, 132, 255, 0.18), transparent 32%),
+        linear-gradient(180deg, #0c1624 0%, #0a1420 100%);
+}
+
+.event-delete-screen__header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.event-delete-screen__main {
+    padding: 48px 24px 72px;
+}
+
+.event-delete-screen__container {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+@media (max-width: 700px) {
+    .event-delete-screen__main {
+        padding: 32px 16px 56px;
+    }
+}

@@ -1,62 +1,46 @@
-import { getPlaces } from '../../api/places.api.js';
-import { getMe } from '../../api/profile.api.js';
-import { getAccessToken } from '../../modules/session/session.store.js';
-import { attachEventCreateForm, renderEventCreateForm } from '../../modules/events/event-create-form.js';
-import { renderTemplate } from '../../app/templates/renderer.js';
+import { createEvent } from '../../api/events.api.js';
+import { getMeOrNull } from '../../api/profile.api.js';
+import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
+import { renderEventForm } from '../../modules/events/event-form.js';
+import {
+  attachEventEditorScreen,
+  renderEventEditorScreen,
+} from '../../modules/events/event-editor-screen.js';
+import { mapEventFormPayloadToEventPayload } from '../../modules/events/event-form-payload.js';
+import { loadEventFormReferenceData } from '../../modules/events/event-form-reference-data.js';
 
-/**
- * Формирует короткое имя пользователя из email.
- *
- * @param {{ email?: string } | null | undefined} user
- * @returns {string}
- */
-function getUserDisplayName(user) {
-  if (!user?.email) {
-    return '';
-  }
-
-  return user.email.split('@')[0];
-}
+/** @typedef {import('../../types/router.js').RouteContext} RouteContext */
+/** @typedef {import('../../types/router.js').RouteView} RouteView */
 
 /**
  * Страница создания события.
  *
- * @param {{ navigate: (path: string, options?: { replace?: boolean }) => void }} options
- * @returns {Promise<{ html: string, mount(root: HTMLElement): (() => void) }>}
+ * @param {RouteContext} options
+ * @returns {Promise<RouteView>}
  */
 export async function eventCreatePage({ navigate }) {
   const headerQuery = new URLSearchParams(window.location.search).get('query') || '';
   let user = null;
-  let places = [];
-
-  if (getAccessToken()) {
-    try {
-      const me = await getMe();
-      user = {
-        ...me,
-        displayName: getUserDisplayName(me),
-      };
-    } catch {
-      user = null;
+  const me = await getMeOrNull();
+  user = me
+    ? {
+      ...me,
+      displayName: getHeaderUserDisplayName(me),
     }
-  }
+    : null;
 
-  try {
-    const response = await getPlaces();
-    places = Array.isArray(response?.items)
-      ? response.items.map((place) => ({
-        value: String(place?.id || ''),
-        label: [place?.name, place?.addressLine].filter(Boolean).join(' · ') || 'Без названия',
-      }))
-      : [];
-  } catch {
-    places = [];
-  }
+  const { places, categories } = await loadEventFormReferenceData();
 
-  const eventCreateForm = renderEventCreateForm({ places });
+  const eventForm = renderEventForm({
+    mode: 'create',
+    places,
+    categories,
+  });
 
-  const html = renderTemplate('event-create', {
-    eventCreateForm,
+  const html = renderEventEditorScreen({
+    eyebrow: 'Новое событие',
+    title: 'Создай свое мероприятие!',
+    eventForm,
     user,
     headerSearch: { query: headerQuery },
   });
@@ -64,36 +48,28 @@ export async function eventCreatePage({ navigate }) {
   return {
     html,
     mount(root) {
-      const headerSearchForm = root.querySelector('[data-role="header-search-form"]');
+      return attachEventEditorScreen(root, {
+        navigate,
+        async onSubmit(formPayload) {
+          try {
+            const payload = mapEventFormPayloadToEventPayload(formPayload);
+            const createdEvent = await createEvent(payload);
+            const nextEventId = createdEvent?.id;
 
-      const handleHeaderSearchSubmit = (event) => {
-        event.preventDefault();
+            if (nextEventId) {
+              navigate(`/events/${nextEventId}`);
+              return;
+            }
 
-        const formData = new FormData(headerSearchForm);
-        const query = String(formData.get('query') || '').trim();
-        const params = new URLSearchParams();
-
-        if (query) {
-          params.set('query', query);
-        }
-
-        const suffix = params.toString() ? `?${params.toString()}` : '';
-        navigate(`/events${suffix}`);
-      };
-
-      headerSearchForm?.addEventListener('submit', handleHeaderSearchSubmit);
-
-      const detachEventCreateForm = attachEventCreateForm(root, {
-        onSubmit() {},
+            navigate('/events');
+          } catch (error) {
+            window.alert(error?.message || 'Не удалось опубликовать событие');
+          }
+        },
         onCancel() {
           navigate('/events');
         },
       });
-
-      return () => {
-        headerSearchForm?.removeEventListener('submit', handleHeaderSearchSubmit);
-        detachEventCreateForm();
-      };
     },
   };
 }

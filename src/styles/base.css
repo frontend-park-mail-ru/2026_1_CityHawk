@@ -70,6 +70,10 @@ footer, header, hgroup, menu, nav, section {
     display: block;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 /* 9. База для html и body */
 html, body {
     height: 100%;

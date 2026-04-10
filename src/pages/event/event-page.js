@@ -1,26 +1,15 @@
 import { getEventById, getEvents } from '../../api/events.api.js';
-import { getMe } from '../../api/profile.api.js';
+import { getMeOrNull } from '../../api/profile.api.js';
+import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
+
+/** @typedef {import('../../types/router.js').RouteContext} RouteContext */
+/** @typedef {import('../../types/router.js').RouteView} RouteView */
 import { renderEventDescription, attachEventDescription } from '../../modules/events/event-description.js';
 import { renderEventGallery } from '../../modules/events/event-gallery.js';
 import { renderEventHero } from '../../modules/events/event-hero.js';
 import { renderEventLocation } from '../../modules/events/event-location.js';
 import { renderEventRecommendations } from '../../modules/events/event-recommendations.js';
-import { getAccessToken } from '../../modules/session/session.store.js';
-
-/**
- * Возвращает короткое имя пользователя по email.
- *
- * @param {{ email?: string } | null | undefined} user
- * @returns {string}
- */
-function getUserDisplayName(user) {
-  if (!user?.email) {
-    return '';
-  }
-
-  return user.email.split('@')[0];
-}
 
 /**
  * Форматирует дату мероприятия в короткий текст.
@@ -117,6 +106,8 @@ function mapEventDetailsToPageViewModel(rawEvent = {}) {
   const galleryImages = mapEventImagesToGalleryViewModel(rawEvent);
 
   return {
+    id: String(rawEvent?.id || ''),
+    authorId: String(rawEvent?.author?.id || '').trim(),
     category,
     title,
     dateText: formatEventDate(firstSession?.startAt || rawEvent?.dateText),
@@ -129,7 +120,7 @@ function mapEventDetailsToPageViewModel(rawEvent = {}) {
       place?.description || 'Подробная навигация и ориентиры для посетителей появятся после интеграции с backend.',
     ],
     galleryImages,
-    mapImageUrl: '/public/static/img/photo.jpeg',
+    mapImageUrl: '/public/static/img/map.jpeg',
     mapAlt: `Карта для ${title}`,
   };
 }
@@ -222,28 +213,28 @@ function mapRecommendationsToViewModel(response, currentEventId) {
 
   return [
     {
-      id: 'standup',
+      id: '',
       imageUrl: '/public/static/img/standup.png',
       title: 'Женский стендап',
       description: '27 марта · Live Арена, Москва',
       tags: ['Comedy'],
     },
     {
-      id: 'navka',
+      id: '',
       imageUrl: '/public/static/img/navka.jpeg',
       title: 'Ледовое шоу Татьяны Навки',
       description: '10 февраля · Навка Арена, Москва',
       tags: ['Show', 'Ice'],
     },
     {
-      id: 'balet',
+      id: '',
       imageUrl: '/public/static/img/balet.jpg',
       title: 'Балет Щелкунчик',
       description: '14 марта · Большой театр, Москва',
       tags: ['Ballet'],
     },
     {
-      id: 'concert',
+      id: '',
       imageUrl: '/public/static/img/concert.jpeg',
       title: 'Вечерний концерт',
       description: 'Суббота · Центр города',
@@ -255,8 +246,8 @@ function mapRecommendationsToViewModel(response, currentEventId) {
 /**
  * Создаёт представление страницы мероприятия.
  *
- * @param {{ navigate: (path: string, options?: { replace?: boolean }) => void, params?: Record<string, string> }} options
- * @returns {Promise<{ html: string, mount(root: HTMLElement): (() => void) }>}
+ * @param {RouteContext} options
+ * @returns {Promise<RouteView>}
  */
 export async function eventPage({ navigate, params = {} }) {
   // 1. Получить eventId из params.
@@ -264,18 +255,13 @@ export async function eventPage({ navigate, params = {} }) {
   const headerQuery = new URLSearchParams(window.location.search).get('query') || '';
 
   // Отдельный блок авторизации пока оставляем как есть, так как им занимается другая часть команды.
-  let user = null;
-  if (getAccessToken()) {
-    try {
-      const me = await getMe();
-      user = {
-        ...me,
-        displayName: getUserDisplayName(me),
-      };
-    } catch {
-      user = null;
+  const me = await getMeOrNull();
+  const user = me
+    ? {
+      ...me,
+      displayName: getHeaderUserDisplayName(me),
     }
-  }
+    : null;
 
   // 2. Загрузить getEventById(eventId) и сохранить rawEvent.
   let rawEvent = getFallbackEvent(eventId);
@@ -298,16 +284,23 @@ export async function eventPage({ navigate, params = {} }) {
 
   // 4. Получить view-model для страницы.
   const event = mapEventDetailsToPageViewModel(rawEvent);
+  const canManageEvent = Boolean(
+    user?.id
+    && event.authorId
+    && String(user.id) === String(event.authorId),
+  );
 
   // 5. Собрать html страницы из модулей.
   const html = renderTemplate('event', {
     headerSearch: { query: headerQuery },
     eventHero: renderEventHero({
+      eventId,
       category: event.category,
       title: event.title,
       dateText: event.dateText,
       placeText: event.placeText,
       posterUrl: event.posterUrl,
+      canManage: canManageEvent,
     }),
     eventDescription: renderEventDescription({
       leadText: event.leadText,

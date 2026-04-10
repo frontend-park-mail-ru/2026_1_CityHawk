@@ -1,0 +1,15 @@
+<div class="{{fieldClass}} form-field">
+    <label class="form-field__label{{#if labelClass}} {{labelClass}}{{/if}}" for="{{id}}">{{label}}</label>
+    {{#if wrapperClass}}<div class="{{wrapperClass}} form-field__control">{{else}}<div class="form-field__control">{{/if}}
+        <select
+            id="{{id}}"
+            name="{{name}}"
+            class="form-field__select{{#if selectClass}} {{selectClass}}{{/if}}"
+        >
+            {{#each options}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+        </select>
+        {{#if errorClass}}<p class="form-field__error {{errorClass}}">{{errorMessage}}</p>{{/if}}
+    </div>
+</div>

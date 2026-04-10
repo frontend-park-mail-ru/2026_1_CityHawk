@@ -1,0 +1,18 @@
+<div class="event-editor-screen">
+  <header class="event-editor-screen__header">
+    {{> header}}
+  </header>
+
+  <main class="event-editor-screen__main">
+    <div class="event-editor-screen__container">
+      {{#if eyebrow}}
+        <section class="event-editor-screen__intro">
+          <p class="event-editor-screen__eyebrow">{{eyebrow}}</p>
+          <h1 class="event-editor-screen__title">{{title}}</h1>
+        </section>
+      {{/if}}
+
+      {{{eventForm}}}
+    </div>
+  </main>
+</div>
