@@ -32,7 +32,7 @@ export async function getEventById(eventId) {
 /**
  * Создаёт мероприятие.
  *
- * @param {Record<string, unknown>} payload
+ * @param {EventPayload} payload
  * @returns {Promise<any>}
  */
 export async function createEvent(payload) {
@@ -46,7 +46,7 @@ export async function createEvent(payload) {
  * Обновляет мероприятие.
  *
  * @param {string | number} eventId
- * @param {Record<string, unknown>} payload
+ * @param {Partial<EventPayload>} payload
  * @returns {Promise<any>}
  */
 export async function updateEvent(eventId, payload) {

@@ -6,6 +6,17 @@ import { renderTemplate } from '../../app/templates/renderer.js';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
+ * Выполняет SPA-навигацию без полной перезагрузки страницы.
+ *
+ * @param {string} path Путь для перехода.
+ * @returns {void}
+ */
+function navigateSpa(path) {
+  window.history.pushState(null, '', path);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+}
+
+/**
  * Управляет состоянием анимации билетов между шагами регистрации.
  *
  * @param {ParentNode | null | undefined} root Корневой узел страницы.
@@ -429,6 +440,28 @@ function setupStep2(root, state, rerender) {
 }
 
 /**
+ * Подключает SPA-переход с финального шага регистрации.
+ *
+ * @param {ParentNode} root Корневой узел страницы.
+ * @returns {void}
+ */
+function setupStep3(root) {
+
+  const finishBtn = root.querySelector('.js-go-home');
+
+  if (!finishBtn) return;
+
+  finishBtn.addEventListener('click', function (e) {
+
+    e.preventDefault();
+
+    navigateSpa('/');
+
+  });
+
+}
+
+/**
  * Возвращает имя шаблона для текущего шага регистрации.
  *
  * @param {number} step Номер шага.
@@ -464,6 +497,10 @@ function mountRegister(root, state, rerender) {
 
   if (state.step === 2) {
     setupStep2(root, state, rerender);
+  }
+
+  if (state.step === 3) {
+    setupStep3(root);
   }
 }
 

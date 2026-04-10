@@ -4,6 +4,7 @@ import { homePage } from '../pages/home/home-page.js';
 import { eventListPage } from '../pages/event-list/event-list-page.js';
 import { eventCreatePage } from '../pages/event-create/event-create-page.js';
 import { loginPage } from '../pages/login/login-page.js';
+import { passwordResetPage } from '../pages/password_reset/password_reset-page.js';
 import { registerPage } from '../pages/register/register-page.js';
 import { notFoundPage } from '../pages/not-found/not-found-page.js';
 import { eventPage } from '../pages/event/event-page.js';
@@ -32,6 +33,7 @@ async function startApp() {
       '/events/new': eventCreatePage,
       '/events/:eventId': eventPage,
       '/login': loginPage,
+      '/password_reset': passwordResetPage,
       '/register': registerPage,
     },
     notFound: notFoundPage,
