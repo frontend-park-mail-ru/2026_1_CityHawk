@@ -1,0 +1,28 @@
+.event-list-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top center, rgba(41, 85, 145, 0.16), transparent 32%),
+        linear-gradient(180deg, #081321 0%, #071426 35%, #081a31 100%);
+    color: var(--home-color-text);
+}
+
+.event-list-page__container {
+    width: 100%;
+    max-width: var(--home-content-width);
+    margin: 0 auto;
+    padding: 0 var(--home-side-padding);
+}
+
+.event-list-page__hero {
+    padding: 28px 0 20px;
+}
+
+@media (max-width: 768px) {
+    .event-list-page__container {
+        padding: 0 var(--home-side-padding-mobile);
+    }
+
+    .event-list-page__hero {
+        padding-top: 32px;
+    }
+}

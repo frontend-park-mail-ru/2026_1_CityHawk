@@ -1,0 +1,26 @@
+<section class="event-hero" style="--event-hero-bg: url('{{posterUrl}}');">
+  <div class="event-hero__container">
+    <div class="event-hero__grid">
+      <div class="event-hero__content">
+        {{#if category}}
+          <p class="event-hero__eyebrow">{{category}}</p>
+        {{/if}}
+
+        <h1 class="event-hero__title">{{title}}</h1>
+
+        <div class="event-hero__meta">
+          {{#if dateText}}
+            <p class="event-hero__meta-text">{{dateText}}</p>
+          {{/if}}
+          {{#if placeText}}
+            <p class="event-hero__meta-text">{{placeText}}</p>
+          {{/if}}
+        </div>
+      </div>
+
+      <div class="event-hero__poster">
+        <img src="{{posterUrl}}" alt="{{title}}" class="event-hero__poster-image" />
+      </div>
+    </div>
+  </div>
+</section>

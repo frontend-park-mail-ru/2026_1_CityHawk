@@ -1,6 +1,22 @@
 import './styles/base.css';
 import './styles/tokens.css';
 import './pages/home/home.css';
+import './pages/event/event-page.css';
+import './pages/event-list/event-list.css';
+import './pages/event-create/event-create.css';
+import './components/header/header.css';
+import './components/footer/footer.css';
+import './modules/home/hero-search.css';
+import './modules/home/home-events-section.css';
+import './modules/home/home-mood-section.css';
+import './modules/events/event-hero.css';
+import './modules/events/event-description.css';
+import './modules/events/event-gallery.css';
+import './modules/events/event-location.css';
+import './modules/events/event-recommendations.css';
+import './modules/events/event-create-form.css';
+import './modules/events/event-list-filters.css';
+import './modules/events/event-list-catalog.css';
 import './modules/auth/auth.css';
 
 import './app/bootstrap.js';

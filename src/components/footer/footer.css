@@ -1,0 +1,111 @@
+.site-footer__container {
+    width: 100%;
+    max-width: var(--home-content-width);
+    margin: 0 auto;
+    padding: 0 var(--home-side-padding);
+}
+
+.site-footer {
+    padding: 34px 0 22px;
+    background: var(--home-color-surface);
+    color: var(--home-color-text);
+}
+
+.site-footer__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+}
+
+.site-footer__column {
+    padding: 0 20px;
+    border-right: 1px solid var(--home-color-border);
+}
+
+.site-footer__column:last-child {
+    border-right: none;
+}
+
+.site-footer__title {
+    margin: 0 0 14px;
+    font-size: var(--home-text-4);
+    font-weight: 600;
+    color: var(--home-color-text);
+}
+
+.site-footer__text {
+    margin: 0 0 10px;
+    font-size: var(--home-text-5);
+    line-height: 1.5;
+}
+
+.site-footer__link {
+    display: block;
+    margin-bottom: 10px;
+    font-size: var(--home-text-5);
+    text-decoration: underline;
+    transition:
+        color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.site-footer__bottom {
+    margin-top: 26px;
+    text-align: center;
+    font-size: var(--home-text-4);
+    color: var(--home-color-text);
+}
+
+.site-footer__bottom p {
+    margin: 0 0 10px;
+}
+
+.site-footer__bottom-links {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.site-footer__bottom-links a {
+    text-decoration: underline;
+    transition:
+        color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.site-footer__link:hover,
+.site-footer__link:focus-visible,
+.site-footer__bottom-links a:hover,
+.site-footer__bottom-links a:focus-visible {
+    color: var(--home-color-brand);
+}
+
+@media (prefers-color-scheme: dark) {
+    .site-footer {
+        border-top: 1px solid rgba(139, 188, 233, 0.16);
+    }
+}
+
+@media (max-width: 1100px) {
+    .site-footer__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .site-footer__column {
+        padding: 0 0 20px;
+        border-right: none;
+        border-bottom: 1px solid var(--home-color-border);
+    }
+
+    .site-footer__column:last-child {
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .site-footer__container {
+        padding: 0 var(--home-side-padding-mobile);
+    }
+}

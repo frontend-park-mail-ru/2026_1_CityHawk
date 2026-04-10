@@ -1,0 +1,109 @@
+<form class="event-create-form" data-role="event-create-form">
+  <div class="event-create-form__hero">
+    <div class="event-create-form__fields">
+      <label class="event-create-form__field">
+        <span class="event-create-form__label">Название события</span>
+        <input
+          type="text"
+          class="event-create-form__input"
+          name="title"
+          placeholder="Например, Futurione"
+        />
+      </label>
+
+      <div class="event-create-form__row">
+        <label class="event-create-form__field">
+          <span class="event-create-form__label">Дата</span>
+          <input type="date" class="event-create-form__input" name="date" />
+        </label>
+
+        <label class="event-create-form__field">
+          <span class="event-create-form__label">Место</span>
+          <input
+            type="text"
+            class="event-create-form__input"
+            name="place"
+            placeholder="Например, ВДНХ"
+          />
+        </label>
+      </div>
+    </div>
+
+    <div class="event-create-form__poster">
+      <div class="event-create-upload event-create-upload--poster">
+        <span class="event-create-upload__plus">+</span>
+        <span class="event-create-upload__text">Загрузить обложку</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="event-create-form__grid">
+    <label class="event-create-form__field">
+      <span class="event-create-form__label">Категория</span>
+      <select class="event-create-form__input" name="category">
+        <option value="">Выбери категорию</option>
+        {{#each categories}}
+          <option value="{{this.value}}">{{this.label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label class="event-create-form__field">
+      <span class="event-create-form__label">Теги</span>
+      <input
+        type="text"
+        class="event-create-form__input"
+        name="tags"
+        placeholder="Например, Art, Digital, Family"
+      />
+    </label>
+
+    <label class="event-create-form__field event-create-form__field--full">
+      <span class="event-create-form__label">Описание события</span>
+      <textarea
+        class="event-create-form__textarea event-create-form__textarea--large"
+        name="description"
+        placeholder="Расскажи о событии подробнее"
+      ></textarea>
+    </label>
+
+    <label class="event-create-form__field event-create-form__field--full">
+      <span class="event-create-form__label">Описание местоположения</span>
+      <textarea
+        class="event-create-form__textarea"
+        name="locationDescription"
+        placeholder="Укажи ориентиры, вход, этаж или другие детали, которые помогут пользователю добраться"
+      ></textarea>
+    </label>
+  </div>
+
+  <section class="event-create-form__gallery">
+    <div class="event-create-form__gallery-head">
+      <h2 class="event-create-form__gallery-title">Дополнительные фото</h2>
+    </div>
+
+    <div class="event-create-form__gallery-grid">
+      <div class="event-create-upload">
+        <span class="event-create-upload__plus">+</span>
+        <span class="event-create-upload__text">Загрузить фото</span>
+      </div>
+      <div class="event-create-upload">
+        <span class="event-create-upload__plus">+</span>
+        <span class="event-create-upload__text">Загрузить фото</span>
+      </div>
+      <div class="event-create-upload">
+        <span class="event-create-upload__plus">+</span>
+        <span class="event-create-upload__text">Загрузить фото</span>
+      </div>
+      <div class="event-create-upload">
+        <span class="event-create-upload__plus">+</span>
+        <span class="event-create-upload__text">Загрузить фото</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="event-create-form__actions">
+    <button type="submit" class="event-create-form__submit">Опубликовать событие</button>
+    <button type="button" class="event-create-form__cancel" data-action="event-create-cancel">Отмена</button>
+  </div>
+</form>

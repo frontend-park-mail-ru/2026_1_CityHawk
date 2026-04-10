@@ -30,6 +30,9 @@ select {
     background: none;
     border: none;
     outline: none;  /* убираем стандартную обводку */
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 0;
 }
 
 /* Убираем ТОЛЬКО обводку, ключ оставляем */
