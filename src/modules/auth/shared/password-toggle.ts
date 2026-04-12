@@ -1,5 +1,6 @@
-export function attachPasswordToggles(root: ParentNode = document): void {
+export function attachPasswordToggles(root: ParentNode = document): () => void {
   const toggles = root.querySelectorAll('.login__password-toggle');
+  const cleanup: Array<() => void> = [];
 
   toggles.forEach((button) => {
     if (!(button instanceof HTMLButtonElement)) {
@@ -14,7 +15,7 @@ export function attachPasswordToggles(root: ParentNode = document): void {
       return;
     }
 
-    button.addEventListener('click', () => {
+    const handleToggleClick = () => {
       const isHidden = input.type === 'password';
       input.type = isHidden ? 'text' : 'password';
 
@@ -27,6 +28,13 @@ export function attachPasswordToggles(root: ParentNode = document): void {
         confirmField.type = isHidden ? 'text' : 'password';
         confirmUse.setAttribute('href', isHidden ? '#eye-closed' : '#eye-open');
       }
-    });
+    };
+
+    button.addEventListener('click', handleToggleClick);
+    cleanup.push(() => button.removeEventListener('click', handleToggleClick));
   });
+
+  return () => {
+    cleanup.forEach((teardown) => teardown());
+  };
 }

@@ -15,6 +15,10 @@ export async function getMeOrNull(): Promise<User | null> {
       return null;
     }
 
+    if (error instanceof Error && !apiError?.status) {
+      return null;
+    }
+
     throw error;
   }
 }

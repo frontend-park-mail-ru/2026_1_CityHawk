@@ -17,11 +17,15 @@ function createLoginView({ navigate }: Pick<RouteContext, 'navigate'>): RouteVie
     html: renderTemplate('login'),
     mount(root) {
       animateLoginTickets(root);
-      attachLoginForm(root, {
+      const detachLoginForm = attachLoginForm(root, {
         onSuccess() {
           navigate('/');
         },
       });
+
+      return () => {
+        detachLoginForm();
+      };
     },
   };
 }

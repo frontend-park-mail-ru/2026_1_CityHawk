@@ -47,6 +47,14 @@ function buildRoutePattern(routePath: string): {
   };
 }
 
+function getPathname(path: string): string {
+  try {
+    return new URL(path, window.location.origin).pathname;
+  } catch {
+    return '/';
+  }
+}
+
 export class Router {
   private readonly root: HTMLElement;
 
@@ -75,7 +83,7 @@ export class Router {
     const resolvedPath = typeof path === 'string' && path ? path : '/';
     const method = replace ? 'replaceState' : 'pushState';
     window.history[method](null, '', resolvedPath);
-    void this.renderByPath(resolvedPath);
+    void this.renderByPath(window.location.pathname);
   }
 
   onPopState(): void {
@@ -115,7 +123,8 @@ export class Router {
     }
 
     event.preventDefault();
-    this.navigate(new URL(href, window.location.origin).pathname);
+    const nextUrl = new URL(href, window.location.origin);
+    this.navigate(`${nextUrl.pathname}${nextUrl.search}`);
   }
 
   async renderByPath(path: string): Promise<void> {
@@ -124,10 +133,11 @@ export class Router {
       this.cleanup = null;
     }
 
-    const match = this.matchRoute(path);
+    const pathname = getPathname(path);
+    const match = this.matchRoute(pathname);
     const renderer = match?.renderer || this.notFound;
     const view = await renderer({
-      path,
+      path: pathname,
       params: match?.params || {},
       navigate: this.navigate.bind(this),
     });

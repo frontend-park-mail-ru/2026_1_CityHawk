@@ -30,24 +30,32 @@ export function renderRegisterStep(state: RegisterState = {}): string {
   return renderTemplate(getStepTemplate(state.step || 1), state);
 }
 
-export function attachRegisterForm(root: ParentNode, options: RegisterFormOptions = {}): void {
+export function attachRegisterForm(root: ParentNode, options: RegisterFormOptions = {}): () => void {
   const state = options.state || {};
 
-  attachPasswordToggles(root);
-  attachOAuthButtons(root);
+  const detachPasswordToggles = attachPasswordToggles(root);
+  const detachOAuthButtons = attachOAuthButtons(root);
   animateLoginTickets(root, state);
 
+  let detachStep: (() => void) | null = null;
+
   if (state.step === 1) {
-    setupStep1(root, state, options.rerender);
+    detachStep = setupStep1(root, state, options.rerender);
   }
 
   if (state.step === 2) {
-    setupStep2(root, state, options.rerender);
+    detachStep = setupStep2(root, state, options.rerender);
   }
 
   if (state.step === 3) {
-    setupStep3(root, options);
+    detachStep = setupStep3(root, options);
   }
+
+  return () => {
+    detachStep?.();
+    detachPasswordToggles();
+    detachOAuthButtons();
+  };
 }
 
 function getStepTemplate(step: number): string {
@@ -82,7 +90,7 @@ function animateLoginTickets(root: ParentNode, state: RegisterState): void {
   loginEl.classList.add('loaded');
 }
 
-function setupStep1(root: ParentNode, state: RegisterState, rerender?: () => void): void {
+function setupStep1(root: ParentNode, state: RegisterState, rerender?: () => void): () => void {
   const nameInput = root.querySelector('#name');
   const surnameInput = root.querySelector('#surname');
   const submitBtn = root.querySelector('.login__submit');
@@ -90,7 +98,7 @@ function setupStep1(root: ParentNode, state: RegisterState, rerender?: () => voi
   if (!(nameInput instanceof HTMLInputElement)
     || !(surnameInput instanceof HTMLInputElement)
     || !(submitBtn instanceof HTMLButtonElement)) {
-    return;
+    return () => {};
   }
 
   let nameError = false;
@@ -99,7 +107,7 @@ function setupStep1(root: ParentNode, state: RegisterState, rerender?: () => voi
   nameInput.value = state.name || '';
   surnameInput.value = state.surname || '';
 
-  nameInput.addEventListener('input', function handleNameInput(this: HTMLInputElement) {
+  const handleNameInput = function handleNameInput(this: HTMLInputElement): void {
     if (!nameError) return;
     const wrapper = this.closest('.login__field-error-wrapper');
 
@@ -109,9 +117,9 @@ function setupStep1(root: ParentNode, state: RegisterState, rerender?: () => voi
       hideFieldError(wrapper);
       nameError = false;
     }
-  });
+  };
 
-  surnameInput.addEventListener('input', function handleSurnameInput(this: HTMLInputElement) {
+  const handleSurnameInput = function handleSurnameInput(this: HTMLInputElement): void {
     if (!surnameError) return;
     const wrapper = this.closest('.login__field-error-wrapper');
 
@@ -121,9 +129,9 @@ function setupStep1(root: ParentNode, state: RegisterState, rerender?: () => voi
       hideFieldError(wrapper);
       surnameError = false;
     }
-  });
+  };
 
-  submitBtn.addEventListener('click', (event) => {
+  const handleSubmitClick = (event: Event): void => {
     event.preventDefault();
 
     const nameWrapper = nameInput.closest('.login__field-error-wrapper');
@@ -154,10 +162,20 @@ function setupStep1(root: ParentNode, state: RegisterState, rerender?: () => voi
     state.surname = surnameInput.value.trim();
     state.step = 2;
     rerender?.();
-  });
+  };
+
+  nameInput.addEventListener('input', handleNameInput);
+  surnameInput.addEventListener('input', handleSurnameInput);
+  submitBtn.addEventListener('click', handleSubmitClick);
+
+  return () => {
+    nameInput.removeEventListener('input', handleNameInput);
+    surnameInput.removeEventListener('input', handleSurnameInput);
+    submitBtn.removeEventListener('click', handleSubmitClick);
+  };
 }
 
-function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => void): void {
+function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => void): () => void {
   const emailInput = root.querySelector('#email');
   const passwordInput = root.querySelector('#password');
   const confirmInput = root.querySelector('#password-confirm');
@@ -169,7 +187,7 @@ function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => voi
     || !(confirmInput instanceof HTMLInputElement)
     || !(nextBtn instanceof HTMLButtonElement)
     || !(prevBtn instanceof HTMLButtonElement)) {
-    return;
+    return () => {};
   }
 
   const safeEmailInput: HTMLInputElement = emailInput;
@@ -261,36 +279,31 @@ function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => voi
     confirmError = isError && (submitAttempted || confirmError);
   }
 
-  safeEmailInput.addEventListener('input', validateEmail);
-  safePasswordInput.addEventListener('input', updatePasswordField);
-  safePasswordInput.addEventListener('focus', updatePasswordField);
-  safePasswordInput.addEventListener('blur', () => {
+  const handlePasswordBlur = (): void => {
     const wrapper = safePasswordInput.closest('.login__field-error-wrapper');
     const result = checkPasswordStrength(safePasswordInput.value.trim());
 
     if (!result.isError) {
       hideFieldMessage(wrapper);
     }
-  });
+  };
 
-  safeConfirmInput.addEventListener('input', updateConfirmField);
-  safeConfirmInput.addEventListener('focus', updateConfirmField);
-  safeConfirmInput.addEventListener('blur', () => {
+  const handleConfirmBlur = (): void => {
     const wrapper = safeConfirmInput.closest('.login__field-error-wrapper');
 
     if (!confirmError) {
       hideFieldMessage(wrapper);
     }
-  });
+  };
 
-  safePrevBtn.addEventListener('click', (event) => {
+  const handlePrevClick = (event: Event): void => {
     event.preventDefault();
     state.email = safeEmailInput.value;
     state.step = 1;
     rerender?.();
-  });
+  };
 
-  safeNextBtn.addEventListener('click', async (event) => {
+  const handleNextClick = async (event: Event): Promise<void> => {
     event.preventDefault();
 
     submitAttempted = true;
@@ -319,18 +332,46 @@ function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => voi
       const wrapper = safeEmailInput.closest('.login__field-error-wrapper');
       showFieldMessage(wrapper, 'Пользователь уже существует', 'var(--color-mid)', true);
     }
-  });
+  };
+
+  safeEmailInput.addEventListener('input', validateEmail);
+  safePasswordInput.addEventListener('input', updatePasswordField);
+  safePasswordInput.addEventListener('focus', updatePasswordField);
+  safePasswordInput.addEventListener('blur', handlePasswordBlur);
+  safeConfirmInput.addEventListener('input', updateConfirmField);
+  safeConfirmInput.addEventListener('focus', updateConfirmField);
+  safeConfirmInput.addEventListener('blur', handleConfirmBlur);
+  safePrevBtn.addEventListener('click', handlePrevClick);
+  safeNextBtn.addEventListener('click', handleNextClick);
+
+  return () => {
+    safeEmailInput.removeEventListener('input', validateEmail);
+    safePasswordInput.removeEventListener('input', updatePasswordField);
+    safePasswordInput.removeEventListener('focus', updatePasswordField);
+    safePasswordInput.removeEventListener('blur', handlePasswordBlur);
+    safeConfirmInput.removeEventListener('input', updateConfirmField);
+    safeConfirmInput.removeEventListener('focus', updateConfirmField);
+    safeConfirmInput.removeEventListener('blur', handleConfirmBlur);
+    safePrevBtn.removeEventListener('click', handlePrevClick);
+    safeNextBtn.removeEventListener('click', handleNextClick);
+  };
 }
 
-function setupStep3(root: ParentNode, options: RegisterFormOptions): void {
+function setupStep3(root: ParentNode, options: RegisterFormOptions): () => void {
   const finishBtn = root.querySelector('.js-go-home');
 
   if (!(finishBtn instanceof HTMLButtonElement)) {
-    return;
+    return () => {};
   }
 
-  finishBtn.addEventListener('click', (event) => {
+  const handleFinishClick = (event: Event): void => {
     event.preventDefault();
     options.onFinish?.();
-  });
+  };
+
+  finishBtn.addEventListener('click', handleFinishClick);
+
+  return () => {
+    finishBtn.removeEventListener('click', handleFinishClick);
+  };
 }
