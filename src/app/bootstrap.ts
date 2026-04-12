@@ -13,11 +13,13 @@ import { profilePage } from '../pages/profile/profile-page.js';
 import { loadTemplates, renderTemplate } from './templates/renderer.js';
 import type { RouteRenderer } from '../types/router.js';
 
-const root = document.getElementById('root');
+const rootNode = document.getElementById('root');
 
-if (!(root instanceof HTMLElement)) {
+if (!(rootNode instanceof HTMLElement)) {
   throw new Error('Root element #root not found');
 }
+
+const root = rootNode;
 
 async function startApp(): Promise<void> {
   await loadTemplates();
@@ -44,7 +46,7 @@ async function startApp(): Promise<void> {
   router.start();
 }
 
-startApp().catch((error: unknown) => {
+startApp().catch((error: Error | null | undefined) => {
   console.error(error);
   root.innerHTML = renderTemplate('app-error');
 });

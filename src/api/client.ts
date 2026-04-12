@@ -2,15 +2,17 @@ import { API_BASE_URL } from './config.js';
 import { refresh } from './auth.api.js';
 import type { ApiError } from '../types/api.js';
 
+type RequestBody = object | string | number | boolean | null | RequestBody[];
+
 export interface RequestOptions extends Omit<RequestInit, 'body'> {
-  body?: unknown;
+  body?: RequestBody;
 }
 
 interface ErrorResponseBody {
   error?: string;
 }
 
-export async function request<T = unknown>(
+export async function request<T = RequestBody>(
   path: string,
   options: RequestOptions = {},
   retry = true,

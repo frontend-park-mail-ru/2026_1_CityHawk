@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY webpack.config.js babel.config.json tsconfig.json eslint.config.mjs ./
+COPY webpack.config.js babel.config.json tsconfig.json tsconfig.server.json eslint.config.mjs ./
 COPY public ./public
 COPY server ./server
 COPY src ./src

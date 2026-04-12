@@ -1,6 +1,13 @@
 type TemplateName = string;
-type TemplateContext = Record<string, unknown>;
-type CompiledTemplate = (context?: TemplateContext) => string;
+export type TemplateValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | TemplateValue[]
+  | { [key: string]: TemplateValue };
+type CompiledTemplate = (context?: object) => string;
 
 interface HandlebarsRuntime {
   compile(source: string): CompiledTemplate;
@@ -149,12 +156,12 @@ export async function loadTemplates(): Promise<void> {
   isLoaded = true;
 }
 
-export function renderTemplate(name: string, context: TemplateContext = {}): string {
+export function renderTemplate<T extends object>(name: string, context?: T): string {
   const template = templateCache.get(name);
 
   if (!template) {
     throw new Error(`Template "${name}" is not loaded`);
   }
 
-  return template(context);
+  return template(context || {});
 }

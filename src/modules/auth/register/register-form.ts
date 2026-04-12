@@ -12,7 +12,7 @@ import {
 import { checkPasswordStrength, isValidEmail } from '../shared/validators.js';
 import { attachOAuthButtons } from '../oauth.js';
 
-interface RegisterState extends Record<string, unknown> {
+interface RegisterState {
   step?: number;
   name?: string;
   surname?: string;
