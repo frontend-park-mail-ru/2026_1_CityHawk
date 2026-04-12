@@ -45,12 +45,12 @@
 .hero-search__input {
     flex: 1;
     min-width: 0;
-    height: 70px;
+    height: 60px;
     padding: 0 24px;
     border: none;
     outline: none;
     background: var(--color-input-midtone-1);
-    color: var(--color-accent-1);
+    color: var(--home-color-text);
     font-size: var(--home-text-4);
 }
 

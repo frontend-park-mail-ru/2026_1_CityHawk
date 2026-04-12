@@ -241,38 +241,27 @@ main.login {
     display: flex;
     flex-direction: column;
     gap: var(--gap-fields);
+    --form-control-width: var(--width-input);
+    --form-control-height: var(--height-input);
+    --form-control-padding-x: var(--padding-input);
+    --form-control-radius: var(--radius-input);
+    --form-control-border-width: var(--stroke-input-active);
+    --form-label-color: var(--color-accent-1);
+    --form-control-color: var(--color-accent-1);
+    --form-control-bg: var(--color-input-midtone-1);
+    --form-placeholder-color: var(--color-placeholder);
+    --form-control-border-hover: var(--color-accent-3);
+    --form-control-border-focus: var(--color-accent-1);
+    --form-toggle-color: var(--color-accent-1);
+    --form-select-arrow-color: var(--color-accent-1);
+    --form-error-color: var(--color-mid);
+    --form-toggle-size: var(--icon-height-input);
 }
 
 .login__field {
     display: flex;
     flex-direction: column;
     gap: var(--gap-annotation);
-}
-
-.login__field label {
-    font-family: var(--font-primary, sans-serif);
-    font-size: var(--text-annotation);
-    color: var(--color-accent-1);
-    font-weight: 400;
-    line-height: 100%;
-}
-
-.login__field input {
-    width: var(--width-input);
-    height: var(--height-input);
-    padding: 0 var(--padding-input);
-    border: none;
-    border-radius: var(--radius-input);
-    font-family: var(--font-primary, sans-serif);
-    font-size: var(--text-input);
-    color: var(--color-accent-1);
-    background: var(--color-input-midtone-1);
-}
-
-.login__field input::placeholder {
-    color: var(--color-placeholder);
-    font-size: var(--text-input);
-    opacity: 1;
 }
 
 .login__forgot {
@@ -437,69 +426,6 @@ main.login {
     transition: transform 0.1s ease-out;
 }
 
-.login__field input {
-    transition: border-color 0.3s ease-out;
-    border: var(--stroke-input-active) solid transparent;
-}
-
-.login__field input:hover {
-    border-color: var(--color-accent-3);
-}
-
-.login__field input:focus {
-    border-color: var(--color-accent-1);
-}
-
-/* ========================================
-   PASSWORD TOGGLE BUTTON
-   ======================================== */
-
-.login__field-icon-wrapper {
-    position: relative;
-}
-
-.login__field-icon-wrapper input {
-    padding-right: calc(var(--padding-input) * 2 + var(--icon-height-input));
-}
-
-.login__password-toggle {
-    position: absolute;
-    right: var(--padding-input);
-    top: 50%;
-    transform: translateY(-50%);
-    width: var(--icon-height-input);
-    height: var(--icon-height-input);
-    padding: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-    z-index: 2;
-    color: var(--color-accent-1);
-}
-
-.login__password-toggle svg {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.login__password-toggle:active {
-    transform: translateY(-50%) scale(0.95);
-}
-
-.login__field-icon-wrapper input:hover {
-    border-color: var(--color-accent-3);
-}
-
-.login__field-icon-wrapper input:active,
-.login__field-icon-wrapper input:focus {
-    border-color: var(--color-accent-1);
-}
-
-.login__field-icon-wrapper-noicon input {
-    padding-right: var(--padding-input);
-}
-
 /* ========================================
    TICKETS LOAD ANIMATION
    ======================================== */
@@ -554,10 +480,13 @@ main.login {
     display: none;
 }
 
-.login__field-error-wrapper--error input,
-.login__field-error-wrapper--error input:hover,
-.login__field-error-wrapper--error input:focus,
-.login__field-error-wrapper--error input:active {
+.login__field-error-wrapper--error .form-field__input,
+.login__field-error-wrapper--error .form-field__input:hover,
+.login__field-error-wrapper--error .form-field__input:focus,
+.login__field-error-wrapper--error .form-field__input:active,
+.login__field-error-wrapper--error .form-field__select,
+.login__field-error-wrapper--error .form-field__select:hover,
+.login__field-error-wrapper--error .form-field__select:focus {
     border-color: var(--color-mid);
 }
 
@@ -828,7 +757,7 @@ width:100%;
 
 }
 
-.login__field input,
+.form-field__input,
 .login__submit,
 .login__buttons{
 
@@ -1128,12 +1057,9 @@ DARK THEME ADDITIONS
         color: var(--color-blank);
     }
 
-    .login__field label {
-        color: var(--color-blank);
-    }
-
-    .login__field input {
-        color: var(--color-blank);
+    .login__fields {
+        --form-label-color: var(--color-blank);
+        --form-control-color: var(--color-blank);
     }
 
     .login__forgot {
@@ -1200,21 +1126,24 @@ DARK THEME ADDITIONS
     }
 
 
-    .login__field input {
+    .form-field__input,
+    .form-field__select {
         border: var(--stroke-input-active) solid;
         border-color: var(--color-dark-stroke);
     }
 
-    .login__field input:active {
+    .form-field__input:active,
+    .form-field__select:active {
         border-color: var(--color-background-tone-1);
     }
 
-    .login__field input:focus {
+    .form-field__input:focus,
+    .form-field__select:focus {
         border-color: var(--color-background-tone-1);
     }
 
-    .login__field-icon-wrapper input:active,
-    .login__field-icon-wrapper input:focus {
+    .form-field__input-wrap .form-field__input:active,
+    .form-field__input-wrap .form-field__input:focus {
         border-color: var(--color-background-tone-1);
     }
 

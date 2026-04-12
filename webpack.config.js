@@ -39,6 +39,9 @@ module.exports = {
     ],
   },
   resolve: {
+    extensionAlias: {
+      '.js': ['.ts', '.js'],
+    },
     extensions: ['.ts', '.js'],
   },
   plugins: [

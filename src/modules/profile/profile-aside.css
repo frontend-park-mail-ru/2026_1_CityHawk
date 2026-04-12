@@ -1,0 +1,241 @@
+.profile__aside {
+    position: relative;
+    flex: 0 0 var(--profile-aside-width);
+    min-width: 250px;
+    background: var(--color-background-tone-1);
+    border-top-right-radius: var(--profile-panel-radius);
+    border-bottom-right-radius: var(--profile-panel-radius);
+    padding: 28px 0 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--color-blank);
+}
+
+.profile__aside-close {
+    align-self: flex-start;
+    width: 20px;
+    height: 20px;
+    margin: 0 0 38px 40px;
+    color: rgba(255, 255, 255, 0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.profile__aside-close svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.profile__aside-close:hover {
+    color: var(--color-blank);
+}
+
+.profile__aside-close:active {
+    transform: scale(0.95);
+}
+
+.profile__branding {
+    width: 100%;
+    padding: 0 var(--paddings-sidebar, 65px);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-logo, 10px);
+    color: var(--color-blank);
+    text-decoration: none;
+    margin-bottom: 72px;
+}
+
+.profile__logo {
+    height: var(--height-logo, 50px);
+    width: calc(var(--height-logo, 50px) * 213 / 120);
+    aspect-ratio: 213 / 120;
+    background-color: currentColor;
+    -webkit-mask: url("/public/static/assets/logo.svg") center / contain no-repeat;
+    mask: url("/public/static/assets/logo.svg") center / contain no-repeat;
+    flex-shrink: 0;
+}
+
+.profile__brand-name {
+    font-family: var(--font-company, sans-serif);
+    font-size: var(--text-company-name, 56px);
+    line-height: 100%;
+    letter-spacing: -0.07em;
+    font-weight: 400;
+}
+
+.profile__user-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    margin-bottom: 56px;
+}
+
+.profile__avatar-wrapper {
+    position: relative;
+    width: var(--profile-avatar-size);
+    height: var(--profile-avatar-size);
+}
+
+.profile__avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    background: var(--color-input-midtone-1);
+}
+
+.profile__avatar--fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.profile__avatar-initials {
+    font-family: var(--font-slogan, sans-serif);
+    font-size: 54px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-blank);
+}
+
+.profile__avatar-edit {
+    position: absolute;
+    right: 6px;
+    bottom: 10px;
+    width: 46px;
+    height: 46px;
+    border: none;
+    border-radius: 50%;
+    background: var(--color-base);
+    color: var(--color-blank);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.profile__avatar-edit svg {
+    width: 22px;
+    height: 22px;
+}
+
+.profile__avatar-edit:hover {
+    background: var(--color-accent-3);
+}
+
+.profile__avatar-edit:active {
+    transform: scale(0.96);
+}
+
+.profile__user-name {
+    margin: 0;
+    font-family: var(--font-slogan, sans-serif);
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 100%;
+    color: var(--color-blank);
+}
+
+.profile__menu {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    gap: 2px;
+}
+
+.profile__menu-item {
+    height: var(--profile-menu-height);
+    padding: 0 32px 0 44px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    text-decoration: none;
+    color: var(--color-blank);
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-input, 16px);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.profile__menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.profile__menu-item--active {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.profile__menu-icon {
+    width: var(--profile-menu-icon-size);
+    height: var(--profile-menu-icon-size);
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.profile__menu-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+@media (max-width: 900px) {
+    .profile__aside {
+        min-width: 100%;
+        border-top-right-radius: 0;
+        border-bottom-left-radius: 60px;
+        border-bottom-right-radius: 60px;
+        padding: 42px 0 28px;
+    }
+
+    .profile__aside-close {
+        margin-left: 24px;
+        margin-bottom: 28px;
+    }
+
+    .profile__branding {
+        justify-content: center;
+        margin-bottom: 32px;
+    }
+
+    .profile__brand-name {
+        font-size: 42px;
+    }
+
+    .profile__avatar-wrapper {
+        width: 132px;
+        height: 132px;
+    }
+
+    .profile__user-name {
+        font-size: 24px;
+    }
+
+    .profile__menu-item {
+        height: 62px;
+        padding: 0 24px;
+        font-size: 14px;
+    }
+
+    .profile__menu-icon {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile__brand-name {
+        font-size: 34px;
+    }
+}

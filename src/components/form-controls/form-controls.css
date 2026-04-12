@@ -1,0 +1,114 @@
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--form-field-gap, var(--gap-annotation, 10px));
+}
+
+.form-field__label {
+    font-family: var(--form-label-font, var(--font-primary, sans-serif));
+    font-size: var(--form-label-size, var(--text-annotation, 16px));
+    font-weight: var(--form-label-weight, 400);
+    line-height: 100%;
+    color: var(--form-label-color, inherit);
+}
+
+.form-field__control {
+    display: flex;
+    flex-direction: column;
+    gap: var(--form-error-gap, 6px);
+}
+
+.form-field__input-wrap {
+    position: relative;
+}
+
+.form-field__input,
+.form-field__select {
+    width: var(--form-control-width, 100%);
+    height: var(--form-control-height, var(--height-input, 54px));
+    padding: 0 var(--form-control-padding-x, var(--padding-input, 20px));
+    border: var(--form-control-border-width, var(--stroke-input-active, 2px)) solid transparent;
+    border-radius: var(--form-control-radius, var(--radius-input, 10px));
+    background: var(--form-control-bg, var(--color-input-midtone-1));
+    color: var(--form-control-color, inherit);
+    font-family: var(--form-control-font, var(--font-primary, sans-serif));
+    font-size: var(--form-control-size, var(--text-input, 16px));
+    outline: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    appearance: none;
+}
+
+.form-field__input::placeholder {
+    color: var(--form-placeholder-color, var(--color-placeholder));
+    opacity: 1;
+}
+
+.form-field__input:hover,
+.form-field__select:hover {
+    border-color: var(--form-control-border-hover, var(--color-accent-3));
+}
+
+.form-field__input:focus,
+.form-field__select:focus {
+    border-color: var(--form-control-border-focus, var(--color-accent-1));
+}
+
+.form-field__input-wrap .form-field__input {
+    padding-right: calc(
+        var(--form-control-padding-x, var(--padding-input, 20px)) * 2 +
+        var(--form-toggle-size, var(--icon-height-input, 30px))
+    );
+}
+
+.form-field__input-wrap--no-icon .form-field__input {
+    padding-right: var(--form-control-padding-x, var(--padding-input, 20px));
+}
+
+.form-field__toggle {
+    position: absolute;
+    right: var(--form-control-padding-x, var(--padding-input, 20px));
+    top: 50%;
+    transform: translateY(-50%);
+    width: var(--form-toggle-size, var(--icon-height-input, 30px));
+    height: var(--form-toggle-size, var(--icon-height-input, 30px));
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--form-toggle-color, var(--form-control-color, inherit));
+    cursor: pointer;
+    z-index: 1;
+}
+
+.form-field__toggle svg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.form-field__toggle:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.form-field__select {
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--form-select-arrow-color, currentColor) 50%),
+        linear-gradient(135deg, var(--form-select-arrow-color, currentColor) 50%, transparent 50%);
+    background-position:
+        calc(100% - 28px) calc(50% - 4px),
+        calc(100% - 18px) calc(50% - 4px);
+    background-size: 10px 10px, 10px 10px;
+    background-repeat: no-repeat;
+    padding-right: 54px;
+}
+
+.form-field__error {
+    min-height: 16px;
+    font-family: var(--form-error-font, var(--font-primary, sans-serif));
+    font-size: var(--form-error-size, 12px);
+    line-height: 1.25;
+    color: var(--form-error-color, var(--color-mid));
+}
+
+.form-field__error:empty {
+    display: none;
+}

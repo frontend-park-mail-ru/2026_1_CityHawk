@@ -1,12 +1,9 @@
-body {
-    background:
-        radial-gradient(circle at top center, rgba(41, 85, 145, 0.16), transparent 32%),
-        linear-gradient(180deg, #081321 0%, #071426 35%, #081a31 100%);
-}
-
 .event-page {
     min-height: 100vh;
     color: var(--home-color-text);
+    background:
+        radial-gradient(circle at top center, rgba(41, 85, 145, 0.16), transparent 32%),
+        linear-gradient(180deg, #081321 0%, #071426 35%, #081a31 100%);
 }
 
 .event-page__header {
@@ -14,11 +11,15 @@ body {
 }
 
 .event-page__main {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
     padding: 30px 0 56px;
 }
 
 @media (max-width: 768px) {
     .event-page__main {
+        gap: 20px;
         padding-top: 12px;
     }
 }

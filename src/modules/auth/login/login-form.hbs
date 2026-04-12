@@ -7,30 +7,34 @@
     <div class="login__wrapper">
         <h2 class="login__form-title">Вход</h2>
         <div class="login__fields">
-            <div class="login__field login__email">
-                <label for="email">Email</label>
-                <div class="login__field-error-wrapper">
-                    <div class="login__field-icon-wrapper login__field-icon-wrapper-noicon">
-                        <input type="email" id="email" name="email" placeholder="Введите email">
-                    </div>
-                    <p class="login__error-message"></p>
-                </div>
-            </div>
-            <div class="login__field login__password">
-                <label for="password">Пароль</label>
-                <div class="login__field-error-wrapper">
-                    <div class="login__field-icon-wrapper">
-                        <input type="password" id="password" name="password" placeholder="Введите пароль">
-                        <button class="login__password-toggle" type="button" aria-label="Показать пароль">
-                            <svg class="eye-icon" width="45" height="33">
-                                <use href="#eye-open"></use>
-                            </svg>
-                        </button>
-                    </div>
-                    <p class="login__error-message"></p>
-                </div>
-                <a href="/password_reset" class="login__forgot">Забыли пароль?</a>
-            </div>
+            {{> form-input
+                fieldClass="login__field login__email"
+                label="Email"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Введите email"
+                wrapperClass="login__field-error-wrapper"
+                inputWrapperClass="login__field-icon-wrapper login__field-icon-wrapper-noicon form-field__input-wrap--no-icon"
+                errorClass="login__error-message"
+            }}
+            {{> form-input
+                fieldClass="login__field login__password"
+                label="Пароль"
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Введите пароль"
+                wrapperClass="login__field-error-wrapper"
+                inputWrapperClass="login__field-icon-wrapper"
+                errorClass="login__error-message"
+                toggle=true
+                toggleClass="login__password-toggle"
+                toggleAriaLabel="Показать пароль"
+                hintLinkHref="/password_reset"
+                hintLinkClass="login__forgot"
+                hintLinkText="Забыли пароль?"
+            }}
             <button class="login__submit" type="submit">Войти</button>
             <div class="login__oauth">
                 <div class="login__divider">

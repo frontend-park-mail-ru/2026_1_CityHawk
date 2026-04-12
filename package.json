@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "node ./server/index.js",
+    "start": "node ./server-dist/index.js",
     "dev": "webpack serve --config webpack.config.js --mode development",
-    "build": "webpack --config webpack.config.js --mode production",
+    "build": "webpack --config webpack.config.js --mode production && npm run build:server",
+    "build:server": "tsc -p tsconfig.server.json",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
