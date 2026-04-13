@@ -1,55 +1,63 @@
 <form class="event-list-filters" data-role="event-list-filter-form">
+  {{#if hasAnyFilters}}
   <div class="event-list-filters__grid">
-    <label class="event-list-filters__field">
-      <select name="categoryId" class="event-list-filters__input">
-        <option value="">Все категории</option>
-        {{#each categories}}
-          <option value="{{id}}" {{#if selected}}selected{{/if}}>
-            {{name}}
-          </option>
-        {{/each}}
-      </select>
-      <img
-        src="/public/static/icons/for_filters.svg"
-        alt=""
-        class="event-list-filters__field-icon"
-        aria-hidden="true"
-      />
-    </label>
+    {{#if hasCategories}}
+      <label class="event-list-filters__field">
+        <select name="categoryId" class="event-list-filters__input">
+          <option value="">Все категории</option>
+          {{#each categories}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>
+              {{label}}
+            </option>
+          {{/each}}
+        </select>
+        <img
+          src="/public/static/icons/for_filters.svg"
+          alt=""
+          class="event-list-filters__field-icon"
+          aria-hidden="true"
+        />
+      </label>
+    {{/if}}
 
-    <label class="event-list-filters__field">
-      <select name="datePreset" class="event-list-filters__input">
-        <option value="">Любая дата</option>
-        {{#each datePresetOptions}}
-          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-        {{/each}}
-      </select>
-      <img
-        src="/public/static/icons/for_filters.svg"
-        alt=""
-        class="event-list-filters__field-icon"
-        aria-hidden="true"
-      />
-    </label>
+    {{#if hasDatePresetOptions}}
+      <label class="event-list-filters__field">
+        <select name="datePreset" class="event-list-filters__input">
+          <option value="">Любая дата</option>
+          {{#each datePresetOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+        <img
+          src="/public/static/icons/for_filters.svg"
+          alt=""
+          class="event-list-filters__field-icon"
+          aria-hidden="true"
+        />
+      </label>
+    {{/if}}
 
-    <label class="event-list-filters__field">
-      <select name="sort" class="event-list-filters__input">
-        <option value="">По умолчанию</option>
-        {{#each sortOptions}}
-          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-        {{/each}}
-      </select>
-      <img
-        src="/public/static/icons/for_filters.svg"
-        alt=""
-        class="event-list-filters__field-icon"
-        aria-hidden="true"
-      />
-    </label>
+    {{#if hasSortOptions}}
+      <label class="event-list-filters__field">
+        <select name="sort" class="event-list-filters__input">
+          <option value="">По умолчанию</option>
+          {{#each sortOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+        <img
+          src="/public/static/icons/for_filters.svg"
+          alt=""
+          class="event-list-filters__field-icon"
+          aria-hidden="true"
+        />
+      </label>
+    {{/if}}
 
     <div class="event-list-filters__actions">
       <button type="submit" class="event-list-filters__submit">Показать</button>
       <a href="/events" class="event-list-filters__reset">Сбросить</a>
     </div>
   </div>
+  {{/if}}
 </form>

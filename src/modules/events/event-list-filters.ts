@@ -17,10 +17,18 @@ export interface EventListFiltersOptions {
 }
 
 export function renderEventListFilters(state: EventListFiltersState = {}): string {
+  const categories = Array.isArray(state.categories) ? state.categories : [];
+  const datePresetOptions = Array.isArray(state.datePresetOptions) ? state.datePresetOptions : [];
+  const sortOptions = Array.isArray(state.sortOptions) ? state.sortOptions : [];
+
   return renderTemplate('event-list-filters', {
-    categories: Array.isArray(state.categories) ? state.categories : [],
-    datePresetOptions: Array.isArray(state.datePresetOptions) ? state.datePresetOptions : [],
-    sortOptions: Array.isArray(state.sortOptions) ? state.sortOptions : [],
+    categories,
+    datePresetOptions,
+    sortOptions,
+    hasCategories: categories.length > 0,
+    hasDatePresetOptions: datePresetOptions.length > 0,
+    hasSortOptions: sortOptions.length > 0,
+    hasAnyFilters: categories.length > 0 || datePresetOptions.length > 0 || sortOptions.length > 0,
   });
 }
 
