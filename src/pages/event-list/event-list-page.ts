@@ -2,6 +2,7 @@ import { getEvents } from '../../api/events.api.js';
 import { getCategories } from '../../api/categories.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
+import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
 import { renderEventListCatalog } from '../../modules/events/event-list-catalog.js';
 import { attachEventListFilters, renderEventListFilters } from '../../modules/events/event-list-filters.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
@@ -278,6 +279,19 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
         },
       });
 
+      const navigateByHeaderQuery = (nextQuery: string) => {
+        const params = new URLSearchParams(window.location.search);
+
+        if (nextQuery) {
+          params.set('query', nextQuery);
+        } else {
+          params.delete('query');
+        }
+
+        const suffix = params.toString() ? '?' + params.toString() : '';
+        navigate('/events' + suffix);
+      };
+
       const handleHeaderSearchSubmit = (event: SubmitEvent) => {
         event.preventDefault();
 
@@ -286,25 +300,23 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
         }
 
         const formData = new FormData(headerSearchForm);
-        const params = new URLSearchParams(window.location.search);
         const query = String(formData.get('query') || '').trim();
-
-        if (query) {
-          params.set('query', query);
-        } else {
-          params.delete('query');
-        }
-
-        const suffix = params.toString() ? `?${params.toString()}` : '';
-        navigate(`/events${suffix}`);
+        navigateByHeaderQuery(query);
       };
 
+      let detachHeaderSuggestions = () => {};
       if (headerSearchForm instanceof HTMLFormElement) {
         headerSearchForm.addEventListener('submit', handleHeaderSearchSubmit);
+        detachHeaderSuggestions = attachHeaderSearchSuggestions(headerSearchForm, {
+          onPick(query) {
+            navigateByHeaderQuery(query);
+          },
+        });
       }
 
       return () => {
         detachEventListFilters();
+        detachHeaderSuggestions();
 
         if (headerSearchForm instanceof HTMLFormElement) {
           headerSearchForm.removeEventListener('submit', handleHeaderSearchSubmit);

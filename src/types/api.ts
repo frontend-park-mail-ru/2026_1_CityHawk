@@ -128,7 +128,8 @@ export interface EventsQueryParams {
 }
 
 export interface EventSessionPayload {
-  placeId: string;
+  placeId?: string;
+  placeName?: string;
   startAt: string;
   endAt: string;
   price: number;
@@ -170,6 +171,14 @@ export interface RegisterPayload {
   password: string;
   birthday?: string;
   cityId?: string;
+}
+
+export interface UpdateProfilePayload {
+  username?: string;
+  userSurname?: string;
+  birthday?: string;
+  cityId?: string;
+  avatarUrl?: string;
 }
 
 export interface ApiError extends Error {

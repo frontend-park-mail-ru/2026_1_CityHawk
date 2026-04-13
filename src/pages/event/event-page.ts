@@ -1,6 +1,7 @@
 import { getEventById, getEvents } from '../../api/events.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
+import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { attachEventDescription, renderEventDescription } from '../../modules/events/event-description.js';
 import { renderEventGallery } from '../../modules/events/event-gallery.js';
@@ -322,6 +323,17 @@ export async function eventPage({ navigate, params = {} }: RouteContext): Promis
 
       attachEventDescription(root);
 
+      const navigateByHeaderQuery = (nextQuery: string) => {
+        const nextParams = new URLSearchParams();
+
+        if (nextQuery) {
+          nextParams.set('query', nextQuery);
+        }
+
+        const suffix = nextParams.toString() ? '?' + nextParams.toString() : '';
+        navigate('/events' + suffix);
+      };
+
       const handleHeaderSearchSubmit = (event: SubmitEvent) => {
         event.preventDefault();
 
@@ -331,21 +343,22 @@ export async function eventPage({ navigate, params = {} }: RouteContext): Promis
 
         const formData = new FormData(headerSearchForm);
         const query = String(formData.get('query') || '').trim();
-        const nextParams = new URLSearchParams();
-
-        if (query) {
-          nextParams.set('query', query);
-        }
-
-        const suffix = nextParams.toString() ? `?${nextParams.toString()}` : '';
-        navigate(`/events${suffix}`);
+        navigateByHeaderQuery(query);
       };
 
+      let detachHeaderSuggestions = () => {};
       if (headerSearchForm instanceof HTMLFormElement) {
         headerSearchForm.addEventListener('submit', handleHeaderSearchSubmit);
+        detachHeaderSuggestions = attachHeaderSearchSuggestions(headerSearchForm, {
+          onPick(query) {
+            navigateByHeaderQuery(query);
+          },
+        });
       }
 
       return () => {
+        detachHeaderSuggestions();
+
         if (headerSearchForm instanceof HTMLFormElement) {
           headerSearchForm.removeEventListener('submit', handleHeaderSearchSubmit);
         }

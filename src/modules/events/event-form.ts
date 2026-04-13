@@ -36,7 +36,9 @@ interface NormalizedEventFormInitialValues {
   periodEnd: string;
   isAnytime: boolean;
   placeId: string;
+  placeQuery: string;
   category: string;
+  categoryQuery: string;
   tags: string;
   description: string;
   locationDescription: string;
@@ -147,13 +149,60 @@ function normalizeInitialValues(
     periodEnd: String(initialValues.periodEnd || '').trim(),
     isAnytime: Boolean(initialValues.isAnytime),
     placeId: String(initialValues.placeId || '').trim(),
+    placeQuery: '',
     category: String(initialValues.category || '').trim(),
+    categoryQuery: '',
     tags: normalizeTags(initialValues.tags),
     description: String(initialValues.description || '').trim(),
     locationDescription: String(initialValues.locationDescription || '').trim(),
     posterPreviewUrl: String(initialValues.posterPreviewUrl || initialValues.posterUrl || '').trim(),
     galleryPreviewUrls: normalizePreviewUrls(initialValues, 'galleryUrls'),
   };
+}
+
+function findOptionLabelByValue(items: EventFormSelectOption[], value: string): string {
+  const normalizedValue = String(value || '').trim();
+
+  if (!normalizedValue) {
+    return '';
+  }
+
+  const option = items.find((item) => String(item.value || '').trim() === normalizedValue);
+  return String(option?.label || '').trim();
+}
+
+function resolveReferenceId(
+  root: ParentNode,
+  listRole: string,
+  rawValue: FormDataEntryValue | null,
+  config: { allowRawValue?: boolean } = {},
+): string {
+  const value = String(rawValue || '').trim();
+
+  if (!value) {
+    return '';
+  }
+
+  const datalist = root.querySelector<HTMLElement>(`[data-role="${listRole}"]`);
+  if (!(datalist instanceof HTMLDataListElement)) {
+    return value;
+  }
+
+  const normalizedValue = value.toLowerCase();
+  const options = Array.from(datalist.querySelectorAll<HTMLOptionElement>('option'));
+  const matchedByLabel = options.find((option) => String(option.value || '').trim().toLowerCase() === normalizedValue);
+  const mappedId = String(matchedByLabel?.dataset.id || '').trim();
+
+  if (mappedId) {
+    return mappedId;
+  }
+
+  if (config.allowRawValue) {
+    return value;
+  }
+
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+  return isUuid ? value : '';
 }
 
 export function renderEventForm(state: EventFormRenderState = {}): string {
@@ -167,6 +216,13 @@ export function renderEventForm(state: EventFormRenderState = {}): string {
     Array.isArray(state.places) ? state.places : [],
     initialValues.placeId,
   );
+  const resolvedInitialValues = {
+    ...initialValues,
+    placeQuery: initialValues.placeQuery || findOptionLabelByValue(places, initialValues.placeId) || initialValues.placeId,
+    categoryQuery: initialValues.categoryQuery
+      || findOptionLabelByValue(categories, initialValues.category)
+      || initialValues.category,
+  };
   const submitLabel = state.submitLabel
     || (mode === 'edit' ? 'Сохранить изменения' : 'Опубликовать событие');
 
@@ -174,7 +230,7 @@ export function renderEventForm(state: EventFormRenderState = {}): string {
     categories,
     deleteHref: state.deleteHref || '',
     places,
-    initialValues,
+    initialValues: resolvedInitialValues,
     submitLabel,
     isEditMode: mode === 'edit',
   });
@@ -207,8 +263,13 @@ function collectFormValues(form: HTMLFormElement): EventFormValues {
     periodStart: String(formData.get('periodStart') || '').trim(),
     periodEnd: String(formData.get('periodEnd') || '').trim(),
     isAnytime: formData.get('isAnytime') === 'on',
-    placeId: String(formData.get('placeId') || '').trim(),
-    category: String(formData.get('category') || '').trim(),
+    placeId: resolveReferenceId(
+      form,
+      'event-create-place-options',
+      formData.get('place'),
+      { allowRawValue: true },
+    ),
+    category: resolveReferenceId(form, 'event-create-category-options', formData.get('category')),
     tags: String(formData.get('tags') || '')
       .split(',')
       .map((tag) => tag.trim())
@@ -264,13 +325,18 @@ export function attachEventForm(root: ParentNode, options: EventFormOptions = {}
       return;
     }
 
-    const payload = {
-      ...values,
-      imageUrls: await buildImageUrls(posterController, galleryControllers),
-    };
+    try {
+      const payload = {
+        ...values,
+        imageUrls: await buildImageUrls(posterController, galleryControllers),
+      };
 
-    if (typeof options.onSubmit === 'function') {
-      options.onSubmit(payload, form, event);
+      if (typeof options.onSubmit === 'function') {
+        options.onSubmit(payload, form, event);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Не удалось подготовить изображения';
+      window.alert(message);
     }
   };
 

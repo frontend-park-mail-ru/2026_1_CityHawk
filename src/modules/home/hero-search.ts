@@ -1,4 +1,5 @@
 import { renderTemplate } from '../../app/templates/renderer.js';
+import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
 
 export interface HeroSearchState {
   query?: string;
@@ -32,8 +33,14 @@ export function attachHeroSearch(root: ParentNode, options: HeroSearchOptions = 
   };
 
   form.addEventListener('submit', handleSubmit);
+  const detachSuggestions = attachHeaderSearchSuggestions(form, {
+    onPick(query) {
+      options.onSearch?.(query);
+    },
+  });
 
   return () => {
+    detachSuggestions();
     form.removeEventListener('submit', handleSubmit);
   };
 }

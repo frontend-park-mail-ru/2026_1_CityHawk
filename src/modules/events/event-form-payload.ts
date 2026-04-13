@@ -272,12 +272,16 @@ function mapSessionsToInitialSchedule(sessions?: EventSession[]): EventFormSched
 }
 
 function buildSessions(formPayload: EventFormValues): EventSessionPayload[] {
+  const placeValue = String(formPayload.placeId || '').trim();
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(placeValue);
+  const placePayload = isUuid ? { placeId: placeValue } : { placeName: placeValue };
+
   if (formPayload.isAnytime) {
     const sessionDates = buildSingleSessionDates('', true);
 
     return [
       {
-        placeId: formPayload.placeId,
+        ...placePayload,
         startAt: sessionDates.startAt,
         endAt: sessionDates.endAt,
         price: 0,
@@ -295,7 +299,7 @@ function buildSessions(formPayload: EventFormValues): EventSessionPayload[] {
       );
 
       return {
-        placeId: formPayload.placeId,
+        ...placePayload,
         startAt: sessionDates.startAt,
         endAt: sessionDates.endAt,
         price: 0,
@@ -308,7 +312,7 @@ function buildSessions(formPayload: EventFormValues): EventSessionPayload[] {
 
     return [
       {
-        placeId: formPayload.placeId,
+        ...placePayload,
         startAt: sessionDates.startAt,
         endAt: sessionDates.endAt,
         price: 0,
@@ -325,7 +329,7 @@ function buildSessions(formPayload: EventFormValues): EventSessionPayload[] {
 
   return [
     {
-      placeId: formPayload.placeId,
+      ...placePayload,
       startAt: singleSessionDates.startAt,
       endAt: singleSessionDates.endAt,
       price: 0,

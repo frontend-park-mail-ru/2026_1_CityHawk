@@ -13,49 +13,31 @@ export interface ImageFieldController {
   getPreviewUrl: () => string;
 }
 
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.addEventListener('load', () => {
-      if (typeof reader.result === 'string' && reader.result) {
-        resolve(reader.result);
-        return;
-      }
-
-      reject(new Error(`Не удалось прочитать файл ${file.name}`));
-    });
-
-    reader.addEventListener('error', () => {
-      reject(new Error(`Не удалось прочитать файл ${file.name}`));
-    });
-
-    reader.readAsDataURL(file);
-  });
-}
-
 export async function buildImageUrls(
   posterController: ImageFieldController,
   galleryControllers: ImageFieldController[],
 ): Promise<string[]> {
   const posterFile = posterController.getFile();
-  const uploadedPoster = posterFile ? [await fileToDataUrl(posterFile)] : [];
   const galleryFiles = galleryControllers
     .map((controller) => controller.getFile())
     .filter((file): file is File => Boolean(file));
-  const uploadedGallery = await Promise.all(
-    galleryFiles.map((file) => fileToDataUrl(file)),
-  );
+  const hasLocalFiles = Boolean(posterFile) || galleryFiles.length > 0;
+
+  if (hasLocalFiles) {
+    throw new Error('Загрузка файлов с устройства пока не поддерживается. Укажите URL изображения длиной до 2048 символов.');
+  }
+
   const fallbackPreviewUrls = [
     posterController.getPreviewUrl(),
     ...galleryControllers.map((controller) => controller.getPreviewUrl()),
-  ].filter((url) => typeof url === 'string' && url.trim() && !url.startsWith('blob:'));
+  ]
+    .filter((url) => typeof url === 'string' && url.trim())
+    .map((url) => String(url).trim())
+    .filter((url) => !url.startsWith('blob:'))
+    .filter((url) => !url.startsWith('data:'))
+    .filter((url) => url.length <= 2048);
 
-  const imageUrls = uploadedPoster.length > 0 || uploadedGallery.length > 0
-    ? [...uploadedPoster, ...uploadedGallery]
-    : fallbackPreviewUrls;
-
-  return Array.from(new Set(imageUrls)).slice(0, 5);
+  return Array.from(new Set(fallbackPreviewUrls)).slice(0, 5);
 }
 
 export function createImageFieldController({

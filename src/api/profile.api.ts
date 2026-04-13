@@ -1,5 +1,5 @@
 import { request } from './client.js';
-import type { ApiError, User } from '../types/api.js';
+import type { ApiError, UpdateProfilePayload, User } from '../types/api.js';
 
 export async function getMe(): Promise<User> {
   return request('/api/me') as Promise<User>;
@@ -21,4 +21,11 @@ export async function getMeOrNull(): Promise<User | null> {
 
     throw error;
   }
+}
+
+export async function updateProfile(payload: UpdateProfilePayload): Promise<User> {
+  return request<User>('/api/me', {
+    method: 'PATCH',
+    body: payload,
+  });
 }

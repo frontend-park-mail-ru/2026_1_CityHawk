@@ -200,12 +200,20 @@
 
         <label class="event-create-form__field">
           <span class="event-create-form__label">Место</span>
-          <select class="event-create-form__input" name="placeId" data-role="event-create-place">
-            <option value="">Выбери место</option>
+          <input
+            type="text"
+            class="event-create-form__input"
+            name="place"
+            data-role="event-create-place"
+            list="event-create-place-options"
+            placeholder="Начни вводить место"
+            value="{{initialValues.placeQuery}}"
+          />
+          <datalist id="event-create-place-options" data-role="event-create-place-options">
             {{#each places}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+              <option value="{{this.label}}" data-id="{{this.value}}"></option>
             {{/each}}
-          </select>
+          </datalist>
           <span class="event-create-form__error" data-role="event-create-place-error" hidden></span>
         </label>
       </div>
@@ -242,12 +250,20 @@
   <div class="event-create-form__grid">
     <label class="event-create-form__field">
       <span class="event-create-form__label">Категория</span>
-      <select class="event-create-form__input" name="category" data-role="event-create-category">
-        <option value="">Выбери категорию</option>
+      <input
+        type="text"
+        class="event-create-form__input"
+        name="category"
+        data-role="event-create-category"
+        list="event-create-category-options"
+        placeholder="Начни вводить категорию"
+        value="{{initialValues.categoryQuery}}"
+      />
+      <datalist id="event-create-category-options" data-role="event-create-category-options">
         {{#each categories}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          <option value="{{this.label}}" data-id="{{this.value}}"></option>
         {{/each}}
-      </select>
+      </datalist>
       <span class="event-create-form__error" data-role="event-create-category-error" hidden></span>
     </label>
 

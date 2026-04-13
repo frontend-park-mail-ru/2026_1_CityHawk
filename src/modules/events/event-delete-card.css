@@ -50,6 +50,8 @@
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
+    caret-color: transparent;
+    user-select: none;
 }
 
 .event-delete-card__confirm {

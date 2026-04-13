@@ -98,7 +98,7 @@ export function createEventFormValidator({
       return false;
     }
 
-    if (!validateRequiredField(values.category, elements.categoryInput, elements.categoryError, 'Выбери категорию')) {
+    if (!validateRequiredField(values.category, elements.categoryInput, elements.categoryError, 'Укажи категорию из доступных вариантов')) {
       return false;
     }
 
@@ -126,15 +126,15 @@ export function createEventFormValidator({
   return {
     bind: () => {
       elements.titleInput?.addEventListener('input', handleTitleInput);
-      elements.placeInput?.addEventListener('change', handlePlaceInput);
-      elements.categoryInput?.addEventListener('change', handleCategoryChange);
+      elements.placeInput?.addEventListener('input', handlePlaceInput);
+      elements.categoryInput?.addEventListener('input', handleCategoryChange);
       elements.descriptionInput?.addEventListener('input', handleDescriptionInput);
       elements.locationDescriptionInput?.addEventListener('input', handleLocationDescriptionInput);
     },
     unbind: () => {
       elements.titleInput?.removeEventListener('input', handleTitleInput);
-      elements.placeInput?.removeEventListener('change', handlePlaceInput);
-      elements.categoryInput?.removeEventListener('change', handleCategoryChange);
+      elements.placeInput?.removeEventListener('input', handlePlaceInput);
+      elements.categoryInput?.removeEventListener('input', handleCategoryChange);
       elements.descriptionInput?.removeEventListener('input', handleDescriptionInput);
       elements.locationDescriptionInput?.removeEventListener('input', handleLocationDescriptionInput);
     },

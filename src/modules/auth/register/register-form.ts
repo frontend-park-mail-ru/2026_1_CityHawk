@@ -47,10 +47,6 @@ export function attachRegisterForm(root: ParentNode, options: RegisterFormOption
     detachStep = setupStep2(root, state, options.rerender);
   }
 
-  if (state.step === 3) {
-    detachStep = setupStep3(root, options);
-  }
-
   return () => {
     detachStep?.();
     detachPasswordToggles();
@@ -60,10 +56,9 @@ export function attachRegisterForm(root: ParentNode, options: RegisterFormOption
 
 function getStepTemplate(step: number): string {
   switch (step) {
-    case 1: return 'register-form-step1';
-    case 2: return 'register-form-step2';
-    case 3: return 'register-form-step3';
-    default: return 'register-form-step1';
+    case 1: return 'register-step1';
+    case 2: return 'register-step2';
+    default: return 'register-step1';
   }
 }
 
@@ -325,9 +320,7 @@ function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => voi
         userSurname: state.surname || '',
         password: state.password,
       });
-
-      state.step = 3;
-      rerender?.();
+      options.onFinish?.();
     } catch {
       const wrapper = safeEmailInput.closest('.login__field-error-wrapper');
       showFieldMessage(wrapper, 'Пользователь уже существует', 'var(--color-mid)', true);
@@ -354,24 +347,5 @@ function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => voi
     safeConfirmInput.removeEventListener('blur', handleConfirmBlur);
     safePrevBtn.removeEventListener('click', handlePrevClick);
     safeNextBtn.removeEventListener('click', handleNextClick);
-  };
-}
-
-function setupStep3(root: ParentNode, options: RegisterFormOptions): () => void {
-  const finishBtn = root.querySelector('.js-go-home');
-
-  if (!(finishBtn instanceof HTMLButtonElement)) {
-    return () => {};
-  }
-
-  const handleFinishClick = (event: Event): void => {
-    event.preventDefault();
-    options.onFinish?.();
-  };
-
-  finishBtn.addEventListener('click', handleFinishClick);
-
-  return () => {
-    finishBtn.removeEventListener('click', handleFinishClick);
   };
 }

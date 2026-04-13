@@ -147,17 +147,22 @@ function getFallbackHomeData(): HomeResponse {
 
 export async function homePage({ navigate }: RouteContext): Promise<RouteView> {
   const query = new URLSearchParams(window.location.search).get('query') || '';
-  let homeData = getFallbackHomeData();
+  const fallbackHomeData = getFallbackHomeData();
+  let homeData = fallbackHomeData;
 
   try {
     const response = await getHome();
+    const featuredEvents = Array.isArray(response?.featuredEvents) ? response.featuredEvents : [];
+    const categories = Array.isArray(response?.categories) ? response.categories : [];
+    const collections = Array.isArray(response?.collections) ? response.collections : [];
+
     homeData = {
-      featuredEvents: Array.isArray(response?.featuredEvents) ? response.featuredEvents : [],
-      categories: Array.isArray(response?.categories) ? response.categories : [],
-      collections: Array.isArray(response?.collections) ? response.collections : [],
+      featuredEvents: featuredEvents.length > 0 ? featuredEvents : fallbackHomeData.featuredEvents,
+      categories,
+      collections: collections.length > 0 ? collections : fallbackHomeData.collections,
     };
   } catch {
-    homeData = getFallbackHomeData();
+    homeData = fallbackHomeData;
   }
 
   const me = await getMeOrNull();
@@ -202,7 +207,7 @@ export async function homePage({ navigate }: RouteContext): Promise<RouteView> {
           }
 
           const suffix = params.toString() ? `?${params.toString()}` : '';
-          navigate(`/${suffix}`);
+          navigate(`/events${suffix}`);
         },
       });
 
