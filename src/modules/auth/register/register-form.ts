@@ -1,6 +1,7 @@
 
 import { register } from '../../../api/auth.api.js';
 import { renderTemplate } from '../../../app/templates/renderer.js';
+import type { ApiError } from '../../../types/api.js';
 import { attachPasswordToggles } from '../shared/password-toggle.js';
 import {
   getErrorMessageElement,
@@ -174,7 +175,7 @@ function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => voi
   const emailInput = root.querySelector('#email');
   const passwordInput = root.querySelector('#password');
   const confirmInput = root.querySelector('#password-confirm');
-  const nextBtn = root.querySelector('.login__next');
+  const nextBtn = root.querySelector('[data-role="register-finish"]') || root.querySelector('.login__next');
   const prevBtn = root.querySelector('.login__prev');
 
   if (!(emailInput instanceof HTMLInputElement)
@@ -321,9 +322,26 @@ function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => voi
         password: state.password,
       });
       options.onFinish?.();
-    } catch {
+    } catch (error) {
       const wrapper = safeEmailInput.closest('.login__field-error-wrapper');
-      showFieldMessage(wrapper, 'Пользователь уже существует', 'var(--color-mid)', true);
+      const apiError = error as ApiError | undefined;
+
+      if (apiError?.status === 409) {
+        showFieldMessage(wrapper, 'Пользователь с таким email уже существует', 'var(--color-mid)', true);
+        return;
+      }
+
+      if (apiError?.status === 400) {
+        showFieldMessage(wrapper, apiError.message || 'Проверьте корректность введенных данных', 'var(--color-mid)', true);
+        return;
+      }
+
+      if (apiError?.status && apiError.status >= 500) {
+        showFieldMessage(wrapper, 'Сервер временно недоступен. Попробуйте позже', 'var(--color-mid)', true);
+        return;
+      }
+
+      showFieldMessage(wrapper, 'Не удалось завершить регистрацию. Проверьте соединение и попробуйте снова', 'var(--color-mid)', true);
     }
   };
 

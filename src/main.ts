@@ -1,5 +1,6 @@
 import './styles/base.css';
 import './styles/tokens.css';
+import './styles/toast.css';
 import './pages/home/home.css';
 import './pages/event/event-page.css';
 import './pages/event-list/event-list.css';

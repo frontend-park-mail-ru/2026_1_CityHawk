@@ -20,6 +20,23 @@
       </label>
     {{/if}}
 
+    {{#if hasTags}}
+      <label class="event-list-filters__field">
+        <select name="tagId" class="event-list-filters__input">
+          <option value="">Все теги</option>
+          {{#each tags}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+        <img
+          src="/public/static/icons/for_filters.svg"
+          alt=""
+          class="event-list-filters__field-icon"
+          aria-hidden="true"
+        />
+      </label>
+    {{/if}}
+
     {{#if hasDatePresetOptions}}
       <label class="event-list-filters__field">
         <select name="datePreset" class="event-list-filters__input">

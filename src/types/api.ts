@@ -106,6 +106,10 @@ export interface CategoryListResponse {
   items: Category[];
 }
 
+export interface TagListResponse {
+  items: Tag[];
+}
+
 export interface PlaceListResponse {
   items: Place[];
 }

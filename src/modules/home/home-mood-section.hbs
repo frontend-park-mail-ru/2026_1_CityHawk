@@ -1,25 +1,30 @@
 <section class="mood-section">
   <div class="mood-section__container">
-    <section class="mood-section__content">
-      <div class="mood-section__head">
-        <h2 class="mood-section__title">Найди своё настроение!</h2>
-        <a href="/" class="mood-section__link">показать ещё...</a>
-      </div>
+    <section class="mood-section__layout">
+      <div class="mood-section__left">
+        <div class="mood-section__head">
+          <h2 class="mood-section__title">Подборки событий</h2>
+          
+        </div>
+        <p class="mood-section__text">Не знаешь куда пойти? Выбирай настроение, а мы подберём тебе событие!</p>
 
-      <div class="mood-section__layout">
-        <div class="mood-section__column">
+        <div class="mood-section__left-grid">
           {{#each moodLeft}}
-            <article class="mood-card {{modifier}}">
+            <a class="mood-card {{modifier}}" href="{{href}}">
               <img src="{{imageUrl}}" alt="{{title}}" class="mood-card__image" />
               <span class="mood-card__tag">{{title}}</span>
-            </article>
+            </a>
           {{/each}}
         </div>
+      </div>
 
-        <article class="mood-card mood-card--tall">
-          <img src="{{moodTall.imageUrl}}" alt="{{moodTall.title}}" class="mood-card__image" />
-          <span class="mood-card__tag">{{moodTall.title}}</span>
-        </article>
+      <div class="mood-section__right">
+        {{#each moodRight}}
+          <a class="mood-card mood-card--right" href="{{href}}">
+            <img src="{{imageUrl}}" alt="{{title}}" class="mood-card__image" />
+            <span class="mood-card__tag">{{title}}</span>
+          </a>
+        {{/each}}
       </div>
     </section>
   </div>

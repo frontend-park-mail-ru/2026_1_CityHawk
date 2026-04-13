@@ -1,4 +1,5 @@
 import { searchAll } from '../../api/search.api.js';
+import { localizeCategoryName } from '../../modules/events/category-localization.js';
 
 interface HeaderSearchSuggestionsOptions {
   onPick?: (query: string) => void;
@@ -50,7 +51,10 @@ function normalizeSuggestions(payload: unknown): string[] {
   if (Array.isArray(source.categories)) {
     source.categories.forEach((item) => {
       if (item && typeof item === 'object' && 'name' in item) {
-        const name = String((item as { name?: unknown }).name || '').trim();
+        const name = localizeCategoryName({
+          name: String((item as { name?: unknown }).name || '').trim(),
+          slug: String((item as { slug?: unknown }).slug || '').trim(),
+        });
         if (name) {
           names.add(name);
         }

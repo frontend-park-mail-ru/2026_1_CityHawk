@@ -8,6 +8,7 @@ export interface SelectOption {
 
 export interface EventListFiltersState {
   categories?: SelectOption[];
+  tags?: SelectOption[];
   datePresetOptions?: SelectOption[];
   sortOptions?: SelectOption[];
 }
@@ -18,17 +19,20 @@ export interface EventListFiltersOptions {
 
 export function renderEventListFilters(state: EventListFiltersState = {}): string {
   const categories = Array.isArray(state.categories) ? state.categories : [];
+  const tags = Array.isArray(state.tags) ? state.tags : [];
   const datePresetOptions = Array.isArray(state.datePresetOptions) ? state.datePresetOptions : [];
   const sortOptions = Array.isArray(state.sortOptions) ? state.sortOptions : [];
 
   return renderTemplate('event-list-filters', {
     categories,
+    tags,
     datePresetOptions,
     sortOptions,
     hasCategories: categories.length > 0,
+    hasTags: tags.length > 0,
     hasDatePresetOptions: datePresetOptions.length > 0,
     hasSortOptions: sortOptions.length > 0,
-    hasAnyFilters: categories.length > 0 || datePresetOptions.length > 0 || sortOptions.length > 0,
+    hasAnyFilters: categories.length > 0 || tags.length > 0 || datePresetOptions.length > 0 || sortOptions.length > 0,
   });
 }
 

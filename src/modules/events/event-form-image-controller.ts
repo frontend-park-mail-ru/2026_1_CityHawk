@@ -13,6 +13,62 @@ export interface ImageFieldController {
   getPreviewUrl: () => string;
 }
 
+function normalizeHttpUrl(rawUrl: string): string {
+  const value = String(rawUrl || '').trim();
+
+  if (!value) {
+    return '';
+  }
+
+  try {
+    const resolved = new URL(value, window.location.origin);
+    const protocol = resolved.protocol.toLowerCase();
+
+    if (protocol !== 'http:' && protocol !== 'https:') {
+      return '';
+    }
+
+    return resolved.toString();
+  } catch {
+    return '';
+  }
+}
+
+async function uploadImageFile(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch('/api/uploads/images', {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let errorMessage = 'Не удалось загрузить изображение';
+
+    try {
+      const errorData = await response.json() as { error?: string };
+      if (typeof errorData?.error === 'string' && errorData.error) {
+        errorMessage = errorData.error;
+      }
+    } catch {
+      // ignore parse errors
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  const result = await response.json() as { url?: string; imageUrl?: string };
+  const url = normalizeHttpUrl(String(result.url || result.imageUrl || ''));
+
+  if (!url) {
+    throw new Error('Сервер вернул некорректную ссылку на изображение');
+  }
+
+  return url;
+}
+
 export async function buildImageUrls(
   posterController: ImageFieldController,
   galleryControllers: ImageFieldController[],
@@ -21,18 +77,21 @@ export async function buildImageUrls(
   const galleryFiles = galleryControllers
     .map((controller) => controller.getFile())
     .filter((file): file is File => Boolean(file));
-  const hasLocalFiles = Boolean(posterFile) || galleryFiles.length > 0;
+  const posterPreviewUrl = posterController.getPreviewUrl();
 
-  if (hasLocalFiles) {
-    throw new Error('Загрузка файлов с устройства пока не поддерживается. Укажите URL изображения длиной до 2048 символов.');
-  }
+  const uploadedPosterUrl = posterFile ? await uploadImageFile(posterFile) : '';
+  const uploadedGalleryUrls = await Promise.all(
+    galleryFiles.map((file) => uploadImageFile(file)),
+  );
 
   const fallbackPreviewUrls = [
-    posterController.getPreviewUrl(),
+    uploadedPosterUrl || posterPreviewUrl,
+    ...uploadedGalleryUrls,
     ...galleryControllers.map((controller) => controller.getPreviewUrl()),
   ]
     .filter((url) => typeof url === 'string' && url.trim())
-    .map((url) => String(url).trim())
+    .map((url) => normalizeHttpUrl(String(url)))
+    .filter(Boolean)
     .filter((url) => !url.startsWith('blob:'))
     .filter((url) => !url.startsWith('data:'))
     .filter((url) => url.length <= 2048);

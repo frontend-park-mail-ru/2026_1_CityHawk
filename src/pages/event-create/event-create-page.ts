@@ -28,12 +28,13 @@ export async function eventCreatePage({ navigate }: RouteContext): Promise<Route
     }
     : null;
 
-  const { places, categories } = await loadEventFormReferenceData();
+  const { places, categories, tags } = await loadEventFormReferenceData();
 
   const eventForm = renderEventForm({
     mode: 'create',
     places,
     categories,
+    tags,
   });
 
   const html = renderEventEditorScreen({

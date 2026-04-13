@@ -206,7 +206,7 @@ function mapSessionsToInitialSchedule(sessions?: EventSession[]): EventFormSched
       multipleEndTimes: [],
       periodStart: '',
       periodEnd: '',
-      isAnytime: false,
+      isAnytime: true,
     };
   }
 
@@ -277,16 +277,7 @@ function buildSessions(formPayload: EventFormValues): EventSessionPayload[] {
   const placePayload = isUuid ? { placeId: placeValue } : { placeName: placeValue };
 
   if (formPayload.isAnytime) {
-    const sessionDates = buildSingleSessionDates('', true);
-
-    return [
-      {
-        ...placePayload,
-        startAt: sessionDates.startAt,
-        endAt: sessionDates.endAt,
-        price: 0,
-      },
-    ];
+    return [];
   }
 
   if (formPayload.scheduleMode === 'multiple') {
@@ -385,7 +376,7 @@ export function mapEventDetailsToInitialValues(rawEvent: EventDetailsLike = {}):
     placeId: String(firstSession?.placeId || firstSession?.place?.id || '').trim(),
     category: String(categories[0]?.id || categoryIds[0] || '').trim(),
     tags: tags
-      .map((tag) => (typeof tag === 'string' ? tag : tag?.name || tag?.id || ''))
+      .map((tag) => (typeof tag === 'string' ? tag : tag?.id || tag?.name || ''))
       .filter((tag): tag is string => Boolean(tag)),
     description: String(rawEvent?.fullDescription || '').trim(),
     locationDescription: String(rawEvent?.shortDescription || '').trim(),

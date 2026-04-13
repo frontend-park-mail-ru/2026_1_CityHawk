@@ -68,7 +68,7 @@
 .event-hero__title {
     margin: 0 0 18px;
     font-family: var(--font-display, serif);
-    font-size: clamp(42px, 7vw, 72px);
+    font-size: clamp(42px, 7vw, 32px);
     line-height: 0.98;
     letter-spacing: -0.03em;
     font-weight: 800;
@@ -78,7 +78,7 @@
 .event-hero__meta-text {
     margin: 0 0 10px;
     color: var(--home-color-text-muted);
-    font-size: var(--home-text-3);
+    font-size: var(--home-text-4);
     line-height: 1.45;
 }
 

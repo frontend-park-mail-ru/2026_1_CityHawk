@@ -20,11 +20,7 @@
 }
 
 .event-gallery--three .event-gallery__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.event-gallery--three .event-gallery__card:first-child {
-    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .event-gallery__card {
@@ -52,10 +48,6 @@
     aspect-ratio: 16 / 10;
 }
 
-.event-gallery--three .event-gallery__card:first-child .event-gallery__image {
-    aspect-ratio: 21 / 9;
-}
-
 .event-gallery__card:hover {
     transform: translateY(-4px);
     border-color: rgba(139, 188, 233, 0.3);
@@ -81,7 +73,4 @@
         grid-template-columns: 1fr;
     }
 
-    .event-gallery--three .event-gallery__card:first-child {
-        grid-column: auto;
-    }
 }

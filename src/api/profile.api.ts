@@ -7,7 +7,9 @@ export async function getMe(): Promise<User> {
 
 export async function getMeOrNull(): Promise<User | null> {
   try {
-    return await getMe();
+    // Lightweight auth probe for public pages:
+    // avoid refresh cascade when user is simply not logged in.
+    return await request<User>('/api/me', {}, false);
   } catch (error) {
     const apiError = error as ApiError;
 

@@ -1,4 +1,5 @@
 import { renderTemplate } from '../../app/templates/renderer.js';
+import { showToast } from '../../app/ui/toast.js';
 import type {
   EventFormInitialValues,
   EventFormScheduleMode,
@@ -55,6 +56,7 @@ export interface EventFormRenderState {
   submitLabel?: string;
   categories?: EventFormSelectOption[];
   places?: EventFormSelectOption[];
+  tags?: EventFormSelectOption[];
   initialValues?: EventFormInitialValues;
   deleteHref?: string;
 }
@@ -205,6 +207,187 @@ function resolveReferenceId(
   return isUuid ? value : '';
 }
 
+function resolveReferenceIdsFromCsv(
+  root: ParentNode,
+  listRole: string,
+  rawValue: FormDataEntryValue | null,
+): string[] {
+  const value = String(rawValue || '').trim();
+
+  if (!value) {
+    return [];
+  }
+
+  const datalist = root.querySelector<HTMLElement>(`[data-role="${listRole}"]`);
+  const options = datalist instanceof HTMLDataListElement
+    ? Array.from(datalist.querySelectorAll<HTMLOptionElement>('option'))
+    : [];
+
+  const labelToId = new Map<string, string>();
+  options.forEach((option) => {
+    const label = String(option.value || '').trim().toLowerCase();
+    const id = String(option.dataset.id || '').trim();
+
+    if (label && id) {
+      labelToId.set(label, id);
+    }
+  });
+
+  const isUuid = (candidate: string): boolean => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(candidate);
+
+  return Array.from(new Set(
+    value
+      .split(',')
+      .map((part) => String(part || '').trim())
+      .filter(Boolean)
+      .map((part) => labelToId.get(part.toLowerCase()) || part)
+      .filter((part) => isUuid(part)),
+  ));
+}
+
+function attachTagPicker(form: HTMLFormElement): () => void {
+  const selectedContainer = form.querySelector<HTMLElement>('[data-role="event-create-tags-selected"]');
+  const input = form.querySelector<HTMLInputElement>('[data-role="event-create-tags-input"]');
+  const hidden = form.querySelector<HTMLInputElement>('[data-role="event-create-tags-hidden"]');
+  const datalist = form.querySelector<HTMLDataListElement>('[data-role="event-create-tag-options"]');
+
+  if (!(selectedContainer instanceof HTMLElement)
+    || !(input instanceof HTMLInputElement)
+    || !(hidden instanceof HTMLInputElement)) {
+    return () => {};
+  }
+
+  const isUuid = (candidate: string): boolean => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(candidate);
+
+  const labelToId = new Map<string, string>();
+  const idToLabel = new Map<string, string>();
+
+  if (datalist instanceof HTMLDataListElement) {
+    Array.from(datalist.querySelectorAll<HTMLOptionElement>('option')).forEach((option) => {
+      const label = String(option.value || '').trim();
+      const id = String(option.dataset.id || '').trim();
+
+      if (label && id) {
+        labelToId.set(label.toLowerCase(), id);
+        idToLabel.set(id, label);
+      }
+    });
+  }
+
+  const selectedIds = new Set<string>();
+
+  const resolveTagId = (rawValue: string): string => {
+    const normalized = String(rawValue || '').trim();
+    if (!normalized) {
+      return '';
+    }
+
+    const mapped = labelToId.get(normalized.toLowerCase()) || normalized;
+    return isUuid(mapped) ? mapped : '';
+  };
+
+  const syncFromHidden = () => {
+    selectedIds.clear();
+
+    hidden.value
+      .split(',')
+      .map((part) => String(part || '').trim())
+      .filter(Boolean)
+      .map((part) => resolveTagId(part))
+      .filter(Boolean)
+      .forEach((id) => selectedIds.add(id));
+  };
+
+  const render = () => {
+    hidden.value = Array.from(selectedIds).join(', ');
+    selectedContainer.innerHTML = '';
+
+    Array.from(selectedIds).forEach((id) => {
+      const chip = document.createElement('span');
+      chip.className = 'event-create-form__tag-chip';
+
+      const text = document.createElement('span');
+      text.textContent = idToLabel.get(id) || id;
+      chip.append(text);
+
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'event-create-form__tag-chip-remove';
+      removeButton.dataset.id = id;
+      removeButton.setAttribute('aria-label', 'Удалить тег');
+      removeButton.textContent = '×';
+      chip.append(removeButton);
+
+      selectedContainer.append(chip);
+    });
+  };
+
+  const commitInputValue = (): void => {
+    const nextId = resolveTagId(input.value);
+
+    if (!nextId) {
+      return;
+    }
+
+    selectedIds.add(nextId);
+    input.value = '';
+    render();
+  };
+
+  const handleInputKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === 'Enter' || event.key === ',') {
+      event.preventDefault();
+      commitInputValue();
+    }
+  };
+
+  const handleInputChange = (): void => {
+    commitInputValue();
+  };
+
+  const handleInputBlur = (): void => {
+    commitInputValue();
+  };
+
+  const handleSelectedClick = (event: Event): void => {
+    const target = event.target;
+
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    const button = target.closest<HTMLButtonElement>('.event-create-form__tag-chip-remove');
+
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    const id = String(button.dataset.id || '').trim();
+
+    if (!id) {
+      return;
+    }
+
+    selectedIds.delete(id);
+    render();
+  };
+
+  syncFromHidden();
+  render();
+
+  input.addEventListener('keydown', handleInputKeyDown);
+  input.addEventListener('change', handleInputChange);
+  input.addEventListener('blur', handleInputBlur);
+  selectedContainer.addEventListener('click', handleSelectedClick);
+
+  return () => {
+    input.removeEventListener('keydown', handleInputKeyDown);
+    input.removeEventListener('change', handleInputChange);
+    input.removeEventListener('blur', handleInputBlur);
+    selectedContainer.removeEventListener('click', handleSelectedClick);
+  };
+}
+
 export function renderEventForm(state: EventFormRenderState = {}): string {
   const mode = state.mode === 'edit' ? 'edit' : 'create';
   const initialValues = normalizeInitialValues(state.initialValues);
@@ -216,6 +399,7 @@ export function renderEventForm(state: EventFormRenderState = {}): string {
     Array.isArray(state.places) ? state.places : [],
     initialValues.placeId,
   );
+  const tags = Array.isArray(state.tags) ? state.tags : [];
   const resolvedInitialValues = {
     ...initialValues,
     placeQuery: initialValues.placeQuery || findOptionLabelByValue(places, initialValues.placeId) || initialValues.placeId,
@@ -230,6 +414,7 @@ export function renderEventForm(state: EventFormRenderState = {}): string {
     categories,
     deleteHref: state.deleteHref || '',
     places,
+    tags,
     initialValues: resolvedInitialValues,
     submitLabel,
     isEditMode: mode === 'edit',
@@ -270,10 +455,7 @@ function collectFormValues(form: HTMLFormElement): EventFormValues {
       { allowRawValue: true },
     ),
     category: resolveReferenceId(form, 'event-create-category-options', formData.get('category')),
-    tags: String(formData.get('tags') || '')
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter(Boolean),
+    tags: resolveReferenceIdsFromCsv(form, 'event-create-tag-options', formData.get('tags')),
     description: String(formData.get('description') || '').trim(),
     locationDescription: String(formData.get('locationDescription') || '').trim(),
   };
@@ -336,7 +518,7 @@ export function attachEventForm(root: ParentNode, options: EventFormOptions = {}
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Не удалось подготовить изображения';
-      window.alert(message);
+      showToast(message, { type: 'error' });
     }
   };
 
@@ -350,6 +532,7 @@ export function attachEventForm(root: ParentNode, options: EventFormOptions = {}
 
   scheduleController.bind();
   validator.bind();
+  const detachTagPicker = attachTagPicker(form);
   posterController.bind();
   galleryControllers.forEach((controller) => controller.bind());
 
@@ -361,6 +544,7 @@ export function attachEventForm(root: ParentNode, options: EventFormOptions = {}
   return () => {
     validator.unbind();
     scheduleController.unbind();
+    detachTagPicker();
     posterController.unbind();
     galleryControllers.forEach((controller) => controller.unbind());
     form.removeEventListener('submit', handleSubmit);

@@ -6,7 +6,8 @@ import { renderTemplate } from '../../app/templates/renderer.js';
 import { attachEventDescription, renderEventDescription } from '../../modules/events/event-description.js';
 import { renderEventGallery } from '../../modules/events/event-gallery.js';
 import { renderEventHero } from '../../modules/events/event-hero.js';
-import { renderEventLocation } from '../../modules/events/event-location.js';
+import { attachEventLocation, renderEventLocation } from '../../modules/events/event-location.js';
+import { localizeCategoryName } from '../../modules/events/category-localization.js';
 import { renderEventRecommendations } from '../../modules/events/event-recommendations.js';
 import type {
   EventCard,
@@ -126,7 +127,9 @@ function mapEventDetailsToPageViewModel(rawEvent: EventDetailsLike = {}): EventP
   ].filter(Boolean);
   const categories = Array.isArray(rawEvent.categories) ? rawEvent.categories : [];
   const legacyCategoryName = rawEvent.category?.name || '';
-  const category = categories[0]?.name || legacyCategoryName || 'Мероприятие';
+  const category = categories[0]
+    ? localizeCategoryName(categories[0])
+    : localizeCategoryName({ name: legacyCategoryName }) || 'Мероприятие';
   const galleryImages = mapEventImagesToGalleryViewModel(rawEvent);
 
   return {
@@ -322,6 +325,7 @@ export async function eventPage({ navigate, params = {} }: RouteContext): Promis
       const headerSearchForm = root.querySelector('[data-role="header-search-form"]');
 
       attachEventDescription(root);
+      const detachEventLocation = attachEventLocation(root);
 
       const navigateByHeaderQuery = (nextQuery: string) => {
         const nextParams = new URLSearchParams();
@@ -357,6 +361,7 @@ export async function eventPage({ navigate, params = {} }: RouteContext): Promis
       }
 
       return () => {
+        detachEventLocation();
         detachHeaderSuggestions();
 
         if (headerSearchForm instanceof HTMLFormElement) {

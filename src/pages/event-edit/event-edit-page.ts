@@ -61,7 +61,7 @@ export async function eventEditPage({ navigate, params }: RouteContext): Promise
     };
   }
 
-  const { places, categories } = await loadEventFormReferenceData();
+  const { places, categories, tags } = await loadEventFormReferenceData();
 
   const eventForm = renderEventForm({
     mode: 'edit',
@@ -69,6 +69,7 @@ export async function eventEditPage({ navigate, params }: RouteContext): Promise
     deleteHref: `/events/${eventId}/delete`,
     places,
     categories,
+    tags,
     initialValues: mapEventDetailsToInitialValues(event),
   });
 
