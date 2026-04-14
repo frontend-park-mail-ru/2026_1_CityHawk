@@ -53,18 +53,24 @@
 }
 
 .event-card__meta {
+    --event-card-tag-row-height: 32px;
+    --event-card-tag-row-gap: 8px;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    align-content: flex-start;
+    gap: var(--event-card-tag-row-gap);
     margin-top: 8px;
+    max-height: calc(var(--event-card-tag-row-height) * 2 + var(--event-card-tag-row-gap));
+    overflow: hidden;
 }
 
 .event-card__tag {
     display: inline-flex;
     align-items: center;
     max-width: 100%;
-    min-height: 30px;
-    padding: 5px 12px;
+    height: var(--event-card-tag-row-height);
+    box-sizing: border-box;
+    padding: 0 12px;
     border: 1px solid var(--home-color-border);
     border-radius: 999px;
     background: rgba(176, 184, 196, 0.18);
