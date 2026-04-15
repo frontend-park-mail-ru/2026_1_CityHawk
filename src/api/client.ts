@@ -12,20 +12,57 @@ interface ErrorResponseBody {
   error?: string;
 }
 
+function readCookie(name: string): string {
+  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = document.cookie.match(new RegExp(`(?:^|; )${escapedName}=([^;]*)`));
+  const value = match?.[1];
+
+  if (!value) {
+    return '';
+  }
+
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function isUnsafeMethod(method: string): boolean {
+  const normalized = method.toUpperCase();
+  return normalized === 'POST'
+    || normalized === 'PUT'
+    || normalized === 'PATCH'
+    || normalized === 'DELETE';
+}
+
+export function applyCsrfHeader(headers: Headers, method = 'GET'): void {
+  if (!isUnsafeMethod(method) || headers.has('X-CSRF-Token')) {
+    return;
+  }
+
+  const token = readCookie('csrf_token');
+  if (token) {
+    headers.set('X-CSRF-Token', token);
+  }
+}
+
 export async function request<T = RequestBody>(
   path: string,
   options: RequestOptions = {},
   retry = true,
 ): Promise<T> {
-  
+  const method = String(options.method || 'GET').toUpperCase();
   const headers = new Headers(options.headers || {});
 
   if (!headers.has('Content-Type') && options.body) {
     headers.set('Content-Type', 'application/json');
   }
+  applyCsrfHeader(headers, method);
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
+    method,
     headers,
     credentials: 'include',
     body: options.body ? JSON.stringify(options.body) : undefined,

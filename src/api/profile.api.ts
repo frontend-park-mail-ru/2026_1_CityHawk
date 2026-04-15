@@ -1,4 +1,5 @@
-import { request } from './client.js';
+import { applyCsrfHeader, request } from './client.js';
+import { API_BASE_URL } from './config.js';
 import type { ApiError, UpdateProfilePayload, User } from '../types/api.js';
 
 export async function getMe(): Promise<User> {
@@ -30,4 +31,58 @@ export async function updateProfile(payload: UpdateProfilePayload): Promise<User
     method: 'PATCH',
     body: payload,
   });
+}
+
+export async function updateProfileMultipart(
+  payload: UpdateProfilePayload = {},
+  avatarFile?: File,
+): Promise<User> {
+  const formData = new FormData();
+
+  if (payload.username !== undefined) {
+    formData.append('username', payload.username);
+  }
+  if (payload.userSurname !== undefined) {
+    formData.append('userSurname', payload.userSurname);
+  }
+  if (payload.birthday !== undefined) {
+    formData.append('birthday', payload.birthday);
+  }
+  if (payload.cityId !== undefined) {
+    formData.append('cityId', payload.cityId);
+  }
+  if (payload.avatarUrl !== undefined) {
+    formData.append('avatarUrl', payload.avatarUrl);
+  }
+  if (avatarFile) {
+    formData.append('avatar', avatarFile);
+  }
+  const headers = new Headers();
+  applyCsrfHeader(headers, 'PATCH');
+
+  const response = await fetch(`${API_BASE_URL}/api/me`, {
+    method: 'PATCH',
+    headers,
+    credentials: 'include',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}`;
+
+    try {
+      const errorData = await response.json() as { error?: string };
+      if (typeof errorData?.error === 'string' && errorData.error) {
+        errorMessage = errorData.error;
+      }
+    } catch {
+      errorMessage = `HTTP ${response.status}`;
+    }
+
+    const error: ApiError = new Error(errorMessage);
+    error.status = response.status;
+    throw error;
+  }
+
+  return response.json() as Promise<User>;
 }

@@ -1,5 +1,4 @@
 import { searchAll } from '../../api/search.api.js';
-import { localizeCategoryName } from '../../modules/events/category-localization.js';
 
 interface HeaderSearchSuggestionsOptions {
   onPick?: (query: string) => void;
@@ -24,56 +23,13 @@ function normalizeSuggestions(payload: unknown): string[] {
 
   const source = payload as {
     items?: unknown;
-    events?: unknown;
-    categories?: unknown;
-    tags?: unknown;
   };
 
-  if (Array.isArray(source.items)) {
-    return source.items
+  return Array.isArray(source.items)
+    ? source.items
       .map((item) => String(item || '').trim())
-      .filter(Boolean);
-  }
-
-  const names = new Set<string>();
-
-  if (Array.isArray(source.events)) {
-    source.events.forEach((item) => {
-      if (item && typeof item === 'object' && 'title' in item) {
-        const title = String((item as { title?: unknown }).title || '').trim();
-        if (title) {
-          names.add(title);
-        }
-      }
-    });
-  }
-
-  if (Array.isArray(source.categories)) {
-    source.categories.forEach((item) => {
-      if (item && typeof item === 'object' && 'name' in item) {
-        const name = localizeCategoryName({
-          name: String((item as { name?: unknown }).name || '').trim(),
-          slug: String((item as { slug?: unknown }).slug || '').trim(),
-        });
-        if (name) {
-          names.add(name);
-        }
-      }
-    });
-  }
-
-  if (Array.isArray(source.tags)) {
-    source.tags.forEach((item) => {
-      if (item && typeof item === 'object' && 'name' in item) {
-        const name = String((item as { name?: unknown }).name || '').trim();
-        if (name) {
-          names.add(name);
-        }
-      }
-    });
-  }
-
-  return Array.from(names);
+      .filter(Boolean)
+    : [];
 }
 
 export function attachHeaderSearchSuggestions(

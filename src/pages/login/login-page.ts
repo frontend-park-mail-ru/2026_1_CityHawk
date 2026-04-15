@@ -1,3 +1,4 @@
+import '../../modules/auth/auth.css';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { attachLoginForm } from '../../modules/auth/login/login-form.js';
 import {

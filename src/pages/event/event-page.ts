@@ -1,5 +1,11 @@
+import './event-page.css';
 import { getEventById, getEvents } from '../../api/events.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
+import '../../modules/events/event-hero.css';
+import '../../modules/events/event-description.css';
+import '../../modules/events/event-gallery.css';
+import '../../modules/events/event-location.css';
+import '../../modules/events/event-recommendations.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
 import { renderTemplate } from '../../app/templates/renderer.js';

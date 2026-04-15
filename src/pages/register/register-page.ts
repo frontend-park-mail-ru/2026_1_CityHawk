@@ -1,3 +1,4 @@
+import '../../modules/auth/auth.css';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { attachRegisterForm, renderRegisterStep } from '../../modules/auth/register/register-form.js';
 import {

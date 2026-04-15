@@ -63,6 +63,12 @@
     color: #ffb3b3;
 }
 
+.event-create-form__hint {
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--home-color-text-muted);
+}
+
 .event-create-form__checkbox {
     display: inline-flex;
     align-items: center;

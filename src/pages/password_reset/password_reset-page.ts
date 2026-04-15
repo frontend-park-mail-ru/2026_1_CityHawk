@@ -1,3 +1,4 @@
+import '../../modules/auth/auth.css';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { hideFieldError, showFieldError } from '../../modules/auth/shared/field-messages.js';
 import { isValidEmail } from '../../modules/auth/shared/validators.js';

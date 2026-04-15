@@ -1,5 +1,8 @@
-import { getMeOrNull, updateProfile } from '../../api/profile.api.js';
+import { getMeOrNull, updateProfile, updateProfileMultipart } from '../../api/profile.api.js';
 import { logout } from '../../api/auth.api.js';
+import './profile.css';
+import '../../modules/profile/profile-aside.css';
+import '../../modules/profile/profile-form.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { showToast } from '../../app/ui/toast.js';
@@ -18,27 +21,6 @@ function getUserInitials(name?: string): string {
   }
 
   return parts.map((part) => part[0]?.toUpperCase() || '').join('');
-}
-
-function normalizeHttpUrl(rawUrl: string): string {
-  const value = String(rawUrl || '').trim();
-
-  if (!value) {
-    return '';
-  }
-
-  try {
-    const resolved = new URL(value, window.location.origin);
-    const protocol = resolved.protocol.toLowerCase();
-
-    if (protocol !== 'http:' && protocol !== 'https:') {
-      return '';
-    }
-
-    return resolved.toString();
-  } catch {
-    return '';
-  }
 }
 
 export async function profilePage({ navigate }: RouteContext): Promise<RouteView> {
@@ -64,41 +46,6 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
   };
 
   const html = renderTemplate('profile', { user });
-
-  async function uploadImageFile(file: File): Promise<string> {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await fetch('/api/uploads/images', {
-      method: 'POST',
-      credentials: 'include',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      let errorMessage = 'Не удалось загрузить аватар';
-
-      try {
-        const errorData = await response.json() as { error?: string };
-        if (typeof errorData?.error === 'string' && errorData.error) {
-          errorMessage = errorData.error;
-        }
-      } catch {
-        // ignore parse errors
-      }
-
-      throw new Error(errorMessage);
-    }
-
-    const result = await response.json() as { url?: string; imageUrl?: string };
-    const url = normalizeHttpUrl(String(result.url || result.imageUrl || ''));
-
-    if (!url) {
-      throw new Error('Сервер вернул некорректную ссылку на изображение');
-    }
-
-    return url;
-  }
 
   return {
     html,
@@ -162,8 +109,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         }
 
         try {
-          const avatarUrl = await uploadImageFile(file);
-          await updateProfile({ avatarUrl });
+          await updateProfileMultipart({}, file);
           navigate('/profile', { replace: true });
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Не удалось обновить аватар';

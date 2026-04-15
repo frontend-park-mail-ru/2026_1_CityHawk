@@ -1,40 +1,8 @@
 const path = require('path');
-const fs = require('fs');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const multer = require('multer');
 
 const publicPath = path.resolve(__dirname, 'public');
-const uploadsDir = path.resolve(publicPath, 'static', 'img');
-
-fs.mkdirSync(uploadsDir, { recursive: true });
-
-const uploadStorage = multer.diskStorage({
-  destination: (_req, _file, callback) => {
-    callback(null, uploadsDir);
-  },
-  filename: (_req, file, callback) => {
-    const ext = path.extname(file.originalname || '').toLowerCase();
-    const safeExt = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif'].includes(ext) ? ext : '.jpg';
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    callback(null, `upload-${uniqueSuffix}${safeExt}`);
-  },
-});
-
-const upload = multer({
-  storage: uploadStorage,
-  limits: {
-    fileSize: 10 * 1024 * 1024,
-  },
-  fileFilter: (_req, file, callback) => {
-    if (!file.mimetype.startsWith('image/')) {
-      callback(new Error('Можно загружать только изображения'));
-      return;
-    }
-
-    callback(null, true);
-  },
-});
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
@@ -99,33 +67,41 @@ module.exports = {
         {
           from: path.resolve(__dirname, 'public/static'),
           to: 'public/static',
+          globOptions: {
+            ignore: ['**/.DS_Store'],
+          },
         },
       ],
     }),
   ],
+  optimization: {
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+        },
+      },
+    },
+  },
+  performance: {
+    hints: 'warning',
+    maxAssetSize: 700 * 1024,
+    maxEntrypointSize: 700 * 1024,
+    assetFilter: (assetFilename) => (
+      !assetFilename.includes('public/static/img/')
+      && !assetFilename.endsWith('.DS_Store')
+      && !assetFilename.endsWith('.map')
+    ),
+  },
   devServer: {
     static: {
       directory: publicPath,
     },
     historyApiFallback: true,
     port: 3000,
-    setupMiddlewares: (middlewares, devServer) => {
-      if (devServer?.app) {
-        devServer.app.post('/api/uploads/images', upload.single('file'), (req, res) => {
-          if (!req.file) {
-            res.status(400).json({ error: 'Файл не был загружен' });
-            return;
-          }
-
-          const origin = `${req.protocol}://${req.get('host')}`;
-
-          res.status(201).json({
-            url: `${origin}/public/static/img/${req.file.filename}`,
-          });
-        });
-      }
-
-      return middlewares;
-    },
   },
 };

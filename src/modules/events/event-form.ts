@@ -1,12 +1,13 @@
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { showToast } from '../../app/ui/toast.js';
+import { getPlaceSuggestions, resolvePlaceSuggestion } from '../../api/places.api.js';
 import type {
   EventFormInitialValues,
   EventFormScheduleMode,
   EventFormValues,
 } from './event-form-payload.js';
 import {
-  buildImageUrls,
+  buildImageData,
   createImageFieldController,
 } from './event-form-image-controller.js';
 import type { ImageFieldController } from './event-form-image-controller.js';
@@ -16,6 +17,7 @@ import { getEventFormElements } from './event-form-selectors.js';
 import { createEventFormValidator } from './event-form-validation.js';
 
 const GALLERY_PREVIEW_SLOTS = 4;
+const PLACE_SUGGESTIONS_LIMIT = 5;
 
 export interface EventFormMultipleRow {
   date: string;
@@ -49,6 +51,7 @@ interface NormalizedEventFormInitialValues {
 
 export interface EventFormSubmitPayload extends EventFormValues {
   imageUrls: string[];
+  imageFiles: File[];
 }
 
 export interface EventFormRenderState {
@@ -243,6 +246,161 @@ function resolveReferenceIdsFromCsv(
       .map((part) => labelToId.get(part.toLowerCase()) || part)
       .filter((part) => isUuid(part)),
   ));
+}
+
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+interface PlaceLookupController {
+  resolvePlaceValue: (rawValue: string) => Promise<string>;
+  unbind: () => void;
+}
+
+function createPlaceLookupController(form: HTMLFormElement): PlaceLookupController {
+  const input = form.querySelector<HTMLInputElement>('[data-role="event-create-place"]');
+  const datalist = form.querySelector<HTMLDataListElement>('[data-role="event-create-place-options"]');
+  const hint = form.querySelector<HTMLElement>('[data-role="event-create-place-hint"]');
+
+  if (!(input instanceof HTMLInputElement) || !(datalist instanceof HTMLDataListElement)) {
+    return {
+      resolvePlaceValue: async (rawValue) => rawValue,
+      unbind: () => {},
+    };
+  }
+
+  const labelToToken = new Map<string, string>();
+  let timer: number | undefined;
+  let requestID = 0;
+
+  const setHint = (message = ''): void => {
+    if (!(hint instanceof HTMLElement)) {
+      return;
+    }
+
+    hint.textContent = message;
+    hint.hidden = !message;
+  };
+
+  const clearOptions = (): void => {
+    labelToToken.clear();
+    datalist.innerHTML = '';
+    setHint('');
+  };
+
+  const renderOptions = (items: Array<{ token?: string; label?: string }>): void => {
+    clearOptions();
+
+    items.forEach((item) => {
+      const label = String(item?.label || '').trim();
+      const token = String(item?.token || '').trim();
+
+      if (!label || !token) {
+        return;
+      }
+
+      labelToToken.set(label.toLowerCase(), token);
+      const option = document.createElement('option');
+      option.value = label;
+      option.dataset.token = token;
+      datalist.append(option);
+    });
+  };
+
+  const loadSuggestions = async (rawQuery: string): Promise<void> => {
+    const query = rawQuery.trim();
+
+    if (query.length < 2) {
+      clearOptions();
+      return;
+    }
+
+    const current = ++requestID;
+    setHint('Ищем места...');
+
+    try {
+      const response = await getPlaceSuggestions(query, PLACE_SUGGESTIONS_LIMIT);
+
+      if (current !== requestID) {
+        return;
+      }
+
+      const items = Array.isArray(response?.items) ? response.items : [];
+      renderOptions(items);
+      setHint(items.length ? '' : 'Ничего не найдено');
+    } catch {
+      if (current === requestID) {
+        clearOptions();
+        setHint('Не удалось загрузить подсказки');
+      }
+    }
+  };
+
+  const scheduleLoad = (): void => {
+    if (timer !== undefined) {
+      window.clearTimeout(timer);
+    }
+
+    timer = window.setTimeout(() => {
+      void loadSuggestions(input.value);
+    }, 250);
+  };
+
+  const handleInput = (): void => {
+    scheduleLoad();
+  };
+
+  const handleFocus = (): void => {
+    if (input.value.trim().length >= 2) {
+      scheduleLoad();
+    }
+  };
+
+  const handleBlur = (): void => {
+    const value = input.value.trim();
+    if (value.length < 2) {
+      setHint('');
+    }
+  };
+
+  input.addEventListener('input', handleInput);
+  input.addEventListener('focus', handleFocus);
+  input.addEventListener('blur', handleBlur);
+
+  return {
+    async resolvePlaceValue(rawValue: string): Promise<string> {
+      const value = String(rawValue || '').trim();
+
+      if (!value || isUuid(value)) {
+        return value;
+      }
+
+      const token = labelToToken.get(value.toLowerCase());
+
+      if (!token) {
+        return value;
+      }
+
+      const resolved = await resolvePlaceSuggestion(token);
+      const resolvedPlaceID = String(resolved?.id || '').trim();
+
+      if (!resolvedPlaceID) {
+        throw new Error('Не удалось подтвердить выбранное место');
+      }
+
+      return resolvedPlaceID;
+    },
+    unbind(): void {
+      if (timer !== undefined) {
+        window.clearTimeout(timer);
+      }
+
+      input.removeEventListener('input', handleInput);
+      input.removeEventListener('focus', handleFocus);
+      input.removeEventListener('blur', handleBlur);
+      setHint('');
+    },
+  };
 }
 
 function attachTagPicker(form: HTMLFormElement): () => void {
@@ -493,6 +651,12 @@ export function attachEventForm(root: ParentNode, options: EventFormOptions = {}
     elements,
     scheduleController,
   });
+  const placeLookup = form instanceof HTMLFormElement
+    ? createPlaceLookupController(form)
+    : {
+      resolvePlaceValue: async (rawValue: string): Promise<string> => rawValue,
+      unbind: () => {},
+    };
 
   const handleSubmit = async (event: SubmitEvent): Promise<void> => {
     event.preventDefault();
@@ -502,15 +666,17 @@ export function attachEventForm(root: ParentNode, options: EventFormOptions = {}
     }
 
     const values = collectFormValues(form);
+    values.placeId = await placeLookup.resolvePlaceValue(values.placeId);
 
     if (!validator.validate(values)) {
       return;
     }
 
     try {
+      const imageData = await buildImageData(posterController, galleryControllers);
       const payload = {
         ...values,
-        imageUrls: await buildImageUrls(posterController, galleryControllers),
+        ...imageData,
       };
 
       if (typeof options.onSubmit === 'function') {
@@ -545,6 +711,7 @@ export function attachEventForm(root: ParentNode, options: EventFormOptions = {}
     validator.unbind();
     scheduleController.unbind();
     detachTagPicker();
+    placeLookup.unbind();
     posterController.unbind();
     galleryControllers.forEach((controller) => controller.unbind());
     form.removeEventListener('submit', handleSubmit);

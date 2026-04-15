@@ -34,59 +34,26 @@ function normalizeHttpUrl(rawUrl: string): string {
   }
 }
 
-async function uploadImageFile(file: File): Promise<string> {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const response = await fetch('/api/uploads/images', {
-    method: 'POST',
-    credentials: 'include',
-    body: formData,
-  });
-
-  if (!response.ok) {
-    let errorMessage = 'Не удалось загрузить изображение';
-
-    try {
-      const errorData = await response.json() as { error?: string };
-      if (typeof errorData?.error === 'string' && errorData.error) {
-        errorMessage = errorData.error;
-      }
-    } catch {
-      // ignore parse errors
-    }
-
-    throw new Error(errorMessage);
-  }
-
-  const result = await response.json() as { url?: string; imageUrl?: string };
-  const url = normalizeHttpUrl(String(result.url || result.imageUrl || ''));
-
-  if (!url) {
-    throw new Error('Сервер вернул некорректную ссылку на изображение');
-  }
-
-  return url;
+export interface EventFormImageData {
+  imageUrls: string[];
+  imageFiles: File[];
 }
 
-export async function buildImageUrls(
+export async function buildImageData(
   posterController: ImageFieldController,
   galleryControllers: ImageFieldController[],
-): Promise<string[]> {
+): Promise<EventFormImageData> {
   const posterFile = posterController.getFile();
   const galleryFiles = galleryControllers
     .map((controller) => controller.getFile())
     .filter((file): file is File => Boolean(file));
-  const posterPreviewUrl = posterController.getPreviewUrl();
-
-  const uploadedPosterUrl = posterFile ? await uploadImageFile(posterFile) : '';
-  const uploadedGalleryUrls = await Promise.all(
-    galleryFiles.map((file) => uploadImageFile(file)),
-  );
+  const imageFiles = [
+    ...(posterFile ? [posterFile] : []),
+    ...galleryFiles,
+  ];
 
   const fallbackPreviewUrls = [
-    uploadedPosterUrl || posterPreviewUrl,
-    ...uploadedGalleryUrls,
+    posterController.getPreviewUrl(),
     ...galleryControllers.map((controller) => controller.getPreviewUrl()),
   ]
     .filter((url) => typeof url === 'string' && url.trim())
@@ -96,7 +63,10 @@ export async function buildImageUrls(
     .filter((url) => !url.startsWith('data:'))
     .filter((url) => url.length <= 2048);
 
-  return Array.from(new Set(fallbackPreviewUrls)).slice(0, 5);
+  return {
+    imageUrls: Array.from(new Set(fallbackPreviewUrls)).slice(0, 5),
+    imageFiles,
+  };
 }
 
 export function createImageFieldController({
