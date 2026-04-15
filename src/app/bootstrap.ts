@@ -15,7 +15,26 @@ function lazyRoute<TModule extends Record<string, unknown>>(
   exportName: keyof TModule,
 ): RouteRenderer {
   return async (context) => {
-    const module = await loader();
+    let module: TModule;
+    try {
+      module = await loader();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error || '');
+      const isChunkLoadError = message.includes('ChunkLoadError')
+        || message.includes('Loading chunk');
+      const reloadGuardKey = '__cityhawk_chunk_reload_attempted__';
+
+      if (isChunkLoadError && !sessionStorage.getItem(reloadGuardKey)) {
+        sessionStorage.setItem(reloadGuardKey, '1');
+        window.location.reload();
+        throw error;
+      }
+
+      sessionStorage.removeItem(reloadGuardKey);
+      throw error;
+    }
+
+    sessionStorage.removeItem('__cityhawk_chunk_reload_attempted__');
     const renderer = module[exportName];
 
     if (typeof renderer !== 'function') {

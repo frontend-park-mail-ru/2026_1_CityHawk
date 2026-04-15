@@ -1,6 +1,14 @@
 {{#if id}}
   <a href="/events/{{id}}" class="event-card {{cardClass}}">
-    <img src="{{imageUrl}}" alt="{{title}}" class="event-card__image" />
+    <img
+      src="{{imageUrl}}"
+      alt="{{title}}"
+      class="event-card__image"
+      loading="lazy"
+      decoding="async"
+      referrerpolicy="no-referrer"
+      onerror="this.onerror=null;this.src='/public/static/img/concert.jpeg';"
+    />
     <h3 class="event-card__title">{{title}}</h3>
 
     {{#each textLines}}
@@ -17,7 +25,15 @@
   </a>
 {{else}}
   <div class="event-card {{cardClass}}">
-    <img src="{{imageUrl}}" alt="{{title}}" class="event-card__image" />
+    <img
+      src="{{imageUrl}}"
+      alt="{{title}}"
+      class="event-card__image"
+      loading="lazy"
+      decoding="async"
+      referrerpolicy="no-referrer"
+      onerror="this.onerror=null;this.src='/public/static/img/concert.jpeg';"
+    />
     <h3 class="event-card__title">{{title}}</h3>
 
     {{#each textLines}}
