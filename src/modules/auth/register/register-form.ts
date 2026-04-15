@@ -45,7 +45,7 @@ export function attachRegisterForm(root: ParentNode, options: RegisterFormOption
   }
 
   if (state.step === 2) {
-    detachStep = setupStep2(root, state, options.rerender);
+    detachStep = setupStep2(root, state, options.rerender, options.onFinish);
   }
 
   return () => {
@@ -171,7 +171,12 @@ function setupStep1(root: ParentNode, state: RegisterState, rerender?: () => voi
   };
 }
 
-function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => void): () => void {
+function setupStep2(
+  root: ParentNode,
+  state: RegisterState,
+  rerender?: () => void,
+  onFinish?: () => void,
+): () => void {
   const emailInput = root.querySelector('#email');
   const passwordInput = root.querySelector('#password');
   const confirmInput = root.querySelector('#password-confirm');
@@ -321,7 +326,6 @@ function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => voi
         userSurname: state.surname || '',
         password: state.password,
       });
-      options.onFinish?.();
     } catch (error) {
       const wrapper = safeEmailInput.closest('.login__field-error-wrapper');
       const apiError = error as ApiError | undefined;
@@ -342,7 +346,10 @@ function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => voi
       }
 
       showFieldMessage(wrapper, 'Не удалось завершить регистрацию. Проверьте соединение и попробуйте снова', 'var(--color-mid)', true);
+      return;
     }
+
+    onFinish?.();
   };
 
   safeEmailInput.addEventListener('input', validateEmail);

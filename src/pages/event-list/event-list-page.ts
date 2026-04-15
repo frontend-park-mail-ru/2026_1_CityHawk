@@ -267,6 +267,7 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
   const eventListCatalog = renderEventListCatalog({
     cards,
     hasCards: cards.length > 0,
+    canCreateEvent: Boolean(user),
   });
   const html = renderTemplate('event-list', {
     eventListFilters,

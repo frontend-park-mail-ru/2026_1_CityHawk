@@ -12,6 +12,46 @@ interface ErrorResponseBody {
   error?: string;
 }
 
+function joinApiBase(path: string): string {
+  const normalizedBase = API_BASE_URL.endsWith('/')
+    ? API_BASE_URL.slice(0, -1)
+    : API_BASE_URL;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${normalizedBase}${normalizedPath}`;
+}
+
+function normalizeApiMediaPath(value: string): string {
+  if (value.startsWith('/uploads/')) {
+    return joinApiBase(value);
+  }
+
+  if (value.startsWith('uploads/')) {
+    return joinApiBase(`/${value}`);
+  }
+
+  return value;
+}
+
+export function normalizeApiResponse<T>(payload: T): T {
+  if (typeof payload === 'string') {
+    return normalizeApiMediaPath(payload) as T;
+  }
+
+  if (Array.isArray(payload)) {
+    return payload.map((item) => normalizeApiResponse(item)) as T;
+  }
+
+  if (payload && typeof payload === 'object') {
+    const source = payload as Record<string, unknown>;
+    const normalized = Object.fromEntries(
+      Object.entries(source).map(([key, value]) => [key, normalizeApiResponse(value)]),
+    );
+    return normalized as T;
+  }
+
+  return payload;
+}
+
 function readCookie(name: string): string {
   const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const match = document.cookie.match(new RegExp(`(?:^|; )${escapedName}=([^;]*)`));
@@ -96,5 +136,6 @@ export async function request<T = RequestBody>(
     return null as T;
   }
 
-  return response.json() as Promise<T>;
+  const data = await response.json() as T;
+  return normalizeApiResponse(data);
 }

@@ -1,4 +1,4 @@
-import { applyCsrfHeader, request } from './client.js';
+import { applyCsrfHeader, normalizeApiResponse, request } from './client.js';
 import { API_BASE_URL } from './config.js';
 import type {
   ApiError,
@@ -104,7 +104,8 @@ async function requestMultipart<TResponse>(
     throw error;
   }
 
-  return response.json() as Promise<TResponse>;
+  const data = await response.json() as TResponse;
+  return normalizeApiResponse(data);
 }
 
 export async function createEventMultipart(

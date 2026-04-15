@@ -13,6 +13,7 @@ export interface EventListCatalogCard {
 export interface EventListCatalogState {
   cards?: EventListCatalogCard[];
   hasCards?: boolean;
+  canCreateEvent?: boolean;
 }
 
 export function renderEventListCatalog(state: EventListCatalogState = {}): string {
@@ -25,5 +26,6 @@ export function renderEventListCatalog(state: EventListCatalogState = {}): strin
       cardClass: 'event-card--catalog',
     })),
     hasCards: typeof state.hasCards === 'boolean' ? state.hasCards : cards.length > 0,
+    canCreateEvent: Boolean(state.canCreateEvent),
   });
 }

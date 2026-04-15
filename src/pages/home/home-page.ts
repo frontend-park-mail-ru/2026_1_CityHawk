@@ -229,7 +229,12 @@ export async function homePage({ navigate }: RouteContext): Promise<RouteView> {
     homeData = fallbackHomeData;
   }
 
-  const me = await getMeOrNull();
+  let me: User | null = null;
+  try {
+    me = await getMeOrNull();
+  } catch {
+    me = null;
+  }
   const user: (User & { displayName: string }) | null = me
     ? {
       ...me,

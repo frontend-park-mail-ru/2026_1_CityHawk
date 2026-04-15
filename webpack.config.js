@@ -17,6 +17,7 @@ module.exports = {
         ? 'service-worker.js'
         : 'bundle.[contenthash].js'
     ),
+    chunkFilename: '[id].[contenthash].js',
     clean: true,
     publicPath: '/',
   },

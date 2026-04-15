@@ -1,4 +1,4 @@
-import { applyCsrfHeader, request } from './client.js';
+import { applyCsrfHeader, normalizeApiResponse, request } from './client.js';
 import { API_BASE_URL } from './config.js';
 import type { ApiError, UpdateProfilePayload, User } from '../types/api.js';
 
@@ -13,8 +13,14 @@ export async function getMeOrNull(): Promise<User | null> {
     return await request<User>('/api/me', {}, false);
   } catch (error) {
     const apiError = error as ApiError;
+    const message = error instanceof Error ? error.message.toLowerCase() : '';
 
-    if (apiError?.status === 401 || apiError?.status === 404) {
+    if (apiError?.status === 400
+      || apiError?.status === 401
+      || apiError?.status === 403
+      || apiError?.status === 404
+      || message.includes('missing access token')
+      || message.includes('unauthorized')) {
       return null;
     }
 
@@ -84,5 +90,6 @@ export async function updateProfileMultipart(
     throw error;
   }
 
-  return response.json() as Promise<User>;
+  const data = await response.json() as User;
+  return normalizeApiResponse(data);
 }
