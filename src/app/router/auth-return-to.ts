@@ -1,7 +1,7 @@
-const AUTH_PATHS = new Set(['/login', '/register']);
+const AUTH_PATHS = ['/login', '/register'];
 
 export function isAuthPath(pathname: string): boolean {
-  return AUTH_PATHS.has(String(pathname || '').trim());
+  return AUTH_PATHS.includes(String(pathname || '').trim());
 }
 
 export function getCurrentPathWithSearch(): string {
