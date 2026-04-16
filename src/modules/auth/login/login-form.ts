@@ -13,7 +13,7 @@ export function renderLoginForm(): string {
   return renderTemplate('login-form');
 }
 
-export function attachLoginForm(root: ParentNode, options: LoginFormOptions = {}): void {
+export function attachLoginForm(root: ParentNode, options: LoginFormOptions = {}): () => void {
   const submitBtn = root.querySelector('.login__submit');
   const emailInput = root.querySelector('#email');
   const passwordInput = root.querySelector('#password');
@@ -21,16 +21,16 @@ export function attachLoginForm(root: ParentNode, options: LoginFormOptions = {}
   if (!(submitBtn instanceof HTMLButtonElement)
     || !(emailInput instanceof HTMLInputElement)
     || !(passwordInput instanceof HTMLInputElement)) {
-    return;
+    return () => {};
   }
 
-  attachPasswordToggles(root);
-  attachOAuthButtons(root);
+  const detachPasswordToggles = attachPasswordToggles(root);
+  const detachOAuthButtons = attachOAuthButtons(root);
 
   let emailError = false;
   let passError = false;
 
-  emailInput.addEventListener('input', function handleEmailInput() {
+  const handleEmailInput = function handleEmailInput(this: HTMLInputElement): void {
     if (!emailError) return;
     const wrapper = this.closest('.login__field-error-wrapper');
     const val = this.value.trim();
@@ -43,9 +43,9 @@ export function attachLoginForm(root: ParentNode, options: LoginFormOptions = {}
       hideFieldError(wrapper);
       emailError = false;
     }
-  });
+  };
 
-  passwordInput.addEventListener('input', function handlePasswordInput() {
+  const handlePasswordInput = function handlePasswordInput(this: HTMLInputElement): void {
     if (!passError) return;
     const wrapper = this.closest('.login__field-error-wrapper');
     const val = this.value.trim();
@@ -56,9 +56,9 @@ export function attachLoginForm(root: ParentNode, options: LoginFormOptions = {}
       hideFieldError(wrapper);
       passError = false;
     }
-  });
+  };
 
-  submitBtn.addEventListener('click', async (event) => {
+  const handleSubmitClick = async (event: Event): Promise<void> => {
     event.preventDefault();
 
     const emailWrapper = emailInput.closest('.login__field-error-wrapper');
@@ -107,5 +107,17 @@ export function attachLoginForm(root: ParentNode, options: LoginFormOptions = {}
         passErrorMsg.textContent = '';
       }
     }
-  });
+  };
+
+  emailInput.addEventListener('input', handleEmailInput);
+  passwordInput.addEventListener('input', handlePasswordInput);
+  submitBtn.addEventListener('click', handleSubmitClick);
+
+  return () => {
+    emailInput.removeEventListener('input', handleEmailInput);
+    passwordInput.removeEventListener('input', handlePasswordInput);
+    submitBtn.removeEventListener('click', handleSubmitClick);
+    detachPasswordToggles();
+    detachOAuthButtons();
+  };
 }

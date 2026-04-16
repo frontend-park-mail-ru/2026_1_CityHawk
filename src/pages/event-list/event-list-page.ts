@@ -29,6 +29,10 @@ interface FilterState {
   sort: string;
 }
 
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
 function formatEventDate(value?: string | null): string {
   if (!value) {
     return '';
@@ -134,10 +138,11 @@ function getFallbackCatalogData(): CatalogData {
 
 function getFilterStateFromLocation(): FilterState {
   const params = new URLSearchParams(window.location.search);
+  const rawCategoryId = params.get('categoryId') || '';
 
   return {
     query: params.get('query') || '',
-    categoryId: params.get('categoryId') || '',
+    categoryId: isUuid(rawCategoryId) ? rawCategoryId : '',
     datePreset: params.get('datePreset') || '',
     sort: params.get('sort') || '',
   };
@@ -176,7 +181,7 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
 
   try {
     const dateRange = getDateRangeFromPreset(filters.datePreset);
-    const [eventsResponse, categoriesResponse] = await Promise.all([
+    const [eventsResult, categoriesResult] = await Promise.allSettled([
       getEvents({
         query: filters.query,
         categoryId: filters.categoryId,
@@ -188,20 +193,30 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
       getCategories(),
     ]);
 
+    const items = eventsResult.status === 'fulfilled' && Array.isArray(eventsResult.value?.items)
+      ? eventsResult.value.items
+      : catalogData.items;
+    const categories = categoriesResult.status === 'fulfilled'
+      && Array.isArray(categoriesResult.value?.items)
+      ? categoriesResult.value.items
+      : catalogData.categories;
+
     catalogData = {
-      items: Array.isArray(eventsResponse?.items) ? eventsResponse.items : [],
-      categories: Array.isArray(categoriesResponse?.items) ? categoriesResponse.items : [],
+      items,
+      categories,
     };
   } catch {
     catalogData = getFallbackCatalogData();
   }
 
   const cards = catalogData.items.map(mapEventToCatalogCardViewModel);
-  const categoryOptions = catalogData.categories.map((category) => ({
-    value: category.id,
-    label: category.name,
-    selected: String(category.id || '') === String(filters.categoryId || ''),
-  }));
+  const categoryOptions = catalogData.categories
+    .filter((category) => isUuid(String(category.id || '')))
+    .map((category) => ({
+      value: category.id,
+      label: category.name,
+      selected: String(category.id || '') === String(filters.categoryId || ''),
+    }));
   const datePresetOptions = [
     { value: 'today', label: 'Сегодня' },
     { value: 'tomorrow', label: 'Завтра' },
@@ -248,7 +263,7 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
           if (filters.query) {
             params.set('query', filters.query);
           }
-          if (categoryId) {
+          if (categoryId && isUuid(categoryId)) {
             params.set('categoryId', categoryId);
           }
           if (datePreset) {

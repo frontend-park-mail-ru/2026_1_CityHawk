@@ -14,13 +14,13 @@ export function renderHeroSearch(state: HeroSearchState = {}): string {
   });
 }
 
-export function attachHeroSearch(root: ParentNode, options: HeroSearchOptions = {}): void {
+export function attachHeroSearch(root: ParentNode, options: HeroSearchOptions = {}): () => void {
   const form = root.querySelector('[data-role="hero-search-form"]');
   if (!(form instanceof HTMLFormElement)) {
-    return;
+    return () => {};
   }
 
-  form.addEventListener('submit', (event: SubmitEvent) => {
+  const handleSubmit = (event: SubmitEvent) => {
     event.preventDefault();
 
     const formData = new FormData(form);
@@ -29,5 +29,11 @@ export function attachHeroSearch(root: ParentNode, options: HeroSearchOptions = 
     if (typeof options.onSearch === 'function') {
       options.onSearch(query);
     }
-  });
+  };
+
+  form.addEventListener('submit', handleSubmit);
+
+  return () => {
+    form.removeEventListener('submit', handleSubmit);
+  };
 }

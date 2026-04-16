@@ -6,6 +6,7 @@ import type {
   EventSessionPayload,
   Tag,
 } from '../../types/api.js';
+import type { EventFormSubmitPayload } from './event-form.js';
 
 export type EventFormScheduleMode = 'single' | 'multiple' | 'period';
 
@@ -51,19 +52,6 @@ export interface EventFormValues {
   locationDescription: string;
 }
 
-interface EventFormScheduleState {
-  scheduleMode: EventFormScheduleMode;
-  singleDate: string;
-  singleStartTime: string;
-  singleEndTime: string;
-  multipleDates: string[];
-  multipleStartTimes: string[];
-  multipleEndTimes: string[];
-  periodStart: string;
-  periodEnd: string;
-  isAnytime: boolean;
-}
-
 interface EventImageLike {
   imageUrl?: string;
   url?: string;
@@ -80,6 +68,19 @@ interface EventDetailsLike {
   sessions?: EventSession[];
   imageUrl?: string;
   images?: EventImageLike[];
+}
+
+interface EventFormScheduleState {
+  scheduleMode: EventFormScheduleMode;
+  singleDate: string;
+  singleStartTime: string;
+  singleEndTime: string;
+  multipleDates: string[];
+  multipleStartTimes: string[];
+  multipleEndTimes: string[];
+  periodStart: string;
+  periodEnd: string;
+  isAnytime: boolean;
 }
 
 function pad(value: number | string): string {
@@ -342,7 +343,17 @@ function mapImageUrls(rawEvent: EventDetailsLike): string[] {
   return images.slice(0, 4);
 }
 
-export function mapEventFormPayloadToEventPayload(formPayload: EventFormValues): EventPayload {
+function normalizeTagIds(tags: string[]): string[] {
+  return Array.from(new Set(
+    tags
+      .map((tag) => String(tag || '').trim())
+      .filter(Boolean),
+  ));
+}
+
+export function mapEventFormPayloadToEventPayload(
+  formPayload: EventFormSubmitPayload,
+): EventPayload {
   return {
     title: formPayload.title,
     shortDescription: formPayload.locationDescription,
@@ -350,8 +361,8 @@ export function mapEventFormPayloadToEventPayload(formPayload: EventFormValues):
     ageLimit: 0,
     sourceUrl: '',
     categoryIds: formPayload.category ? [formPayload.category] : [],
-    tagIds: [],
-    imageUrls: [],
+    tagIds: normalizeTagIds(formPayload.tags),
+    imageUrls: formPayload.imageUrls,
     sessions: buildSessions(formPayload),
   };
 }
@@ -363,6 +374,7 @@ export function mapEventDetailsToInitialValues(rawEvent: EventDetailsLike = {}):
   const categories = Array.isArray(rawEvent?.categories) ? rawEvent.categories : [];
   const tags = Array.isArray(rawEvent?.tags) ? rawEvent.tags : [];
   const schedule = mapSessionsToInitialSchedule(sessions);
+  const galleryPreviewUrls = mapImageUrls(rawEvent);
 
   return {
     title: String(rawEvent?.title || '').trim(),
@@ -374,7 +386,8 @@ export function mapEventDetailsToInitialValues(rawEvent: EventDetailsLike = {}):
     description: String(rawEvent?.fullDescription || '').trim(),
     locationDescription: String(rawEvent?.shortDescription || '').trim(),
     posterPreviewUrl: String(rawEvent?.coverImageUrl || rawEvent?.imageUrl || '').trim(),
-    galleryPreviewUrls: mapImageUrls(rawEvent),
+    galleryPreviewUrls,
+    galleryUrls: galleryPreviewUrls,
     ...schedule,
   };
 }

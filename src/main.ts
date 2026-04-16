@@ -27,3 +27,6 @@ import './modules/events/event-list-catalog.css';
 import './modules/auth/auth.css';
 
 import './app/bootstrap.js';
+import { registerServiceWorker } from './app/register-service-worker.js';
+
+registerServiceWorker();

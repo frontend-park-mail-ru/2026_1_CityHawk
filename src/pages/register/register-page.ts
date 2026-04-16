@@ -24,9 +24,12 @@ function createRegisterView(
   return {
     html: renderRegisterHtml(state),
     mount(root) {
+      let detachRegisterForm = () => {};
+
       const rerender = () => {
+        detachRegisterForm();
         root.innerHTML = renderRegisterHtml(state);
-        attachRegisterForm(root, {
+        detachRegisterForm = attachRegisterForm(root, {
           state,
           rerender,
           onFinish() {
@@ -35,13 +38,17 @@ function createRegisterView(
         });
       };
 
-      attachRegisterForm(root, {
+      detachRegisterForm = attachRegisterForm(root, {
         state,
         rerender,
         onFinish() {
           navigate('/');
         },
       });
+
+      return () => {
+        detachRegisterForm();
+      };
     },
   };
 }

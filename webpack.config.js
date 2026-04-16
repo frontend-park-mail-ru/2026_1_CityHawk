@@ -4,10 +4,17 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
-  entry: './src/main.ts',
+  entry: {
+    main: './src/main.ts',
+    'service-worker': './src/service-worker.ts',
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.[contenthash].js',
+    filename: (pathData) => (
+      pathData.chunk && pathData.chunk.name === 'service-worker'
+        ? 'service-worker.js'
+        : 'bundle.[contenthash].js'
+    ),
     clean: true,
     publicPath: '/',
   },
@@ -34,7 +41,11 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
+        use: ['style-loader', 'css-loader', 'postcss-loader'],
+      },
+      {
+        test: /\.hbs$/i,
+        type: 'asset/source',
       },
     ],
   },
@@ -47,17 +58,13 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html',
+      chunks: ['main'],
     }),
     new CopyWebpackPlugin({
       patterns: [
         {
           from: path.resolve(__dirname, 'public/static'),
           to: 'public/static',
-        },
-        {
-          from: '**/*.hbs',
-          context: path.resolve(__dirname, 'src'),
-          to: 'src/[path][name][ext]',
         },
       ],
     }),

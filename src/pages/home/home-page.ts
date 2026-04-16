@@ -191,7 +191,7 @@ export async function homePage({ navigate }: RouteContext): Promise<RouteView> {
     mount(root) {
       const logoutButton = root.querySelector('[data-action="logout"]');
 
-      attachHeroSearch(root, {
+      const detachHeroSearch = attachHeroSearch(root, {
         onSearch(nextQuery) {
           const params = new URLSearchParams(window.location.search);
 
@@ -216,6 +216,8 @@ export async function homePage({ navigate }: RouteContext): Promise<RouteView> {
       }
 
       return () => {
+        detachHeroSearch();
+
         if (logoutButton instanceof HTMLElement) {
           logoutButton.removeEventListener('click', handleLogout);
         }
