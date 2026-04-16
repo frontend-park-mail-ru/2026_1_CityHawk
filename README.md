@@ -1,66 +1,109 @@
-# CityHawk Frontend
+# CityHawk
 
-Фронтенд проекта CityHawk на TypeScript.
+Сервис для поиска и управления мероприятиями: регистрация, авторизация, профиль, каталог/поиск, создание и редактирование событий.
 
-Проект состоит из двух частей:
-- клиентское SPA в `src/`, которое собирается через `webpack`
-- небольшой `express`-сервер в `server/index.ts`, который отдает собранный фронтенд и runtime-конфиг
+## Демо
 
-## Стек
+- Frontend: http://cityhawk.ru
+- Backend API: http://cityhawk.ru:8080
 
-- TypeScript
-- Webpack
-- Express
-- Handlebars partials/templates
+## Что реализовано
 
-## Структура
+### Архитектура и технологии
 
-- `src/` — клиентское приложение
-- `server/` — серверная часть на TypeScript
-- `public/` — статические файлы
-- `dist/` — сборка фронтенда
-- `server-dist/` — собранный сервер
+- SPA без перезагрузки страниц (History API + клиентский роутер)
+- TypeScript + ES6 modules
+- Сборка: Webpack
+- Транспиляция: Babel
+- Шаблоны и компонентный подход: Handlebars (`.hbs`)
+- CSS-методология: БЭМ
+- Постпроцессинг CSS: PostCSS + Autoprefixer
+- Service Worker и кэширование для офлайн-режима
 
-## Скрипты
+### Основные пользовательские сценарии
 
-- `npm run dev` — локальная разработка через `webpack-dev-server`
-- `npm run build` — собирает фронтенд и сервер
-- `npm run build:server` — отдельно собирает `server/index.ts`
-- `npm start` — запускает собранный сервер из `server-dist/index.js`
-- `npm run lint` — проверка eslint
-- `npm run lint:fix` — автоисправление eslint
+- Авторизация с валидацией
+- Регистрация с валидацией
+- Профиль пользователя
+- Подборки мероприятий
+- Список мероприятий с фильтрами
+- Поиск по мероприятиям/категориям/тегам
+- Страница мероприятия
+- Создание мероприятия
+- Редактирование мероприятия
+- Удаление мероприятия
 
-## Локальный запуск
+## Роутинг
 
-1. Установить зависимости:
+- `/` — главная
+- `/events` — список мероприятий
+- `/events/new` — создание мероприятия
+- `/events/:eventId` — карточка мероприятия
+- `/events/:eventId/edit` — редактирование
+- `/events/:eventId/delete` — удаление
+- `/login` — вход
+- `/register` — регистрация
+- `/profile` — профиль
+- `/password_reset` — восстановление пароля
+
+## Установка и запуск
+
+### 1) Локально (dev)
 
 ```bash
 npm ci
-```
-
-2. Для разработки фронтенда:
-
-```bash
 npm run dev
 ```
 
-3. Для production-like запуска:
+Frontend поднимется на `http://localhost:3000`.
+
+### 2) Production-like запуск
 
 ```bash
 npm run build
 npm start
 ```
 
+### 3) Docker
+
+```bash
+docker compose up --build
+```
+
 ## Переменные окружения
 
-- `PORT` — порт frontend-сервера, по умолчанию `3000`
-- `API_BASE_URL` — базовый URL backend API, по умолчанию `http://localhost:8080`
+- `PORT` — порт frontend-сервера (по умолчанию `3000`)
+- `API_BASE_URL` — базовый URL backend API (по умолчанию `http://localhost:8080`)
 
-Сервер отдает runtime-конфиг в `/runtime-config.js` и пробрасывает туда `API_BASE_URL`.
+`API_BASE_URL` прокидывается во фронтенд через `/runtime-config.js`.
 
-## TypeScript
+## CORS и cookies
 
-- клиент собирается по [tsconfig.json](/Users/alice/Desktop/2026_1_CityHawk/tsconfig.json:1)
-- сервер собирается отдельно по [tsconfig.server.json](/Users/alice/Desktop/2026_1_CityHawk/tsconfig.server.json:1)
+Для корректной авторизации через cookies backend должен:
 
-Исходный runtime-код проекта переведен на TypeScript: клиент находится в `src/`, сервер в `server/index.ts`.
+- разрешать origin фронтенда;
+- отвечать с `Access-Control-Allow-Credentials: true`;
+- использовать совместимые cookie-атрибуты (`SameSite`, `Secure`) для вашего окружения;
+- обрабатывать preflight (`OPTIONS`) для нужных методов и заголовков.
+
+
+
+## Структура проекта
+
+- `src/` — клиентское приложение
+- `src/app/` — бутстрап, роутер, рендеринг шаблонов, регистрация SW
+- `src/pages/` — страницы приложения
+- `src/modules/` — переиспользуемые модули/фичи
+- `src/components/` — UI-компоненты
+- `src/api/` — API-клиент и адаптеры
+- `server/` — сервер для раздачи фронта
+- `dist/`, `server-dist/` — сборочные артефакты
+
+## NPM-скрипты
+
+- `npm run dev` — запуск webpack-dev-server
+- `npm run build` — сборка фронтенда + сервера
+- `npm run build:server` — сборка только `server/`
+- `npm start` — запуск собранного сервера
+- `npm run lint` — проверка eslint
+- `npm run lint:fix` — автофикс eslint
