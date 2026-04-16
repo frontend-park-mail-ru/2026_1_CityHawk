@@ -1,6 +1,6 @@
 export function attachPasswordToggles(root: ParentNode = document): () => void {
   const toggles = root.querySelectorAll('.login__password-toggle');
-  const cleanup: Array<() => void> = [];
+  const cleanup: Array<(() => void) | undefined> = [];
 
   toggles.forEach((button) => {
     if (!(button instanceof HTMLButtonElement)) {
@@ -35,6 +35,6 @@ export function attachPasswordToggles(root: ParentNode = document): () => void {
   });
 
   return () => {
-    cleanup.forEach((teardown) => teardown());
+    cleanup.forEach((teardown) => teardown?.());
   };
 }

@@ -18,7 +18,7 @@ export function attachOAuthButtons(root: ParentNode): () => void {
     ['.login__oauth-btn--yandex', 'yandex'],
     ['.login__oauth-btn--vk', 'vk'],
   ];
-  const cleanup: Array<() => void> = [];
+  const cleanup: Array<(() => void) | undefined> = [];
 
   buttonToProvider.forEach(([selector, provider]) => {
     const button = root.querySelector(selector);
@@ -34,6 +34,6 @@ export function attachOAuthButtons(root: ParentNode): () => void {
   });
 
   return () => {
-    cleanup.forEach((teardown) => teardown());
+    cleanup.forEach((teardown) => teardown?.());
   };
 }
