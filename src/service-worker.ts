@@ -39,11 +39,11 @@ self.addEventListener('install', (event: ExtendableEvent) => {
 self.addEventListener('activate', (event: ExtendableEvent) => {
   event.waitUntil((async () => {
     const cacheNames = await caches.keys();
-    const allowedCaches = new Set([SHELL_CACHE, DATA_CACHE, STATIC_CACHE]);
+    const allowedCaches = [SHELL_CACHE, DATA_CACHE, STATIC_CACHE];
 
     await Promise.all(
       cacheNames
-        .filter((cacheName) => !allowedCaches.has(cacheName))
+        .filter((cacheName) => !allowedCaches.includes(cacheName))
         .map((cacheName) => caches.delete(cacheName)),
     );
 
