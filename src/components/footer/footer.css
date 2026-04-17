@@ -81,7 +81,7 @@
     color: var(--home-color-brand);
 }
 
-@media (prefers-color-scheme: dark) {
+@media all {
     .site-footer {
         border-top: 1px solid rgba(139, 188, 233, 0.16);
     }

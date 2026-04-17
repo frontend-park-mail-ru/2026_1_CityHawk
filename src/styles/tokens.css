@@ -95,7 +95,7 @@
 * COLORS (Dark Theme)
 * ========================================
 */
-@media (prefers-color-scheme: dark) {
+@media all {
   :root {
     /* Основные тона */
     --color-background-tone-1: #244C87;  /* Background tone 1 */

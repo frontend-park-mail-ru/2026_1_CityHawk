@@ -101,7 +101,7 @@
     transition: all 0.1s ease-out;
 }
 
-@media (prefers-color-scheme: dark) {
+@media all {
     .hero-search__form {
         border-color: rgba(139, 188, 233, 0.2);
         box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);

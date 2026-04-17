@@ -92,7 +92,7 @@
     box-shadow: 0 14px 30px var(--home-color-shadow);
 }
 
-@media (prefers-color-scheme: dark) {
+@media all {
     .event-card {
         background: var(--home-color-card-gradient);
         border-color: rgba(139, 188, 233, 0.12);

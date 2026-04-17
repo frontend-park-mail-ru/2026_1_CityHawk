@@ -26,13 +26,15 @@
             </div>
 
             {{> form-input
-                fieldClass="profile__field"
+                fieldClass="profile__field profile__field--email"
                 label="Email"
                 type="email"
                 id="email"
                 name="email"
                 placeholder="address@service.com"
                 value=user.email
+                inputClass="profile__email-input"
+                errorClass="form-field__error profile__email-error"
             }}
 
             <div class="profile__grid profile__grid--two">

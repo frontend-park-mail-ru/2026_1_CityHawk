@@ -114,6 +114,10 @@ export interface PlaceListResponse {
   items: Place[];
 }
 
+export interface CityListResponse {
+  items: City[];
+}
+
 export interface EventIdResponse {
   id: string;
 }
@@ -178,6 +182,7 @@ export interface RegisterPayload {
 }
 
 export interface UpdateProfilePayload {
+  email?: string;
   username?: string;
   userSurname?: string;
   birthday?: string;

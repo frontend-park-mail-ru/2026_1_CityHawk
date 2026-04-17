@@ -48,6 +48,9 @@ export async function updateProfileMultipart(
   if (payload.username !== undefined) {
     formData.append('username', payload.username);
   }
+  if (payload.email !== undefined) {
+    formData.append('email', payload.email);
+  }
   if (payload.userSurname !== undefined) {
     formData.append('userSurname', payload.userSurname);
   }

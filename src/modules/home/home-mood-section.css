@@ -152,7 +152,7 @@
     opacity: 1;
 }
 
-@media (prefers-color-scheme: dark) {
+@media all {
     .mood-card__tag {
         background: var(--home-color-surface-soft);
         color: var(--home-color-text);

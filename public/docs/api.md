@@ -312,6 +312,7 @@ UI для просмотра OpenAPI.
 
 ```json
 {
+  "email": "new-user@mail.com",
   "username": "Alice",
   "userSurname": "Ivanova",
   "birthday": "2004-01-12",
@@ -326,6 +327,7 @@ UI для просмотра OpenAPI.
 
 ```text
 username=Alice
+email=new-user@mail.com
 userSurname=Ivanova
 birthday=2004-01-12
 cityId=11111111-1111-1111-1111-111111111111
@@ -677,6 +679,25 @@ images=<binary file>
 }
 ```
 
+### GET /api/cities
+
+Возвращает список городов.
+
+Успешный ответ:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "name": "Moscow",
+      "countryName": "Russia",
+      "timezone": "Europe/Moscow"
+    }
+  ]
+}
+```
+
 ### GET /api/tags/{id}/events
 
 События по конкретному тегу.
@@ -891,6 +912,7 @@ Endpoint'ы, которые чаще всего нужны фронтенду:
 - `DELETE /api/events/{eventId}`
 - `GET /api/categories`
 - `GET /api/tags`
+- `GET /api/cities`
 - `GET /api/search`
 - `GET /api/collections`
 - `GET /api/collections/{collectionId}`

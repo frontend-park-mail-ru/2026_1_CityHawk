@@ -1,14 +1,12 @@
 import { getEvents } from '../../api/events.api.js';
 import { getCategories } from '../../api/categories.api.js';
 import { getTags } from '../../api/tags.api.js';
-import { getMeOrNull } from '../../api/profile.api.js';
-import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
 import { localizeCategoryName } from '../../modules/events/category-localization.js';
 import { renderEventListCatalog } from '../../modules/events/event-list-catalog.js';
 import { attachEventListFilters, renderEventListFilters } from '../../modules/events/event-list-filters.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
-import type { Category, EventCard, Tag, User } from '../../types/api.js';
+import type { Category, EventCard, Tag } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
 interface CatalogCardViewModel {
@@ -181,13 +179,7 @@ function getDateRangeFromPreset(preset: string): { dateFrom?: string; dateTo?: s
 
 export async function eventListPage({ navigate }: RouteContext): Promise<RouteView> {
   const filters = getFilterStateFromLocation();
-  const me = await getMeOrNull();
-  const user: (User & { displayName: string }) | null = me
-    ? {
-      ...me,
-      displayName: getHeaderUserDisplayName(me),
-    }
-    : null;
+  const user = null;
 
   let catalogData = getFallbackCatalogData();
 
@@ -280,6 +272,15 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
     html,
     mount(root) {
       const headerSearchForm = root.querySelector('[data-role="header-search-form"]');
+      const getCurrentQuery = () => String(new URLSearchParams(window.location.search).get('query') || '').trim();
+
+      if (headerSearchForm instanceof HTMLFormElement) {
+        const queryInput = headerSearchForm.querySelector<HTMLInputElement>('input[name="query"]');
+        if (queryInput instanceof HTMLInputElement) {
+          queryInput.value = getCurrentQuery();
+        }
+      }
+
       const detachEventListFilters = attachEventListFilters(root, {
         onSubmit(form) {
           const formData = new FormData(form);
@@ -289,8 +290,9 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
           const datePreset = String(formData.get('datePreset') || '').trim();
           const sort = String(formData.get('sort') || '').trim();
 
-          if (filters.query) {
-            params.set('query', filters.query);
+          const query = getCurrentQuery();
+          if (query) {
+            params.set('query', query);
           }
           if (categoryId && isUuid(categoryId)) {
             params.set('categoryId', categoryId);
