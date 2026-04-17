@@ -7,15 +7,6 @@ interface HeaderSearchSuggestionsOptions {
   maxItems?: number;
 }
 
-function escapeHTML(value: string): string {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
 function normalizeSuggestions(payload: unknown): string[] {
   if (!payload || typeof payload !== 'object') {
     return [];
@@ -62,18 +53,21 @@ export function attachHeaderSearchSuggestions(
       return;
     }
 
-    panel.innerHTML = items
+    panel.innerHTML = '';
+
+    items
       .slice(0, maxItems)
-      .map((item, index) => (`
-        <button
-          type="button"
-          class="site-header__search-suggestion"
-          data-role="header-search-suggestion"
-          data-query="${escapeHTML(item)}"
-          data-index="${index}"
-        >${escapeHTML(item)}</button>
-      `))
-      .join('');
+      .forEach((item, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'site-header__search-suggestion';
+        button.dataset.role = 'header-search-suggestion';
+        button.dataset.query = item;
+        button.dataset.index = String(index);
+        button.textContent = item;
+        panel.append(button);
+      });
+
     panel.hidden = false;
   };
 
