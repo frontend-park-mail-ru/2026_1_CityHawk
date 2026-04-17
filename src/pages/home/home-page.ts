@@ -210,12 +210,14 @@ function getFallbackHomeData(): HomeResponse {
 }
 
 export async function homePage({ navigate }: RouteContext): Promise<RouteView> {
-  const query = new URLSearchParams(window.location.search).get('query') || '';
+  const searchParams = new URLSearchParams(window.location.search);
+  const query = searchParams.get('query') || '';
+  const city = searchParams.get('city') || '';
   const fallbackHomeData = getFallbackHomeData();
   let homeData = fallbackHomeData;
 
   try {
-    const response = await getHome();
+    const response = await getHome({ city });
     const featuredEvents = Array.isArray(response?.featuredEvents) ? response.featuredEvents : [];
     const categories = Array.isArray(response?.categories) ? response.categories : [];
     const collections = Array.isArray(response?.collections) ? response.collections : [];

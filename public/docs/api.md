@@ -368,6 +368,10 @@ avatar=<binary file>
 
 Агрегированные данные для главной страницы.
 
+Query параметры:
+
+- `city` — опционально, id или название города для фильтрации главной страницы
+
 Успешный ответ `200 OK`:
 
 ```json
@@ -695,56 +699,6 @@ images=<binary file>
       "timezone": "Europe/Moscow"
     }
   ]
-}
-```
-
-### GET /api/tags/{id}/events
-
-События по конкретному тегу.
-
-Техническое примечание:
-
-- на текущем backend это реализовано через `GET /api/events?tagId={id}`
-- URL `GET /api/tags/{id}/events` в этой документации — удобная форма описания этого сценария
-
-Query параметры:
-
-- `limit` — положительное число, по умолчанию `12`
-- `offset` — неотрицательное число, по умолчанию `0`
-- `query` — опциональный текстовый фильтр
-- `dateFrom` — дата начала в формате `YYYY-MM-DD`
-- `dateTo` — дата конца в формате `YYYY-MM-DD`
-- `sort` — одно из `dateAsc`, `dateDesc`, `titleAsc`
-
-Успешный ответ:
-
-```json
-{
-  "items": [
-    {
-      "id": "rock-concert",
-      "title": "Рок-концерт",
-      "shortDescription": "20 марта, Атмосфера, Москва",
-      "coverImageUrl": "https://example.com/rock.jpg",
-      "tags": [
-        {
-          "id": "item",
-          "name": "Рок",
-          "slug": "item"
-        }
-      ],
-      "nextSession": {
-        "startAt": "2026-04-14T19:30:00Z",
-        "place": {
-          "name": "Атмосфера",
-          "addressLine": "Москва, Атмосфера"
-        }
-      }
-    }
-  ],
-  "total": 1,
-  "limit": 12,
-  "offset": 0
 }
 ```
 
