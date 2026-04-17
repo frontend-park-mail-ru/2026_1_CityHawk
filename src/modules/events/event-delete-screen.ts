@@ -1,6 +1,7 @@
 import { renderTemplate } from '../../app/templates/renderer.js';
 import type { User } from '../../types/api.js';
 import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
+import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
 
 type HeaderSearchState = {
   query?: string;
@@ -31,6 +32,10 @@ export function attachEventDeleteScreen(
 ): () => void {
   const headerSearchForm = root.querySelector('[data-role="header-search-form"]');
   const confirmButton = root.querySelector('[data-action="event-delete-confirm"]');
+  const detachCityPicker = attachHeaderCityPicker(root, {
+    navigate: options.navigate,
+    targetPath: '/events',
+  });
 
   const navigateByHeaderQuery = (query: string) => {
     const params = new URLSearchParams();
@@ -74,6 +79,7 @@ export function attachEventDeleteScreen(
   }
 
   return () => {
+    detachCityPicker();
     detachHeaderSuggestions();
 
     if (headerSearchForm instanceof HTMLFormElement) {

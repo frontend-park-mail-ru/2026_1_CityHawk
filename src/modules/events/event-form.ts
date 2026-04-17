@@ -546,6 +546,162 @@ function attachTagPicker(form: HTMLFormElement): () => void {
   };
 }
 
+function attachStyledDatalistDropdowns(form: HTMLFormElement): () => void {
+  const detachList: Array<() => void> = [];
+  const inputSelectors = [
+    '[data-role="event-create-place"]',
+    '[data-role="event-create-category"]',
+    '[data-role="event-create-tags-input"]',
+  ];
+
+  inputSelectors.forEach((selector) => {
+    const input = form.querySelector<HTMLInputElement>(selector);
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
+
+    const listID = String(input.getAttribute('list') || '').trim();
+    if (!listID) {
+      return;
+    }
+
+    const datalist = form.querySelector<HTMLDataListElement>(`#${listID}`);
+    if (!(datalist instanceof HTMLDataListElement)) {
+      return;
+    }
+
+    const field = input.closest<HTMLElement>('.event-create-form__field')
+      || input.closest<HTMLElement>('.event-create-form__tags')
+      || input.parentElement;
+    if (!(field instanceof HTMLElement)) {
+      return;
+    }
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'event-create-form__dropdown';
+    dropdown.hidden = true;
+    field.append(dropdown);
+
+    const originalListID = listID;
+    input.removeAttribute('list');
+    input.setAttribute('autocomplete', 'off');
+
+    let isOpen = false;
+
+    const readItems = (): Array<{ label: string }> => Array.from(datalist.querySelectorAll<HTMLOptionElement>('option'))
+      .map((option) => ({ label: String(option.value || '').trim() }))
+      .filter((item) => Boolean(item.label));
+
+    const hideDropdown = (): void => {
+      isOpen = false;
+      dropdown.hidden = true;
+      dropdown.innerHTML = '';
+    };
+
+    const renderDropdown = (): void => {
+      const query = input.value.trim().toLowerCase();
+      const items = readItems()
+        .filter((item) => !query || item.label.toLowerCase().includes(query))
+        .slice(0, 8);
+
+      if (!items.length) {
+        hideDropdown();
+        return;
+      }
+
+      dropdown.innerHTML = '';
+      items.forEach((item) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'event-create-form__dropdown-option';
+        button.dataset.value = item.label;
+        button.textContent = item.label;
+        dropdown.append(button);
+      });
+
+      isOpen = true;
+      dropdown.hidden = false;
+    };
+
+    const handleInput = (): void => {
+      renderDropdown();
+    };
+
+    const handleFocus = (): void => {
+      renderDropdown();
+    };
+
+    const handleDocumentClick = (event: Event): void => {
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+
+      if (!field.contains(target)) {
+        hideDropdown();
+      }
+    };
+
+    const handleDropdownClick = (event: Event): void => {
+      const target = event.target;
+      if (!(target instanceof Element)) {
+        return;
+      }
+
+      const optionButton = target.closest<HTMLButtonElement>('.event-create-form__dropdown-option');
+      if (!(optionButton instanceof HTMLButtonElement)) {
+        return;
+      }
+
+      const value = String(optionButton.dataset.value || '').trim();
+      if (!value) {
+        return;
+      }
+
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      hideDropdown();
+      input.focus();
+    };
+
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape' && isOpen) {
+        hideDropdown();
+      }
+    };
+
+    const observer = new MutationObserver(() => {
+      if (isOpen) {
+        renderDropdown();
+      }
+    });
+    observer.observe(datalist, { childList: true, subtree: true, characterData: true });
+
+    input.addEventListener('input', handleInput);
+    input.addEventListener('focus', handleFocus);
+    input.addEventListener('keydown', handleKeyDown);
+    dropdown.addEventListener('click', handleDropdownClick);
+    document.addEventListener('click', handleDocumentClick);
+
+    detachList.push(() => {
+      observer.disconnect();
+      hideDropdown();
+      input.setAttribute('list', originalListID);
+      input.removeEventListener('input', handleInput);
+      input.removeEventListener('focus', handleFocus);
+      input.removeEventListener('keydown', handleKeyDown);
+      dropdown.removeEventListener('click', handleDropdownClick);
+      document.removeEventListener('click', handleDocumentClick);
+      dropdown.remove();
+    });
+  });
+
+  return () => {
+    detachList.forEach((detach) => detach());
+  };
+}
+
 export function renderEventForm(state: EventFormRenderState = {}): string {
   const mode = state.mode === 'edit' ? 'edit' : 'create';
   const initialValues = normalizeInitialValues(state.initialValues);
@@ -699,6 +855,7 @@ export function attachEventForm(root: ParentNode, options: EventFormOptions = {}
   scheduleController.bind();
   validator.bind();
   const detachTagPicker = attachTagPicker(form);
+  const detachStyledDropdowns = attachStyledDatalistDropdowns(form);
   posterController.bind();
   galleryControllers.forEach((controller) => controller.bind());
 
@@ -711,6 +868,7 @@ export function attachEventForm(root: ParentNode, options: EventFormOptions = {}
     validator.unbind();
     scheduleController.unbind();
     detachTagPicker();
+    detachStyledDropdowns();
     placeLookup.unbind();
     posterController.unbind();
     galleryControllers.forEach((controller) => controller.unbind());

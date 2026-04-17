@@ -2,6 +2,7 @@ import { getHome } from '../../api/home.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
 import { logout } from '../../api/auth.api.js';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
+import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
 import { renderHomeEventsSection } from '../../modules/home/home-events-section.js';
 import { renderHomeMoodSection } from '../../modules/home/home-mood-section.js';
 import { attachHeroSearch, renderHeroSearch } from '../../modules/home/hero-search.js';
@@ -263,6 +264,7 @@ export async function homePage({ navigate }: RouteContext): Promise<RouteView> {
     html,
     mount(root) {
       const logoutButton = root.querySelector('[data-action="logout"]');
+      const detachCityPicker = attachHeaderCityPicker(root, { navigate });
 
       const detachHeroSearch = attachHeroSearch(root, {
         onSearch(nextQuery) {
@@ -289,6 +291,7 @@ export async function homePage({ navigate }: RouteContext): Promise<RouteView> {
       }
 
       return () => {
+        detachCityPicker();
         detachHeroSearch();
 
         if (logoutButton instanceof HTMLElement) {

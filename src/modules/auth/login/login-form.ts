@@ -2,7 +2,7 @@ import { login } from '../../../api/auth.api.js';
 import { renderTemplate } from '../../../app/templates/renderer.js';
 import { attachPasswordToggles } from '../shared/password-toggle.js';
 import { hideFieldError, showFieldError, getErrorMessageElement } from '../shared/field-messages.js';
-import { isValidEmail } from '../shared/validators.js';
+import { getEmailValidationError } from '../shared/validators.js';
 import { attachOAuthButtons } from '../oauth.js';
 
 interface LoginFormOptions {
@@ -33,12 +33,10 @@ export function attachLoginForm(root: ParentNode, options: LoginFormOptions = {}
   const handleEmailInput = function handleEmailInput(this: HTMLInputElement): void {
     if (!emailError) return;
     const wrapper = this.closest('.login__field-error-wrapper');
-    const val = this.value.trim();
+    const validationError = getEmailValidationError(this.value);
 
-    if (!val) {
-      showFieldError(wrapper, 'Поле email не должно быть пустым!');
-    } else if (!isValidEmail(val)) {
-      showFieldError(wrapper, 'Введите email в формате address@service.com!');
+    if (validationError) {
+      showFieldError(wrapper, validationError);
     } else {
       hideFieldError(wrapper);
       emailError = false;
@@ -69,11 +67,9 @@ export function attachLoginForm(root: ParentNode, options: LoginFormOptions = {}
     emailError = false;
     passError = false;
 
-    if (!emailVal) {
-      showFieldError(emailWrapper, 'Поле email не должно быть пустым!');
-      emailError = true;
-    } else if (!isValidEmail(emailVal)) {
-      showFieldError(emailWrapper, 'Введите email в формате address@service.com!');
+    const emailValidationError = getEmailValidationError(emailVal);
+    if (emailValidationError) {
+      showFieldError(emailWrapper, emailValidationError);
       emailError = true;
     } else {
       hideFieldError(emailWrapper);

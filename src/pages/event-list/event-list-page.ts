@@ -1,12 +1,15 @@
 import { getEvents } from '../../api/events.api.js';
 import { getCategories } from '../../api/categories.api.js';
 import { getTags } from '../../api/tags.api.js';
+import { getMeOrNull } from '../../api/profile.api.js';
 import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
+import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
+import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { localizeCategoryName } from '../../modules/events/category-localization.js';
 import { renderEventListCatalog } from '../../modules/events/event-list-catalog.js';
 import { attachEventListFilters, renderEventListFilters } from '../../modules/events/event-list-filters.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
-import type { Category, EventCard, Tag } from '../../types/api.js';
+import type { Category, EventCard, Tag, User } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
 interface CatalogCardViewModel {
@@ -26,6 +29,7 @@ interface CatalogData {
 
 interface FilterState {
   query: string;
+  cityId: string;
   categoryId: string;
   tagId: string;
   datePreset: string;
@@ -148,9 +152,11 @@ function getFilterStateFromLocation(): FilterState {
   const params = new URLSearchParams(window.location.search);
   const rawCategoryId = params.get('categoryId') || '';
   const rawTagId = params.get('tagId') || '';
+  const rawCityId = params.get('cityId') || '';
 
   return {
     query: params.get('query') || '',
+    cityId: isUuid(rawCityId) ? rawCityId : '',
     categoryId: isUuid(rawCategoryId) ? rawCategoryId : '',
     tagId: isUuid(rawTagId) ? rawTagId : '',
     datePreset: params.get('datePreset') || '',
@@ -179,7 +185,13 @@ function getDateRangeFromPreset(preset: string): { dateFrom?: string; dateTo?: s
 
 export async function eventListPage({ navigate }: RouteContext): Promise<RouteView> {
   const filters = getFilterStateFromLocation();
-  const user = null;
+  const me = await getMeOrNull();
+  const user: (User & { displayName: string }) | null = me
+    ? {
+      ...me,
+      displayName: getHeaderUserDisplayName(me),
+    }
+    : null;
 
   let catalogData = getFallbackCatalogData();
 
@@ -188,6 +200,7 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
     const [eventsResult, categoriesResult, tagsResult] = await Promise.allSettled([
       getEvents({
         query: filters.query,
+        cityId: filters.cityId,
         categoryId: filters.categoryId,
         tagId: filters.tagId,
         ...dateRange,
@@ -272,6 +285,7 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
     html,
     mount(root) {
       const headerSearchForm = root.querySelector('[data-role="header-search-form"]');
+      const detachCityPicker = attachHeaderCityPicker(root, { navigate });
       const getCurrentQuery = () => String(new URLSearchParams(window.location.search).get('query') || '').trim();
 
       if (headerSearchForm instanceof HTMLFormElement) {
@@ -289,10 +303,19 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
           const tagId = String(formData.get('tagId') || '').trim();
           const datePreset = String(formData.get('datePreset') || '').trim();
           const sort = String(formData.get('sort') || '').trim();
+          const currentParams = new URLSearchParams(window.location.search);
+          const currentCityId = String(currentParams.get('cityId') || '').trim();
+          const currentCityName = String(currentParams.get('city') || '').trim();
 
           const query = getCurrentQuery();
           if (query) {
             params.set('query', query);
+          }
+          if (currentCityId && isUuid(currentCityId)) {
+            params.set('cityId', currentCityId);
+          }
+          if (currentCityName) {
+            params.set('city', currentCityName);
           }
           if (categoryId && isUuid(categoryId)) {
             params.set('categoryId', categoryId);
@@ -348,6 +371,7 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
       }
 
       return () => {
+        detachCityPicker();
         detachEventListFilters();
         detachHeaderSuggestions();
 

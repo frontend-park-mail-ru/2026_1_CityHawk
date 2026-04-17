@@ -7,8 +7,11 @@ import '../../modules/profile/profile-form.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { showToast } from '../../app/ui/toast.js';
-import { isValidEmail } from '../../modules/auth/shared/validators.js';
-import type { UpdateProfilePayload } from '../../types/api.js';
+import {
+  getEmailValidationError,
+  validatePersonName,
+} from '../../modules/auth/shared/validators.js';
+import type { ApiError, UpdateProfilePayload } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
 function getUserInitials(name?: string): string {
@@ -80,23 +83,43 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       const profileForm = root.querySelector('.profile__form');
       const avatarEditButton = root.querySelector('.profile__avatar-edit');
       const avatarInput = root.querySelector('[data-role="profile-avatar-input"]');
+      const firstNameInput = root.querySelector('#firstName');
+      const firstNameError = root.querySelector('.profile__name-error');
+      const lastNameInput = root.querySelector('#lastName');
+      const lastNameError = root.querySelector('.profile__surname-error');
       const emailInput = root.querySelector('#email');
       const emailError = root.querySelector('.profile__email-error');
 
-      const setEmailError = (message = ''): void => {
+      const setFieldError = (
+        input: Element | null,
+        errorNode: Element | null,
+        message = '',
+      ): void => {
         const text = String(message || '').trim();
 
-        if (emailError instanceof HTMLElement) {
-          emailError.textContent = text;
+        if (errorNode instanceof HTMLElement) {
+          errorNode.textContent = text;
         }
 
-        const emailField = emailInput instanceof HTMLInputElement
-          ? emailInput.closest('.profile__field--email')
+        const field = input instanceof HTMLInputElement
+          ? input.closest('.profile__field')
           : null;
 
-        if (emailField instanceof HTMLElement) {
-          emailField.classList.toggle('profile__field--error', Boolean(text));
+        if (field instanceof HTMLElement) {
+          field.classList.toggle('profile__field--error', Boolean(text));
         }
+      };
+
+      const setEmailError = (message = ''): void => {
+        setFieldError(emailInput, emailError, message);
+      };
+
+      const setFirstNameError = (message = ''): void => {
+        setFieldError(firstNameInput, firstNameError, message);
+      };
+
+      const setLastNameError = (message = ''): void => {
+        setFieldError(lastNameInput, lastNameError, message);
       };
 
       const handleLogout = async () => {
@@ -113,17 +136,29 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
 
         const formData = new FormData(profileForm);
         const email = String(formData.get('email') || '').trim();
+        const firstName = String(formData.get('firstName') || '').trim();
+        const lastName = String(formData.get('lastName') || '').trim();
 
-        if (!email || !isValidEmail(email)) {
-          setEmailError('Укажите корректный email в формате address@service.com');
+        const firstNameValidationError = validatePersonName(firstName, 'Имя');
+        const lastNameValidationError = validatePersonName(lastName, 'Фамилия');
+        setFirstNameError(firstNameValidationError || '');
+        setLastNameError(lastNameValidationError || '');
+
+        const emailValidationError = getEmailValidationError(email);
+        if (emailValidationError) {
+          setEmailError(emailValidationError);
           return;
         }
         setEmailError('');
 
+        if (firstNameValidationError || lastNameValidationError) {
+          return;
+        }
+
         const payload: UpdateProfilePayload = {
           email,
-          username: String(formData.get('firstName') || '').trim(),
-          userSurname: String(formData.get('lastName') || '').trim(),
+          username: firstName,
+          userSurname: lastName,
           birthday: String(formData.get('birthdate') || '').trim(),
           cityId: String(formData.get('city') || '').trim(),
         };
@@ -139,6 +174,22 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           await updateProfile(payload);
           navigate('/profile', { replace: true });
         } catch (error) {
+          const apiError = error as ApiError;
+          const details = apiError?.details || {};
+
+          if (details.username) {
+            setFirstNameError('Имя должно быть от 3 до 32 символов');
+          }
+          if (details.userSurname) {
+            setLastNameError('Фамилия должна быть от 3 до 32 символов');
+          }
+          if (details.email) {
+            setEmailError(getEmailValidationError(email) || 'Введите корректный email');
+          }
+          if (details.username || details.userSurname || details.email) {
+            return;
+          }
+
           const message = error instanceof Error ? error.message : 'Не удалось обновить профиль';
           if (String(message).toLowerCase().includes('email')) {
             setEmailError(message);
@@ -155,9 +206,25 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
 
         const email = emailInput.value.trim();
 
-        if (!email || isValidEmail(email)) {
-          setEmailError('');
+        setEmailError(getEmailValidationError(email) || '');
+      };
+
+      const handleFirstNameInput = (): void => {
+        if (!(firstNameInput instanceof HTMLInputElement)) {
+          return;
         }
+
+        const message = validatePersonName(firstNameInput.value, 'Имя');
+        setFirstNameError(message || '');
+      };
+
+      const handleLastNameInput = (): void => {
+        if (!(lastNameInput instanceof HTMLInputElement)) {
+          return;
+        }
+
+        const message = validatePersonName(lastNameInput.value, 'Фамилия');
+        setLastNameError(message || '');
       };
 
       const handleAvatarClick = (): void => {
@@ -207,6 +274,12 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       if (emailInput instanceof HTMLInputElement) {
         emailInput.addEventListener('input', handleEmailInput);
       }
+      if (firstNameInput instanceof HTMLInputElement) {
+        firstNameInput.addEventListener('input', handleFirstNameInput);
+      }
+      if (lastNameInput instanceof HTMLInputElement) {
+        lastNameInput.addEventListener('input', handleLastNameInput);
+      }
 
       return () => {
         if (logoutButton instanceof HTMLElement) {
@@ -223,6 +296,12 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         }
         if (emailInput instanceof HTMLInputElement) {
           emailInput.removeEventListener('input', handleEmailInput);
+        }
+        if (firstNameInput instanceof HTMLInputElement) {
+          firstNameInput.removeEventListener('input', handleFirstNameInput);
+        }
+        if (lastNameInput instanceof HTMLInputElement) {
+          lastNameInput.removeEventListener('input', handleLastNameInput);
         }
       };
     },
