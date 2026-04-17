@@ -2,6 +2,7 @@ import { renderTemplate } from '../../app/templates/renderer.js';
 import { attachEventForm } from './event-form.js';
 import type { EventFormSubmitPayload } from './event-form.js';
 import type { User } from '../../types/api.js';
+import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
 
 type HeaderSearchState = {
   query?: string;
@@ -35,15 +36,7 @@ export function attachEventEditorScreen(
 ): () => void {
   const headerSearchForm = root.querySelector('[data-role="header-search-form"]');
 
-  const handleHeaderSearchSubmit = (event: SubmitEvent) => {
-    event.preventDefault();
-
-    if (!(headerSearchForm instanceof HTMLFormElement)) {
-      return;
-    }
-
-    const formData = new FormData(headerSearchForm);
-    const query = String(formData.get('query') || '').trim();
+  const navigateByHeaderQuery = (query: string) => {
     const params = new URLSearchParams();
 
     if (query) {
@@ -54,8 +47,26 @@ export function attachEventEditorScreen(
     options.navigate?.(`/events${suffix}`);
   };
 
+  const handleHeaderSearchSubmit = (event: SubmitEvent) => {
+    event.preventDefault();
+
+    if (!(headerSearchForm instanceof HTMLFormElement)) {
+      return;
+    }
+
+    const formData = new FormData(headerSearchForm);
+    const query = String(formData.get('query') || '').trim();
+    navigateByHeaderQuery(query);
+  };
+
+  let detachHeaderSuggestions = () => {};
   if (headerSearchForm instanceof HTMLFormElement) {
     headerSearchForm.addEventListener('submit', handleHeaderSearchSubmit);
+    detachHeaderSuggestions = attachHeaderSearchSuggestions(headerSearchForm, {
+      onPick(query) {
+        navigateByHeaderQuery(query);
+      },
+    });
   }
 
   const detachEventForm = attachEventForm(root, {
@@ -64,6 +75,8 @@ export function attachEventEditorScreen(
   });
 
   return () => {
+    detachHeaderSuggestions();
+
     if (headerSearchForm instanceof HTMLFormElement) {
       headerSearchForm.removeEventListener('submit', handleHeaderSearchSubmit);
     }

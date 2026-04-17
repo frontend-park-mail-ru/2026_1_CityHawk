@@ -1,13 +1,10 @@
 import { request } from './client.js';
-import type { Category, EventCard, Tag } from '../types/api.js';
 
 export interface SearchResultsResponse {
-  events?: EventCard[];
-  categories?: Category[];
-  tags?: Tag[];
+  items: string[];
 }
 
-export async function searchAll(query: string): Promise<SearchResultsResponse> {
-  const params = new URLSearchParams({ query });
+export async function searchAll(query: string, limit = 5): Promise<SearchResultsResponse> {
+  const params = new URLSearchParams({ query, limit: String(limit) });
   return request<SearchResultsResponse>(`/api/search?${params.toString()}`);
 }

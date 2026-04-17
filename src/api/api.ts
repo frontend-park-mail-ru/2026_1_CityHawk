@@ -6,5 +6,5 @@ export {
 } from './auth.api.js';
 
 export { getHome } from './home.api.js';
-export { getPlaces } from './places.api.js';
+export { getPlaceSuggestions, resolvePlaceSuggestion } from './places.api.js';
 export { getMe, getMeOrNull } from './profile.api.js';

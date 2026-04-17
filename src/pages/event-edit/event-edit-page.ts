@@ -1,5 +1,7 @@
-import { getEventById, updateEvent } from '../../api/events.api.js';
+import { getEventById, updateEventMultipart } from '../../api/events.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
+import '../../modules/events/event-editor-screen.css';
+import '../../modules/events/event-form.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { renderEventForm } from '../../modules/events/event-form.js';
 import {
@@ -61,7 +63,7 @@ export async function eventEditPage({ navigate, params }: RouteContext): Promise
     };
   }
 
-  const { places, categories } = await loadEventFormReferenceData();
+  const { places, categories, tags } = await loadEventFormReferenceData();
 
   const eventForm = renderEventForm({
     mode: 'edit',
@@ -69,6 +71,7 @@ export async function eventEditPage({ navigate, params }: RouteContext): Promise
     deleteHref: `/events/${eventId}/delete`,
     places,
     categories,
+    tags,
     initialValues: mapEventDetailsToInitialValues(event),
   });
 
@@ -88,7 +91,7 @@ export async function eventEditPage({ navigate, params }: RouteContext): Promise
         async onSubmit(formPayload) {
           try {
             const payload = mapEventFormPayloadToEventPayload(formPayload);
-            await updateEvent(eventId, payload);
+            await updateEventMultipart(eventId, payload, formPayload.imageFiles);
             navigate(`/events/${eventId}`);
           } catch (error) {
             const apiError = error instanceof Error ? (error as ApiError) : undefined;

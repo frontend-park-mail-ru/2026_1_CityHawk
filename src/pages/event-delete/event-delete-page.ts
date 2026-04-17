@@ -1,5 +1,7 @@
 import { deleteEvent, getEventById } from '../../api/events.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
+import '../../modules/events/event-delete-card.css';
+import '../../modules/events/event-delete-screen.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { renderEventDeleteCard } from '../../modules/events/event-delete-card.js';
 import {

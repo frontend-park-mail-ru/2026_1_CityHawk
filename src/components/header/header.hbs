@@ -13,18 +13,26 @@
         </a>
 
         {{#if headerSearch}}
-          <form class="site-header__search" data-role="header-search-form">
-            <input
-              type="text"
-              name="query"
-              class="site-header__search-input"
-              placeholder="Найти события"
-              value="{{headerSearch.query}}"
-            />
-            <button class="site-header__search-button" type="submit" aria-label="Поиск">
-              <img src="/public/static/icons/search.svg" alt="" class="site-header__search-icon" aria-hidden="true" />
-            </button>
-          </form>
+          <div class="site-header__search-wrap" data-role="header-search-wrap">
+            <form class="site-header__search" data-role="header-search-form">
+              <input
+                type="text"
+                name="query"
+                class="site-header__search-input"
+                placeholder="Найти события"
+                value="{{headerSearch.query}}"
+                autocomplete="off"
+              />
+              <button class="site-header__search-button" type="submit" aria-label="Поиск">
+                <img src="/public/static/icons/search.svg" alt="" class="site-header__search-icon" aria-hidden="true" />
+              </button>
+            </form>
+            <div
+              class="site-header__search-suggestions"
+              data-role="header-search-suggestions"
+              hidden
+            ></div>
+          </div>
         {{/if}}
       </div>
 

@@ -19,15 +19,9 @@ export function createOfflineApiFallback(request: Request): Response {
     return createJsonResponse(JSON.stringify({ items: [] }));
   }
 
-  if (url.pathname === '/api/places') {
-    return createJsonResponse(JSON.stringify({ items: [] }));
-  }
-
   if (url.pathname === '/api/search') {
     return createJsonResponse(JSON.stringify({
-      events: [],
-      categories: [],
-      tags: [],
+      items: [],
     }));
   }
 

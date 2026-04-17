@@ -2,6 +2,8 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+const publicPath = path.resolve(__dirname, 'public');
+
 /** @type {import('webpack').Configuration} */
 module.exports = {
   entry: {
@@ -15,6 +17,7 @@ module.exports = {
         ? 'service-worker.js'
         : 'bundle.[contenthash].js'
     ),
+    chunkFilename: '[id].[contenthash].js',
     clean: true,
     publicPath: '/',
   },
@@ -65,13 +68,39 @@ module.exports = {
         {
           from: path.resolve(__dirname, 'public/static'),
           to: 'public/static',
+          globOptions: {
+            ignore: ['**/.DS_Store'],
+          },
         },
       ],
     }),
   ],
+  optimization: {
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+        },
+      },
+    },
+  },
+  performance: {
+    hints: 'warning',
+    maxAssetSize: 700 * 1024,
+    maxEntrypointSize: 700 * 1024,
+    assetFilter: (assetFilename) => (
+      !assetFilename.includes('public/static/img/')
+      && !assetFilename.endsWith('.DS_Store')
+      && !assetFilename.endsWith('.map')
+    ),
+  },
   devServer: {
     static: {
-      directory: path.resolve(__dirname, 'public'),
+      directory: publicPath,
     },
     historyApiFallback: true,
     port: 3000,

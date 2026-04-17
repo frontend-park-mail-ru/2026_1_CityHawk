@@ -5,6 +5,12 @@ import type {
   RouteRenderer,
   RouteView,
 } from '../../types/router.js';
+import {
+  getCurrentPathWithSearch,
+  isAuthPath,
+  normalizeReturnTo,
+  resolveReturnToFromSearch,
+} from './auth-return-to.js';
 
 interface RouterOptions {
   root: HTMLElement;
@@ -124,6 +130,18 @@ export class Router {
 
     event.preventDefault();
     const nextUrl = new URL(href, window.location.origin);
+
+    if (isAuthPath(nextUrl.pathname) && !nextUrl.searchParams.has('returnTo')) {
+      const currentIsAuth = isAuthPath(window.location.pathname);
+      const nextReturnTo = currentIsAuth
+        ? resolveReturnToFromSearch(window.location.search)
+        : normalizeReturnTo(getCurrentPathWithSearch());
+
+      if (nextReturnTo !== '/') {
+        nextUrl.searchParams.set('returnTo', nextReturnTo);
+      }
+    }
+
     this.navigate(`${nextUrl.pathname}${nextUrl.search}`);
   }
 
@@ -144,6 +162,7 @@ export class Router {
     const html = typeof view === 'string' ? view : view?.html || '';
 
     this.root.innerHTML = html;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     if (view && typeof view !== 'string' && typeof view.mount === 'function') {
       const cleanup = view.mount(this.root);

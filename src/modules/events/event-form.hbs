@@ -193,19 +193,28 @@
               data-role="event-create-anytime"
               {{#if initialValues.isAnytime}}checked{{/if}}
             />
-            <span class="event-create-form__checkbox-text">Без даты / в любое время</span>
+            <span class="event-create-form__checkbox-text">В любое время</span>
           </label>
           <span class="event-create-form__error" data-role="event-create-date-error" hidden></span>
         </div>
 
         <label class="event-create-form__field">
           <span class="event-create-form__label">Место</span>
-          <select class="event-create-form__input" name="placeId" data-role="event-create-place">
-            <option value="">Выбери место</option>
+          <input
+            type="text"
+            class="event-create-form__input"
+            name="place"
+            data-role="event-create-place"
+            list="event-create-place-options"
+            placeholder="Начни вводить место"
+            value="{{initialValues.placeQuery}}"
+          />
+          <datalist id="event-create-place-options" data-role="event-create-place-options">
             {{#each places}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+              <option value="{{this.label}}" data-id="{{this.value}}"></option>
             {{/each}}
-          </select>
+          </datalist>
+          <span class="event-create-form__hint" data-role="event-create-place-hint" hidden></span>
           <span class="event-create-form__error" data-role="event-create-place-error" hidden></span>
         </label>
       </div>
@@ -242,24 +251,46 @@
   <div class="event-create-form__grid">
     <label class="event-create-form__field">
       <span class="event-create-form__label">Категория</span>
-      <select class="event-create-form__input" name="category" data-role="event-create-category">
-        <option value="">Выбери категорию</option>
+      <input
+        type="text"
+        class="event-create-form__input"
+        name="category"
+        data-role="event-create-category"
+        list="event-create-category-options"
+        placeholder="Начни вводить категорию"
+        value="{{initialValues.categoryQuery}}"
+      />
+      <datalist id="event-create-category-options" data-role="event-create-category-options">
         {{#each categories}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          <option value="{{this.label}}" data-id="{{this.value}}"></option>
         {{/each}}
-      </select>
+      </datalist>
       <span class="event-create-form__error" data-role="event-create-category-error" hidden></span>
     </label>
 
     <label class="event-create-form__field">
       <span class="event-create-form__label">Теги</span>
-      <input
-        type="text"
-        class="event-create-form__input"
-        name="tags"
-        placeholder="Например, Art, Digital, Family"
-        value="{{initialValues.tags}}"
-      />
+      <div class="event-create-form__tags" data-role="event-create-tags-picker">
+        <input
+          type="text"
+          class="event-create-form__input event-create-form__tags-input"
+          data-role="event-create-tags-input"
+          list="event-create-tag-options"
+          placeholder="Выбери теги из списка"
+        />
+        <div class="event-create-form__tags-selected" data-role="event-create-tags-selected"></div>
+        <input
+          type="hidden"
+          name="tags"
+          data-role="event-create-tags-hidden"
+          value="{{initialValues.tags}}"
+        />
+      </div>
+      <datalist id="event-create-tag-options" data-role="event-create-tag-options">
+        {{#each tags}}
+          <option value="{{this.label}}" data-id="{{this.value}}"></option>
+        {{/each}}
+      </datalist>
     </label>
 
     <label class="event-create-form__field event-create-form__field--full">

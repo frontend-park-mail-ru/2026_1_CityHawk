@@ -1,6 +1,7 @@
 
 import { register } from '../../../api/auth.api.js';
 import { renderTemplate } from '../../../app/templates/renderer.js';
+import type { ApiError } from '../../../types/api.js';
 import { attachPasswordToggles } from '../shared/password-toggle.js';
 import {
   getErrorMessageElement,
@@ -44,11 +45,7 @@ export function attachRegisterForm(root: ParentNode, options: RegisterFormOption
   }
 
   if (state.step === 2) {
-    detachStep = setupStep2(root, state, options.rerender);
-  }
-
-  if (state.step === 3) {
-    detachStep = setupStep3(root, options);
+    detachStep = setupStep2(root, state, options.rerender, options.onFinish);
   }
 
   return () => {
@@ -60,10 +57,9 @@ export function attachRegisterForm(root: ParentNode, options: RegisterFormOption
 
 function getStepTemplate(step: number): string {
   switch (step) {
-    case 1: return 'register-form-step1';
-    case 2: return 'register-form-step2';
-    case 3: return 'register-form-step3';
-    default: return 'register-form-step1';
+    case 1: return 'register-step1';
+    case 2: return 'register-step2';
+    default: return 'register-step1';
   }
 }
 
@@ -175,11 +171,16 @@ function setupStep1(root: ParentNode, state: RegisterState, rerender?: () => voi
   };
 }
 
-function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => void): () => void {
+function setupStep2(
+  root: ParentNode,
+  state: RegisterState,
+  rerender?: () => void,
+  onFinish?: () => void,
+): () => void {
   const emailInput = root.querySelector('#email');
   const passwordInput = root.querySelector('#password');
   const confirmInput = root.querySelector('#password-confirm');
-  const nextBtn = root.querySelector('.login__next');
+  const nextBtn = root.querySelector('[data-role="register-finish"]') || root.querySelector('.login__next');
   const prevBtn = root.querySelector('.login__prev');
 
   if (!(emailInput instanceof HTMLInputElement)
@@ -325,13 +326,30 @@ function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => voi
         userSurname: state.surname || '',
         password: state.password,
       });
-
-      state.step = 3;
-      rerender?.();
-    } catch {
+    } catch (error) {
       const wrapper = safeEmailInput.closest('.login__field-error-wrapper');
-      showFieldMessage(wrapper, 'Пользователь уже существует', 'var(--color-mid)', true);
+      const apiError = error as ApiError | undefined;
+
+      if (apiError?.status === 409) {
+        showFieldMessage(wrapper, 'Пользователь с таким email уже существует', 'var(--color-mid)', true);
+        return;
+      }
+
+      if (apiError?.status === 400) {
+        showFieldMessage(wrapper, apiError.message || 'Проверьте корректность введенных данных', 'var(--color-mid)', true);
+        return;
+      }
+
+      if (apiError?.status && apiError.status >= 500) {
+        showFieldMessage(wrapper, 'Сервер временно недоступен. Попробуйте позже', 'var(--color-mid)', true);
+        return;
+      }
+
+      showFieldMessage(wrapper, 'Не удалось завершить регистрацию. Проверьте соединение и попробуйте снова', 'var(--color-mid)', true);
+      return;
     }
+
+    onFinish?.();
   };
 
   safeEmailInput.addEventListener('input', validateEmail);
@@ -354,24 +372,5 @@ function setupStep2(root: ParentNode, state: RegisterState, rerender?: () => voi
     safeConfirmInput.removeEventListener('blur', handleConfirmBlur);
     safePrevBtn.removeEventListener('click', handlePrevClick);
     safeNextBtn.removeEventListener('click', handleNextClick);
-  };
-}
-
-function setupStep3(root: ParentNode, options: RegisterFormOptions): () => void {
-  const finishBtn = root.querySelector('.js-go-home');
-
-  if (!(finishBtn instanceof HTMLButtonElement)) {
-    return () => {};
-  }
-
-  const handleFinishClick = (event: Event): void => {
-    event.preventDefault();
-    options.onFinish?.();
-  };
-
-  finishBtn.addEventListener('click', handleFinishClick);
-
-  return () => {
-    finishBtn.removeEventListener('click', handleFinishClick);
   };
 }

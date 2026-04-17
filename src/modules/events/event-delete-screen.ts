@@ -1,5 +1,6 @@
 import { renderTemplate } from '../../app/templates/renderer.js';
 import type { User } from '../../types/api.js';
+import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
 
 type HeaderSearchState = {
   query?: string;
@@ -31,15 +32,7 @@ export function attachEventDeleteScreen(
   const headerSearchForm = root.querySelector('[data-role="header-search-form"]');
   const confirmButton = root.querySelector('[data-action="event-delete-confirm"]');
 
-  const handleHeaderSearchSubmit = (event: SubmitEvent) => {
-    event.preventDefault();
-
-    if (!(headerSearchForm instanceof HTMLFormElement)) {
-      return;
-    }
-
-    const formData = new FormData(headerSearchForm);
-    const query = String(formData.get('query') || '').trim();
+  const navigateByHeaderQuery = (query: string) => {
     const params = new URLSearchParams();
 
     if (query) {
@@ -50,12 +43,30 @@ export function attachEventDeleteScreen(
     options.navigate?.(`/events${suffix}`);
   };
 
+  const handleHeaderSearchSubmit = (event: SubmitEvent) => {
+    event.preventDefault();
+
+    if (!(headerSearchForm instanceof HTMLFormElement)) {
+      return;
+    }
+
+    const formData = new FormData(headerSearchForm);
+    const query = String(formData.get('query') || '').trim();
+    navigateByHeaderQuery(query);
+  };
+
   const handleDeleteConfirm = async (): Promise<void> => {
     await options.onConfirm?.();
   };
 
+  let detachHeaderSuggestions = () => {};
   if (headerSearchForm instanceof HTMLFormElement) {
     headerSearchForm.addEventListener('submit', handleHeaderSearchSubmit);
+    detachHeaderSuggestions = attachHeaderSearchSuggestions(headerSearchForm, {
+      onPick(query) {
+        navigateByHeaderQuery(query);
+      },
+    });
   }
 
   if (confirmButton instanceof HTMLButtonElement) {
@@ -63,6 +74,8 @@ export function attachEventDeleteScreen(
   }
 
   return () => {
+    detachHeaderSuggestions();
+
     if (headerSearchForm instanceof HTMLFormElement) {
       headerSearchForm.removeEventListener('submit', handleHeaderSearchSubmit);
     }

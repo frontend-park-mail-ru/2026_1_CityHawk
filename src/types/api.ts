@@ -106,8 +106,16 @@ export interface CategoryListResponse {
   items: Category[];
 }
 
+export interface TagListResponse {
+  items: Tag[];
+}
+
 export interface PlaceListResponse {
   items: Place[];
+}
+
+export interface CityListResponse {
+  items: City[];
 }
 
 export interface EventIdResponse {
@@ -128,7 +136,8 @@ export interface EventsQueryParams {
 }
 
 export interface EventSessionPayload {
-  placeId: string;
+  placeId?: string;
+  placeName?: string;
   startAt: string;
   endAt: string;
   price: number;
@@ -170,6 +179,15 @@ export interface RegisterPayload {
   password: string;
   birthday?: string;
   cityId?: string;
+}
+
+export interface UpdateProfilePayload {
+  email?: string;
+  username?: string;
+  userSurname?: string;
+  birthday?: string;
+  cityId?: string;
+  avatarUrl?: string;
 }
 
 export interface ApiError extends Error {

@@ -6,7 +6,7 @@
 }
 
 .mood-section {
-    padding: 24px 0 56px;
+    padding: 48px 0 80px;
     background: var(--color-blank);
 }
 
@@ -15,7 +15,13 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 16px;
-    margin-bottom: 42px;
+    margin-bottom: 12px;
+}
+
+.mood-section__text {
+    margin: 0 0 36px;
+    color: var(--home-color-text-muted);
+    font-size: var(--home-text-5);
 }
 
 .mood-section__title {
@@ -47,14 +53,26 @@
 
 .mood-section__layout {
     display: grid;
-    grid-template-columns: 1.03fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
+    align-items: stretch;
 }
 
-.mood-section__column {
+.mood-section__left {
+    min-width: 0;
+}
+
+.mood-section__left-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
+}
+
+.mood-section__right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
 }
 
 .mood-card {
@@ -81,6 +99,12 @@
     height: 500px;
 }
 
+.mood-card--right {
+    height: auto;
+    min-height: 0;
+    flex: 1 1 0;
+}
+
 .mood-card__image {
     width: 100%;
     height: 100%;
@@ -91,8 +115,7 @@
     position: absolute;
     left: 16px;
     bottom: 16px;
-    display: inline-flex;
-    align-items: center;
+    display: block;
     max-width: calc(100% - 32px);
     min-height: 38px;
     padding: 8px 16px;
@@ -129,7 +152,7 @@
     opacity: 1;
 }
 
-@media (prefers-color-scheme: dark) {
+@media all {
     .mood-card__tag {
         background: var(--home-color-surface-soft);
         color: var(--home-color-text);
@@ -165,8 +188,9 @@
         grid-template-columns: 1fr;
     }
 
-    .mood-card--tall {
-        height: 420px;
+    .mood-section__right {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -175,14 +199,15 @@
         padding: 0 var(--home-side-padding-mobile);
     }
 
-    .mood-section__column {
-        grid-template-columns: 1fr;
-    }
-
     .mood-section__head {
         align-items: flex-start;
         flex-direction: column;
         margin-bottom: 30px;
+    }
+
+    .mood-section__left-grid,
+    .mood-section__right {
+        grid-template-columns: 1fr;
     }
 
     .mood-card--wide {
@@ -191,7 +216,8 @@
 
     .mood-card--wide,
     .mood-card:not(.mood-card--wide):not(.mood-card--tall),
-    .mood-card--tall {
+    .mood-card--tall,
+    .mood-card--right {
         height: 240px;
     }
 

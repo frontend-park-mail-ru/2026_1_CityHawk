@@ -1047,7 +1047,7 @@ RETURN BUTTON
 /* ========================================
 DARK THEME ADDITIONS
 ======================================== */
-@media (prefers-color-scheme: dark) {
+@media all {
 
     .login {
         background-color: var(--color-base);

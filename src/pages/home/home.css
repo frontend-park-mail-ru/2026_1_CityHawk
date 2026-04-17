@@ -41,7 +41,7 @@ input {
         url("/public/static/img/hero.jpeg") center / cover no-repeat;
 }
 
-@media (prefers-color-scheme: dark) {
+@media all {
     .home-page__hero {
         background:
             linear-gradient(

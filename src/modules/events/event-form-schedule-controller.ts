@@ -32,6 +32,16 @@ export function createEventFormScheduleController(elements: EventFormElements): 
 
     const shouldDisableSchedule = elements.anytimeInput.checked;
 
+    if (shouldDisableSchedule) {
+      elements.schedulePanels.forEach((panel) => {
+        if (panel instanceof HTMLElement) {
+          panel.hidden = true;
+        }
+      });
+    } else {
+      syncScheduleMode();
+    }
+
     if (elements.dateInput instanceof HTMLInputElement) {
       elements.dateInput.disabled = shouldDisableSchedule;
     }

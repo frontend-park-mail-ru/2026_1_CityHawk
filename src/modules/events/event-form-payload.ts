@@ -206,7 +206,7 @@ function mapSessionsToInitialSchedule(sessions?: EventSession[]): EventFormSched
       multipleEndTimes: [],
       periodStart: '',
       periodEnd: '',
-      isAnytime: false,
+      isAnytime: true,
     };
   }
 
@@ -272,17 +272,12 @@ function mapSessionsToInitialSchedule(sessions?: EventSession[]): EventFormSched
 }
 
 function buildSessions(formPayload: EventFormValues): EventSessionPayload[] {
-  if (formPayload.isAnytime) {
-    const sessionDates = buildSingleSessionDates('', true);
+  const placeValue = String(formPayload.placeId || '').trim();
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(placeValue);
+  const placePayload = isUuid ? { placeId: placeValue } : { placeName: placeValue };
 
-    return [
-      {
-        placeId: formPayload.placeId,
-        startAt: sessionDates.startAt,
-        endAt: sessionDates.endAt,
-        price: 0,
-      },
-    ];
+  if (formPayload.isAnytime) {
+    return [];
   }
 
   if (formPayload.scheduleMode === 'multiple') {
@@ -295,7 +290,7 @@ function buildSessions(formPayload: EventFormValues): EventSessionPayload[] {
       );
 
       return {
-        placeId: formPayload.placeId,
+        ...placePayload,
         startAt: sessionDates.startAt,
         endAt: sessionDates.endAt,
         price: 0,
@@ -308,7 +303,7 @@ function buildSessions(formPayload: EventFormValues): EventSessionPayload[] {
 
     return [
       {
-        placeId: formPayload.placeId,
+        ...placePayload,
         startAt: sessionDates.startAt,
         endAt: sessionDates.endAt,
         price: 0,
@@ -325,7 +320,7 @@ function buildSessions(formPayload: EventFormValues): EventSessionPayload[] {
 
   return [
     {
-      placeId: formPayload.placeId,
+      ...placePayload,
       startAt: singleSessionDates.startAt,
       endAt: singleSessionDates.endAt,
       price: 0,
@@ -381,7 +376,7 @@ export function mapEventDetailsToInitialValues(rawEvent: EventDetailsLike = {}):
     placeId: String(firstSession?.placeId || firstSession?.place?.id || '').trim(),
     category: String(categories[0]?.id || categoryIds[0] || '').trim(),
     tags: tags
-      .map((tag) => (typeof tag === 'string' ? tag : tag?.name || tag?.id || ''))
+      .map((tag) => (typeof tag === 'string' ? tag : tag?.id || tag?.name || ''))
       .filter((tag): tag is string => Boolean(tag)),
     description: String(rawEvent?.fullDescription || '').trim(),
     locationDescription: String(rawEvent?.shortDescription || '').trim(),

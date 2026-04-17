@@ -14,9 +14,9 @@ export interface EventFormElements {
   periodStartInput: HTMLInputElement | null;
   periodEndInput: HTMLInputElement | null;
   anytimeInput: HTMLInputElement | null;
-  placeInput: HTMLSelectElement | null;
+  placeInput: HTMLInputElement | null;
   placeError: HTMLElement | null;
-  categoryInput: HTMLSelectElement | null;
+  categoryInput: HTMLInputElement | null;
   categoryError: HTMLElement | null;
   descriptionInput: HTMLTextAreaElement | null;
   descriptionError: HTMLElement | null;
@@ -47,9 +47,9 @@ export function getEventFormElements(root: ParentNode): EventFormElements {
     periodStartInput: root.querySelector<HTMLInputElement>('[data-role="event-create-period-start"]'),
     periodEndInput: root.querySelector<HTMLInputElement>('[data-role="event-create-period-end"]'),
     anytimeInput: root.querySelector<HTMLInputElement>('[data-role="event-create-anytime"]'),
-    placeInput: root.querySelector<HTMLSelectElement>('[data-role="event-create-place"]'),
+    placeInput: root.querySelector<HTMLInputElement>('[data-role="event-create-place"]'),
     placeError: root.querySelector<HTMLElement>('[data-role="event-create-place-error"]'),
-    categoryInput: root.querySelector<HTMLSelectElement>('[data-role="event-create-category"]'),
+    categoryInput: root.querySelector<HTMLInputElement>('[data-role="event-create-category"]'),
     categoryError: root.querySelector<HTMLElement>('[data-role="event-create-category-error"]'),
     descriptionInput: root.querySelector<HTMLTextAreaElement>('[data-role="event-create-description"]'),
     descriptionError: root.querySelector<HTMLElement>('[data-role="event-create-description-error"]'),

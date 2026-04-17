@@ -1,5 +1,7 @@
-import { createEvent } from '../../api/events.api.js';
+import { createEventMultipart } from '../../api/events.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
+import '../../modules/events/event-editor-screen.css';
+import '../../modules/events/event-form.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { renderEventForm } from '../../modules/events/event-form.js';
 import {
@@ -28,12 +30,13 @@ export async function eventCreatePage({ navigate }: RouteContext): Promise<Route
     }
     : null;
 
-  const { places, categories } = await loadEventFormReferenceData();
+  const { places, categories, tags } = await loadEventFormReferenceData();
 
   const eventForm = renderEventForm({
     mode: 'create',
     places,
     categories,
+    tags,
   });
 
   const html = renderEventEditorScreen({
@@ -52,7 +55,7 @@ export async function eventCreatePage({ navigate }: RouteContext): Promise<Route
         async onSubmit(formPayload) {
           try {
             const payload = mapEventFormPayloadToEventPayload(formPayload);
-            const createdEvent = await createEvent(payload);
+            const createdEvent = await createEventMultipart(payload, formPayload.imageFiles);
             const nextEventId = createdEvent?.id;
 
             if (nextEventId) {

@@ -168,6 +168,10 @@
     transform: scale(0.98);
 }
 
+.profile__field--error .form-field__input {
+    border-color: var(--color-mid);
+}
+
 @media (max-width: 900px) {
     .profile__content {
         padding: 72px 24px 40px;

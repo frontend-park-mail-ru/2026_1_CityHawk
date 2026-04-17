@@ -13,49 +13,60 @@ export interface ImageFieldController {
   getPreviewUrl: () => string;
 }
 
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+function normalizeHttpUrl(rawUrl: string): string {
+  const value = String(rawUrl || '').trim();
 
-    reader.addEventListener('load', () => {
-      if (typeof reader.result === 'string' && reader.result) {
-        resolve(reader.result);
-        return;
-      }
+  if (!value) {
+    return '';
+  }
 
-      reject(new Error(`Не удалось прочитать файл ${file.name}`));
-    });
+  try {
+    const resolved = new URL(value, window.location.origin);
+    const protocol = resolved.protocol.toLowerCase();
 
-    reader.addEventListener('error', () => {
-      reject(new Error(`Не удалось прочитать файл ${file.name}`));
-    });
+    if (protocol !== 'http:' && protocol !== 'https:') {
+      return '';
+    }
 
-    reader.readAsDataURL(file);
-  });
+    return resolved.toString();
+  } catch {
+    return '';
+  }
 }
 
-export async function buildImageUrls(
+export interface EventFormImageData {
+  imageUrls: string[];
+  imageFiles: File[];
+}
+
+export async function buildImageData(
   posterController: ImageFieldController,
   galleryControllers: ImageFieldController[],
-): Promise<string[]> {
+): Promise<EventFormImageData> {
   const posterFile = posterController.getFile();
-  const uploadedPoster = posterFile ? [await fileToDataUrl(posterFile)] : [];
   const galleryFiles = galleryControllers
     .map((controller) => controller.getFile())
     .filter((file): file is File => Boolean(file));
-  const uploadedGallery = await Promise.all(
-    galleryFiles.map((file) => fileToDataUrl(file)),
-  );
+  const imageFiles = [
+    ...(posterFile ? [posterFile] : []),
+    ...galleryFiles,
+  ];
+
   const fallbackPreviewUrls = [
     posterController.getPreviewUrl(),
     ...galleryControllers.map((controller) => controller.getPreviewUrl()),
-  ].filter((url) => typeof url === 'string' && url.trim() && !url.startsWith('blob:'));
+  ]
+    .filter((url) => typeof url === 'string' && url.trim())
+    .map((url) => normalizeHttpUrl(String(url)))
+    .filter(Boolean)
+    .filter((url) => !url.startsWith('blob:'))
+    .filter((url) => !url.startsWith('data:'))
+    .filter((url) => url.length <= 2048);
 
-  const imageUrls = uploadedPoster.length > 0 || uploadedGallery.length > 0
-    ? [...uploadedPoster, ...uploadedGallery]
-    : fallbackPreviewUrls;
-
-  return Array.from(new Set(imageUrls)).slice(0, 5);
+  return {
+    imageUrls: Array.from(new Set(fallbackPreviewUrls)).slice(0, 5),
+    imageFiles,
+  };
 }
 
 export function createImageFieldController({
