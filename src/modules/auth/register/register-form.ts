@@ -10,7 +10,11 @@ import {
   showFieldError,
   showFieldMessage,
 } from '../shared/field-messages.js';
-import { checkPasswordStrength, isValidEmail } from '../shared/validators.js';
+import {
+  checkPasswordStrength,
+  getEmailValidationError,
+  validatePersonName,
+} from '../shared/validators.js';
 import { attachOAuthButtons } from '../oauth.js';
 
 interface RegisterState {
@@ -99,56 +103,61 @@ function setupStep1(root: ParentNode, state: RegisterState, rerender?: () => voi
 
   let nameError = false;
   let surnameError = false;
+  let submitAttempted = false;
 
   nameInput.value = state.name || '';
   surnameInput.value = state.surname || '';
 
-  const handleNameInput = function handleNameInput(this: HTMLInputElement): void {
-    if (!nameError) return;
-    const wrapper = this.closest('.login__field-error-wrapper');
-
-    if (!this.value.trim()) {
-      showFieldError(wrapper, 'Имя не должно быть пустым');
-    } else {
-      hideFieldError(wrapper);
-      nameError = false;
+  const validateName = (): void => {
+    if (!submitAttempted && !nameError) {
+      return;
     }
+
+    const wrapper = nameInput.closest('.login__field-error-wrapper');
+    const message = validatePersonName(nameInput.value, 'Имя');
+
+    if (message) {
+      showFieldError(wrapper, message);
+      nameError = true;
+      return;
+    }
+
+    hideFieldError(wrapper);
+    nameError = false;
   };
 
-  const handleSurnameInput = function handleSurnameInput(this: HTMLInputElement): void {
-    if (!surnameError) return;
-    const wrapper = this.closest('.login__field-error-wrapper');
-
-    if (!this.value.trim()) {
-      showFieldError(wrapper, 'Фамилия не должна быть пустой');
-    } else {
-      hideFieldError(wrapper);
-      surnameError = false;
+  const validateSurname = (): void => {
+    if (!submitAttempted && !surnameError) {
+      return;
     }
+
+    const wrapper = surnameInput.closest('.login__field-error-wrapper');
+    const message = validatePersonName(surnameInput.value, 'Фамилия');
+
+    if (message) {
+      showFieldError(wrapper, message);
+      surnameError = true;
+      return;
+    }
+
+    hideFieldError(wrapper);
+    surnameError = false;
+  };
+
+  const handleNameInput = (): void => {
+    validateName();
+  };
+
+  const handleSurnameInput = (): void => {
+    validateSurname();
   };
 
   const handleSubmitClick = (event: Event): void => {
     event.preventDefault();
 
-    const nameWrapper = nameInput.closest('.login__field-error-wrapper');
-    const surnameWrapper = surnameInput.closest('.login__field-error-wrapper');
-
-    nameError = false;
-    surnameError = false;
-
-    if (!nameInput.value.trim()) {
-      showFieldError(nameWrapper, 'Имя не должно быть пустым');
-      nameError = true;
-    } else {
-      hideFieldError(nameWrapper);
-    }
-
-    if (!surnameInput.value.trim()) {
-      showFieldError(surnameWrapper, 'Фамилия не должна быть пустой');
-      surnameError = true;
-    } else {
-      hideFieldError(surnameWrapper);
-    }
+    submitAttempted = true;
+    validateName();
+    validateSurname();
 
     if (nameError || surnameError) {
       return;
@@ -206,15 +215,13 @@ function setupStep2(
 
   function validateEmail(): void {
     const wrapper = safeEmailInput.closest('.login__field-error-wrapper');
-    const value = safeEmailInput.value.trim();
+    const value = safeEmailInput.value;
 
     if (!submitAttempted && !emailError) return;
 
-    if (!value) {
-      showFieldMessage(wrapper, 'Поле email не должно быть пустым!', 'var(--color-mid)', true);
-      emailError = true;
-    } else if (!isValidEmail(value)) {
-      showFieldMessage(wrapper, 'Введите email в формате address@service.com!', 'var(--color-mid)', true);
+    const validationError = getEmailValidationError(value);
+    if (validationError) {
+      showFieldMessage(wrapper, validationError, 'var(--color-mid)', true);
       emailError = true;
     } else {
       hideFieldMessage(wrapper);
@@ -336,6 +343,15 @@ function setupStep2(
       }
 
       if (apiError?.status === 400) {
+        if (apiError?.details?.email) {
+          showFieldMessage(
+            wrapper,
+            getEmailValidationError(safeEmailInput.value) || 'Укажите корректный email',
+            'var(--color-mid)',
+            true,
+          );
+          return;
+        }
         showFieldMessage(wrapper, apiError.message || 'Проверьте корректность введенных данных', 'var(--color-mid)', true);
         return;
       }

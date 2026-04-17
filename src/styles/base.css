@@ -27,12 +27,29 @@ input,
 textarea,
 select {
     font: inherit;
+    color: inherit;
     background: none;
     border: none;
     outline: none;  /* убираем стандартную обводку */
     appearance: none;
     -webkit-appearance: none;
+    -moz-appearance: none;
     border-radius: 0;
+}
+
+/* Доп. reset для select в разных браузерах */
+select {
+    text-indent: 0.01px;
+    text-overflow: '';
+}
+
+select::-ms-expand {
+    display: none;
+}
+
+option {
+    font: inherit;
+    color: inherit;
 }
 
 /* Убираем ТОЛЬКО обводку, ключ оставляем */

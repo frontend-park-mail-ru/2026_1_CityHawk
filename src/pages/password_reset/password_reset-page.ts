@@ -1,7 +1,7 @@
 import '../../modules/auth/auth.css';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { hideFieldError, showFieldError } from '../../modules/auth/shared/field-messages.js';
-import { isValidEmail } from '../../modules/auth/shared/validators.js';
+import { getEmailValidationError } from '../../modules/auth/shared/validators.js';
 import type { RouteView } from '../../types/router.js';
 
 interface PasswordResetState {
@@ -50,12 +50,10 @@ function setupStep1(
     }
 
     const wrapper = this.closest('.login__field-error-wrapper');
-    const value = this.value.trim();
+    const validationError = getEmailValidationError(this.value);
 
-    if (!value) {
-      showFieldError(wrapper, 'Поле email не должно быть пустым!');
-    } else if (!isValidEmail(value)) {
-      showFieldError(wrapper, 'Введите email в формате address@service.com!');
+    if (validationError) {
+      showFieldError(wrapper, validationError);
     } else {
       hideFieldError(wrapper);
       emailError = false;
@@ -70,11 +68,9 @@ function setupStep1(
 
     emailError = false;
 
-    if (!value) {
-      showFieldError(wrapper, 'Поле email не должно быть пустым!');
-      emailError = true;
-    } else if (!isValidEmail(value)) {
-      showFieldError(wrapper, 'Введите email в формате address@service.com!');
+    const validationError = getEmailValidationError(value);
+    if (validationError) {
+      showFieldError(wrapper, validationError);
       emailError = true;
     } else {
       hideFieldError(wrapper);

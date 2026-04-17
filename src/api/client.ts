@@ -10,6 +10,7 @@ export interface RequestOptions extends Omit<RequestInit, 'body'> {
 
 interface ErrorResponseBody {
   error?: string;
+  details?: Record<string, string>;
 }
 
 function joinApiBase(path: string): string {
@@ -117,11 +118,15 @@ export async function request<T = RequestBody>(
 
   if (!response.ok) {
     let errorMessage = `HTTP ${response.status}`;
+    let errorDetails: Record<string, string> | undefined;
 
     try {
       const errorData = await response.json() as ErrorResponseBody;
       if (typeof errorData?.error === 'string' && errorData.error) {
         errorMessage = errorData.error;
+      }
+      if (errorData?.details && typeof errorData.details === 'object') {
+        errorDetails = errorData.details;
       }
     } catch {
       errorMessage = `HTTP ${response.status}`;
@@ -129,6 +134,9 @@ export async function request<T = RequestBody>(
 
     const error: ApiError = new Error(errorMessage);
     error.status = response.status;
+    if (errorDetails) {
+      error.details = errorDetails;
+    }
     throw error;
   }
 

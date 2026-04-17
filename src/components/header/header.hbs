@@ -7,10 +7,29 @@
       </a>
 
       <div class="site-header__main">
-        <a href="#" class="site-header__link site-header__link--with-icon">
-          <img src="/public/static/icons/location.svg" alt="" class="site-header__link-icon" aria-hidden="true" />
-          <span>Москва</span>
-        </a>
+        <div class="site-header__city" data-role="header-city">
+          <button
+            type="button"
+            class="site-header__link site-header__link--with-icon site-header__link--button site-header__city-trigger"
+            data-role="header-city-trigger"
+            aria-label="Выбрать город"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+          >
+            <img src="/public/static/icons/location.svg" alt="" class="site-header__link-icon" aria-hidden="true" />
+            <span data-role="header-city-label">Москва</span>
+          </button>
+          <div class="site-header__city-menu" data-role="header-city-menu" hidden>
+            <button
+              type="button"
+              class="site-header__city-option"
+              data-role="header-city-option"
+              data-city-id=""
+              data-city-name=""
+            >Все города</button>
+            <div data-role="header-city-options"></div>
+          </div>
+        </div>
 
         {{#if headerSearch}}
           <div class="site-header__search-wrap" data-role="header-search-wrap">

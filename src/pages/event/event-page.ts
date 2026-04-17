@@ -8,6 +8,7 @@ import '../../modules/events/event-location.css';
 import '../../modules/events/event-recommendations.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
+import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { attachEventDescription, renderEventDescription } from '../../modules/events/event-description.js';
 import { renderEventGallery } from '../../modules/events/event-gallery.js';
@@ -329,6 +330,10 @@ export async function eventPage({ navigate, params = {} }: RouteContext): Promis
     html,
     mount(root) {
       const headerSearchForm = root.querySelector('[data-role="header-search-form"]');
+      const detachCityPicker = attachHeaderCityPicker(root, {
+        navigate,
+        targetPath: '/events',
+      });
 
       attachEventDescription(root);
       const detachEventLocation = attachEventLocation(root);
@@ -367,6 +372,7 @@ export async function eventPage({ navigate, params = {} }: RouteContext): Promis
       }
 
       return () => {
+        detachCityPicker();
         detachEventLocation();
         detachHeaderSuggestions();
 

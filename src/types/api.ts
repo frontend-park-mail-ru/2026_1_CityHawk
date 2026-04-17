@@ -192,6 +192,7 @@ export interface UpdateProfilePayload {
 
 export interface ApiError extends Error {
   status?: number;
+  details?: Record<string, string>;
 }
 
 export interface AuthUser {
