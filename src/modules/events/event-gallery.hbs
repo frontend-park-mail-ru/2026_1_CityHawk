@@ -1,0 +1,11 @@
+<section class="event-gallery {{galleryClass}}">
+  <div class="event-gallery__container">
+    <div class="event-gallery__grid">
+      {{#each images}}
+        <article class="event-gallery__card">
+          <img src="{{imageUrl}}" alt="{{alt}}" class="event-gallery__image" />
+        </article>
+      {{/each}}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,71 @@
+<section class="profile__content">
+    <div class="profile__wrapper">
+        <h1 class="profile__title">Настройки профиля</h1>
+
+        <form class="profile__form" method="post" action="/profile">
+            <div class="profile__grid profile__grid--two">
+                {{> form-input
+                    fieldClass="profile__field"
+                    label="Имя"
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    placeholder="Имя"
+                    value=user.firstName
+                    errorClass="form-field__error profile__name-error"
+                }}
+
+                {{> form-input
+                    fieldClass="profile__field"
+                    label="Фамилия"
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    placeholder="Фамилия"
+                    value=user.lastName
+                    errorClass="form-field__error profile__surname-error"
+                }}
+            </div>
+
+            {{> form-input
+                fieldClass="profile__field profile__field--email"
+                label="Email"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="address@service.com"
+                value=user.email
+                inputClass="profile__email-input"
+                errorClass="form-field__error profile__email-error"
+            }}
+
+            <div class="profile__grid profile__grid--two">
+                {{> form-input
+                    fieldClass="profile__field"
+                    label="Дата рождения"
+                    type="date"
+                    id="birthdate"
+                    name="birthdate"
+                    value=user.birthdate
+                }}
+
+                {{> form-select
+                    fieldClass="profile__field"
+                    label="Город"
+                    id="city"
+                    name="city"
+                    options=user.cityOptions
+                }}
+            </div>
+
+            <div class="profile__account-actions">
+                <button class="profile__logout-link" type="button">Выйти из аккаунта</button>
+            </div>
+
+            <div class="profile__actions">
+                <button class="profile__button profile__button--secondary" type="reset">Отменить</button>
+                <button class="profile__button profile__button--primary" type="submit">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</section>

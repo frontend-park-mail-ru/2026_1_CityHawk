@@ -1,0 +1,18 @@
+<section class="home-events">
+  <div class="home-events__container">
+    <section class="home-events__content">
+      <div class="home-events__head">
+        <h2 class="home-events__title">
+          Мероприятия, которые стоит посетить
+        </h2>
+        <a href="/events" class="home-events__link">показать ещё...</a>
+      </div>
+
+      <div class="home-events__grid">
+        {{#each cardsHtml}}
+          {{{this}}}
+        {{/each}}
+      </div>
+    </section>
+  </div>
+</section>

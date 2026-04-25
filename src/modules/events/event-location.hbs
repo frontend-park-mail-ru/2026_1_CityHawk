@@ -1,0 +1,20 @@
+<section class="event-location">
+  <div class="event-location__container">
+    <div class="event-location__grid">
+      <div class="event-location__info">
+        <h2 class="event-location__title">Как добраться?</h2>
+
+        <div class="event-location__text">
+          {{#each paragraphs}}
+            <p class="event-location__paragraph">{{this}}</p>
+          {{/each}}
+        </div>
+      </div>
+
+      <button type="button" class="event-location__map" data-role="event-location-map" aria-label="К началу страницы события">
+        <img src="{{mapImageUrl}}" alt="{{mapAlt}}" class="event-location__map-image" />
+        <span class="event-location__map-pin"></span>
+      </button>
+    </div>
+  </div>
+</section>

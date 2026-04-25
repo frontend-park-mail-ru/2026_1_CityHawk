@@ -1,0 +1,14 @@
+<section class="event-recommendations">
+  <div class="event-recommendations__container">
+    <div class="event-recommendations__head">
+      <h2 class="event-recommendations__title">Вам может понравиться</h2>
+      <a href="/" class="event-recommendations__link">показать ещё...</a>
+    </div>
+
+    <div class="event-recommendations__grid">
+      {{#each cardsHtml}}
+        {{{this}}}
+      {{/each}}
+    </div>
+  </div>
+</section>

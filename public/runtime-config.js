@@ -1,3 +1,3 @@
-window.__APP_CONFIG__ = {
-  API_BASE_URL: 'http://cityhawk.ru:8080'
+window.__APP_CONFIG__ = window.__APP_CONFIG__ || {
+  API_BASE_URL: 'http://localhost:8080',
 };

@@ -3,7 +3,7 @@ import globals from 'globals';
 
 export default [
   {
-    ignores: ['node_modules/**', 'public/static/**'],
+    ignores: ['dist/**', 'server-dist/**', 'node_modules/**', 'public/static/**'],
   },
   js.configs.recommended,
   {
@@ -17,7 +17,7 @@ export default [
     },
   },
   {
-    files: ['server/**/*.js'],
+    files: ['server/**/*.js', '*.config.js', 'webpack.config.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'script',

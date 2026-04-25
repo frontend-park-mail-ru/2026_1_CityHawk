@@ -3,18 +3,40 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "node ./server/index.js",
-    "dev": "node ./server/index.js",
+    "start": "node ./server-dist/index.js",
+    "dev": "webpack serve --config webpack.config.js --mode development",
+    "build": "webpack --config webpack.config.js --mode production && npm run build:server",
+    "build:server": "tsc -p tsconfig.server.json",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@types/multer": "^2.1.0",
     "express": "^5.1.0",
-    "morgan": "^1.10.1"
+    "morgan": "^1.10.1",
+    "multer": "^2.1.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
     "@eslint/js": "^9.22.0",
+    "@types/express": "^4.17.25",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^25.6.0",
+    "@types/webpack-env": "^1.18.8",
+    "autoprefixer": "^10.4.27",
+    "babel-loader": "^10.0.0",
+    "copy-webpack-plugin": "^14.0.0",
+    "css-loader": "^7.1.2",
     "eslint": "^9.22.0",
-    "globals": "^16.0.0"
+    "globals": "^16.0.0",
+    "html-webpack-plugin": "^5.6.3",
+    "postcss-loader": "^8.2.1",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.2",
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
   }
 }

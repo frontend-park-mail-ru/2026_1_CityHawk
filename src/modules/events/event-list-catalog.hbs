@@ -1,0 +1,21 @@
+<section class="event-list-catalog">
+  <div class="event-list-catalog__head">
+    <h2 class="event-list-catalog__title">События</h2>
+    {{#if canCreateEvent}}
+      <a href="/events/new" class="event-list-catalog__create">Создать событие</a>
+    {{/if}}
+  </div>
+
+  {{#if hasCards}}
+    <div class="event-list-catalog__grid">
+      {{#each cardsHtml}}
+        {{{this}}}
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="event-list-catalog__empty">
+      <h2 class="event-list-catalog__empty-title">Ничего не найдено</h2>
+      <p class="event-list-catalog__empty-text">Попробуй изменить фильтры или сбросить поиск.</p>
+    </div>
+  {{/if}}
+</section>

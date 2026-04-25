@@ -1,0 +1,202 @@
+.profile__content {
+    position: relative;
+    flex: 0 0 var(--profile-content-width);
+    background: var(--color-base);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 104px 40px 40px;
+}
+
+.profile__wrapper {
+    width: 100%;
+    max-width: var(--profile-content-max-width);
+}
+
+.profile__title {
+    margin: 0 0 44px;
+    text-align: center;
+    font-family: var(--font-slogan, sans-serif);
+    font-size: var(--text-form-title, 36px);
+    font-weight: 700;
+    line-height: 100%;
+    color: var(--color-blank);
+}
+
+.profile__form {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    --form-control-width: 100%;
+    --form-control-height: var(--height-input, 54px);
+    --form-control-padding-x: var(--padding-input, 20px);
+    --form-control-radius: var(--radius-input, 10px);
+    --form-control-border-width: var(--stroke-input-active, 2px);
+    --form-label-color: var(--color-blank);
+    --form-control-color: var(--color-blank);
+    --form-control-bg: var(--color-input-midtone-1);
+    --form-placeholder-color: var(--color-placeholder);
+    --form-control-border-hover: var(--color-accent-3);
+    --form-control-border-focus: var(--color-accent-1);
+    --form-toggle-color: var(--color-blank);
+    --form-select-arrow-color: var(--color-blank);
+    --form-error-color: var(--color-mid);
+}
+
+.profile__grid {
+    display: grid;
+    gap: 24px 36px;
+}
+
+.profile__grid--two {
+    grid-template-columns: 1fr 1fr;
+}
+
+.profile__chips-field {
+    min-height: var(--height-input, 54px);
+    padding: 14px 16px;
+    border-radius: var(--radius-input, 10px);
+    background: var(--color-input-midtone-1);
+    border: var(--stroke-input-active, 2px) solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    transition: border-color 0.2s ease;
+}
+
+.profile__chips-field:hover {
+    border-color: var(--color-accent-3);
+}
+
+.profile__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.profile__chip {
+    padding: 6px 12px;
+    border-radius: var(--profile-chip-radius);
+    background: rgba(72, 121, 198, 0.55);
+    color: var(--color-blank);
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-small-annotation, 14px);
+    line-height: 1;
+}
+
+.profile__chips-settings {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: transparent;
+    color: var(--color-blank);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.profile__chips-settings svg {
+    width: 24px;
+    height: 24px;
+}
+
+.profile__account-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.profile__password-link,
+.profile__logout-link {
+    color: var(--color-blank);
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-links, 16px);
+    text-decoration: underline;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.profile__password-link:hover,
+.profile__logout-link:hover {
+    color: var(--color-accent-3);
+}
+
+.profile__actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    gap: var(--gap-buttons-half, 40px);
+}
+
+.profile__button {
+    width: var(--width-button-half, 230px);
+    height: var(--height-button, 54px);
+    border-radius: var(--radius-button, 40px);
+    font-family: var(--font-primary, sans-serif);
+    font-size: var(--text-button, 16px);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.profile__button--secondary {
+    background: transparent;
+    color: var(--color-blank);
+    border: 2px solid var(--color-background-tone-1);
+}
+
+.profile__button--secondary:hover {
+    border-color: var(--color-accent-3);
+    color: var(--color-accent-3);
+}
+
+.profile__button--primary {
+    background: var(--color-background-tone-1);
+    color: var(--color-blank);
+    border: none;
+}
+
+.profile__button--primary:hover {
+    background: var(--color-accent-3);
+}
+
+.profile__button:active {
+    transform: scale(0.98);
+}
+
+.profile__field--error .form-field__input {
+    border-color: var(--color-mid);
+}
+
+@media (max-width: 900px) {
+    .profile__content {
+        padding: 72px 24px 40px;
+    }
+
+    .profile__grid--two {
+        grid-template-columns: 1fr;
+    }
+
+    .profile__actions {
+        flex-direction: column;
+    }
+
+    .profile__button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile__title {
+        font-size: 28px;
+    }
+
+    .profile__chips-field {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

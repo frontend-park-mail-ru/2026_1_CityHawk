@@ -1,0 +1,23 @@
+<section class="mood-section">
+  <div class="mood-section__container">
+    <section class="mood-section__content">
+      <h2 class="mood-section__title">Найди своё настроение!</h2>
+
+      <div class="mood-section__layout">
+        <div class="mood-section__column">
+          {{#each moodLeft}}
+            <article class="mood-card {{modifier}}">
+              <img src="{{imageUrl}}" alt="{{title}}" class="mood-card__image" />
+              <span class="mood-card__tag">{{title}}</span>
+            </article>
+          {{/each}}
+        </div>
+
+        <article class="mood-card mood-card--tall">
+          <img src="{{moodTall.imageUrl}}" alt="{{moodTall.title}}" class="mood-card__image" />
+          <span class="mood-card__tag">{{moodTall.title}}</span>
+        </article>
+      </div>
+    </section>
+  </div>
+</section>

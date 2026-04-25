@@ -1,0 +1,31 @@
+<section class="mood-section">
+  <div class="mood-section__container">
+    <section class="mood-section__layout">
+      <div class="mood-section__left">
+        <div class="mood-section__head">
+          <h2 class="mood-section__title">Подборки событий</h2>
+          
+        </div>
+        <p class="mood-section__text">Не знаешь куда пойти? Выбирай настроение, а мы подберём тебе событие!</p>
+
+        <div class="mood-section__left-grid">
+          {{#each moodLeft}}
+            <a class="mood-card {{modifier}}" href="{{href}}">
+              <img src="{{imageUrl}}" alt="{{title}}" class="mood-card__image" />
+              <span class="mood-card__tag">{{title}}</span>
+            </a>
+          {{/each}}
+        </div>
+      </div>
+
+      <div class="mood-section__right">
+        {{#each moodRight}}
+          <a class="mood-card mood-card--right" href="{{href}}">
+            <img src="{{imageUrl}}" alt="{{title}}" class="mood-card__image" />
+            <span class="mood-card__tag">{{title}}</span>
+          </a>
+        {{/each}}
+      </div>
+    </section>
+  </div>
+</section>

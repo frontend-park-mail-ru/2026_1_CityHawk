@@ -1,0 +1,58 @@
+<div class="login__form">
+    <a href="/" class="login__close" aria-label="На главную">
+        <svg width="454" height="453" viewBox="0 0 454 453" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M441.304 385.652C456.956 401.304 456.956 425.652 441.304 441.304C433.478 449.13 423.913 452.609 413.478 452.609C403.043 452.609 393.478 449.13 385.652 441.304L226.522 282.174L67.3913 441.304C59.5652 449.13 50 452.609 39.5652 452.609C29.1304 452.609 19.5652 449.13 11.7391 441.304C-3.91304 425.652 -3.91304 401.304 11.7391 385.652L170.87 226.522L11.7391 67.3913C-3.91304 51.7391 -3.91304 27.3913 11.7391 11.7391C27.3913 -3.91304 51.7391 -3.91304 67.3913 11.7391L226.522 170.87L385.652 11.7391C401.304 -3.91304 425.652 -3.91304 441.304 11.7391C456.956 27.3913 456.956 51.7391 441.304 67.3913L282.174 226.522L441.304 385.652Z" fill="currentColor"/>
+        </svg>
+    </a>
+  <div class="login__wrapper">
+      <h2 class="login__form-title">Регистрация</h2>
+      <div class="login__fields">
+          {{> form-input
+              fieldClass="login__field login__email"
+              label="Email"
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Введите email"
+              wrapperClass="login__field-error-wrapper"
+              inputWrapperClass="login__field-icon-wrapper login__field-icon-wrapper-noicon form-field__input-wrap--no-icon"
+              errorClass="login__error-message"
+          }}
+          {{> form-input
+              fieldClass="login__field login__password"
+              label="Пароль"
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Введите пароль"
+              wrapperClass="login__field-error-wrapper"
+              inputWrapperClass="login__field-icon-wrapper"
+              errorClass="login__error-message"
+              toggle=true
+              toggleClass="login__password-toggle"
+              toggleAriaLabel="Показать пароль"
+          }}
+          {{> form-input
+              fieldClass="login__field login__password-confirm login__bottomfield"
+              label="Повторите пароль"
+              type="password"
+              id="password-confirm"
+              name="password-confirm"
+              placeholder="Повторите пароль"
+              wrapperClass="login__field-error-wrapper"
+              inputWrapperClass="login__field-icon-wrapper"
+              errorClass="login__error-message"
+              toggle=true
+              toggleClass="login__password-toggle login__password-toggle-confirm"
+              toggleAriaLabel="Показать пароль"
+          }}
+          <div class="login__buttons">
+              <button class="login__prev" type="button">Назад</button>
+              <button class="login__next" data-role="register-finish" type="submit">Завершить регистрацию</button>
+          </div>
+          <div class="login__oauth">
+              <a href="/login" class="login__register">Уже есть аккаунт? Войти</a>
+          </div>
+      </div>
+  </div>
+</div>

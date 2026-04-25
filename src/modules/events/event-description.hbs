@@ -1,0 +1,31 @@
+<section class="event-description">
+  <div class="event-description__container">
+    <div
+      class="event-description__narrow"
+      data-role="event-description"
+      data-expanded="{{#if hasExtraParagraphs}}false{{else}}true{{/if}}"
+    >
+      {{#if leadText}}
+        <p class="event-description__lead">{{leadText}}</p>
+      {{/if}}
+
+      <div class="event-description__text">
+        {{#each paragraphs}}
+          <p class="event-description__paragraph {{#if @index}}event-description__paragraph--extra{{/if}}">
+            {{this}}
+          </p>
+        {{/each}}
+      </div>
+
+      {{#if hasExtraParagraphs}}
+        <button
+          class="event-description__toggle"
+          type="button"
+          data-action="event-description-toggle"
+        >
+          показать ещё...
+        </button>
+      {{/if}}
+    </div>
+  </div>
+</section>

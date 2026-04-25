@@ -1,0 +1,392 @@
+
+import { register } from '../../../api/auth.api.js';
+import { renderTemplate } from '../../../app/templates/renderer.js';
+import type { ApiError } from '../../../types/api.js';
+import { attachPasswordToggles } from '../shared/password-toggle.js';
+import {
+  getErrorMessageElement,
+  hideFieldError,
+  hideFieldMessage,
+  showFieldError,
+  showFieldMessage,
+} from '../shared/field-messages.js';
+import {
+  checkPasswordStrength,
+  getEmailValidationError,
+  validatePersonName,
+} from '../shared/validators.js';
+import { attachOAuthButtons } from '../oauth.js';
+
+interface RegisterState {
+  step?: number;
+  name?: string;
+  surname?: string;
+  email?: string;
+  password?: string;
+}
+
+interface RegisterFormOptions {
+  state?: RegisterState;
+  rerender?: () => void;
+  onFinish?: () => void;
+}
+
+export function renderRegisterStep(state: RegisterState = {}): string {
+  return renderTemplate(getStepTemplate(state.step || 1), state);
+}
+
+export function attachRegisterForm(root: ParentNode, options: RegisterFormOptions = {}): () => void {
+  const state = options.state || {};
+
+  const detachPasswordToggles = attachPasswordToggles(root);
+  const detachOAuthButtons = attachOAuthButtons(root);
+  animateLoginTickets(root, state);
+
+  let detachStep: (() => void) | null = null;
+
+  if (state.step === 1) {
+    detachStep = setupStep1(root, state, options.rerender);
+  }
+
+  if (state.step === 2) {
+    detachStep = setupStep2(root, state, options.rerender, options.onFinish);
+  }
+
+  return () => {
+    detachStep?.();
+    detachPasswordToggles();
+    detachOAuthButtons();
+  };
+}
+
+function getStepTemplate(step: number): string {
+  switch (step) {
+    case 1: return 'register-step1';
+    case 2: return 'register-step2';
+    default: return 'register-step1';
+  }
+}
+
+function animateLoginTickets(root: ParentNode, state: RegisterState): void {
+  const loginEl = root instanceof Element && root.classList.contains('login')
+    ? root
+    : root.querySelector('.login');
+
+  if (!(loginEl instanceof HTMLElement)) return;
+
+  if (state.step === 1) {
+    loginEl.classList.remove('loaded');
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (state.step === 1) {
+          loginEl.classList.add('loaded');
+        }
+      });
+    });
+    return;
+  }
+
+  loginEl.classList.add('loaded');
+}
+
+function setupStep1(root: ParentNode, state: RegisterState, rerender?: () => void): () => void {
+  const nameInput = root.querySelector('#name');
+  const surnameInput = root.querySelector('#surname');
+  const submitBtn = root.querySelector('.login__submit');
+
+  if (!(nameInput instanceof HTMLInputElement)
+    || !(surnameInput instanceof HTMLInputElement)
+    || !(submitBtn instanceof HTMLButtonElement)) {
+    return () => {};
+  }
+
+  let nameError = false;
+  let surnameError = false;
+  let submitAttempted = false;
+
+  nameInput.value = state.name || '';
+  surnameInput.value = state.surname || '';
+
+  const validateName = (): void => {
+    if (!submitAttempted && !nameError) {
+      return;
+    }
+
+    const wrapper = nameInput.closest('.login__field-error-wrapper');
+    const message = validatePersonName(nameInput.value, 'Имя');
+
+    if (message) {
+      showFieldError(wrapper, message);
+      nameError = true;
+      return;
+    }
+
+    hideFieldError(wrapper);
+    nameError = false;
+  };
+
+  const validateSurname = (): void => {
+    if (!submitAttempted && !surnameError) {
+      return;
+    }
+
+    const wrapper = surnameInput.closest('.login__field-error-wrapper');
+    const message = validatePersonName(surnameInput.value, 'Фамилия');
+
+    if (message) {
+      showFieldError(wrapper, message);
+      surnameError = true;
+      return;
+    }
+
+    hideFieldError(wrapper);
+    surnameError = false;
+  };
+
+  const handleNameInput = (): void => {
+    validateName();
+  };
+
+  const handleSurnameInput = (): void => {
+    validateSurname();
+  };
+
+  const handleSubmitClick = (event: Event): void => {
+    event.preventDefault();
+
+    submitAttempted = true;
+    validateName();
+    validateSurname();
+
+    if (nameError || surnameError) {
+      return;
+    }
+
+    state.name = nameInput.value.trim();
+    state.surname = surnameInput.value.trim();
+    state.step = 2;
+    rerender?.();
+  };
+
+  nameInput.addEventListener('input', handleNameInput);
+  surnameInput.addEventListener('input', handleSurnameInput);
+  submitBtn.addEventListener('click', handleSubmitClick);
+
+  return () => {
+    nameInput.removeEventListener('input', handleNameInput);
+    surnameInput.removeEventListener('input', handleSurnameInput);
+    submitBtn.removeEventListener('click', handleSubmitClick);
+  };
+}
+
+function setupStep2(
+  root: ParentNode,
+  state: RegisterState,
+  rerender?: () => void,
+  onFinish?: () => void,
+): () => void {
+  const emailInput = root.querySelector('#email');
+  const passwordInput = root.querySelector('#password');
+  const confirmInput = root.querySelector('#password-confirm');
+  const nextBtn = root.querySelector('[data-role="register-finish"]') || root.querySelector('.login__next');
+  const prevBtn = root.querySelector('.login__prev');
+
+  if (!(emailInput instanceof HTMLInputElement)
+    || !(passwordInput instanceof HTMLInputElement)
+    || !(confirmInput instanceof HTMLInputElement)
+    || !(nextBtn instanceof HTMLButtonElement)
+    || !(prevBtn instanceof HTMLButtonElement)) {
+    return () => {};
+  }
+
+  const safeEmailInput: HTMLInputElement = emailInput;
+  const safePasswordInput: HTMLInputElement = passwordInput;
+  const safeConfirmInput: HTMLInputElement = confirmInput;
+  const safeNextBtn: HTMLButtonElement = nextBtn;
+  const safePrevBtn: HTMLButtonElement = prevBtn;
+
+  let emailError = false;
+  let passError = false;
+  let confirmError = false;
+  let submitAttempted = false;
+
+  safeEmailInput.value = state.email || '';
+
+  function validateEmail(): void {
+    const wrapper = safeEmailInput.closest('.login__field-error-wrapper');
+    const value = safeEmailInput.value;
+
+    if (!submitAttempted && !emailError) return;
+
+    const validationError = getEmailValidationError(value);
+    if (validationError) {
+      showFieldMessage(wrapper, validationError, 'var(--color-mid)', true);
+      emailError = true;
+    } else {
+      hideFieldMessage(wrapper);
+      emailError = false;
+    }
+  }
+
+  function updatePasswordField(): void {
+    const wrapper = safePasswordInput.closest('.login__field-error-wrapper');
+    const pass = safePasswordInput.value.trim();
+    const result = checkPasswordStrength(pass);
+    let showText = true;
+
+    if (!result.isError && submitAttempted && (emailError || confirmError)) {
+      showText = false;
+    }
+
+    const showBorder = result.isError && (submitAttempted || passError);
+
+    if (showText) {
+      showFieldMessage(wrapper, result.msg, result.color, result.isError ? showBorder : false);
+    } else {
+      const errorMsg = getErrorMessageElement(wrapper);
+
+      if (errorMsg) {
+        errorMsg.textContent = '';
+        errorMsg.style.color = '';
+      }
+
+      wrapper?.classList.toggle('login__field-error-wrapper--error', showBorder);
+    }
+
+    passError = result.isError && (submitAttempted || passError);
+  }
+
+  function updateConfirmField(): void {
+    const wrapper = safeConfirmInput.closest('.login__field-error-wrapper');
+    const pass = safePasswordInput.value.trim();
+    const confirm = safeConfirmInput.value.trim();
+
+    let isError = false;
+    let msg = '';
+    let color = '';
+
+    if (!confirm) {
+      msg = 'Пароль не должен быть пустым!';
+      color = 'var(--color-mid)';
+      isError = true;
+    } else if (confirm !== pass) {
+      msg = 'Пароли должны совпадать!';
+      color = 'var(--color-mid)';
+      isError = true;
+    }
+
+    const showBorder = isError && (submitAttempted || confirmError);
+
+    if (isError) {
+      showFieldMessage(wrapper, msg, color, showBorder);
+    } else {
+      hideFieldMessage(wrapper);
+    }
+
+    confirmError = isError && (submitAttempted || confirmError);
+  }
+
+  const handlePasswordBlur = (): void => {
+    const wrapper = safePasswordInput.closest('.login__field-error-wrapper');
+    const result = checkPasswordStrength(safePasswordInput.value.trim());
+
+    if (!result.isError) {
+      hideFieldMessage(wrapper);
+    }
+  };
+
+  const handleConfirmBlur = (): void => {
+    const wrapper = safeConfirmInput.closest('.login__field-error-wrapper');
+
+    if (!confirmError) {
+      hideFieldMessage(wrapper);
+    }
+  };
+
+  const handlePrevClick = (event: Event): void => {
+    event.preventDefault();
+    state.email = safeEmailInput.value;
+    state.step = 1;
+    rerender?.();
+  };
+
+  const handleNextClick = async (event: Event): Promise<void> => {
+    event.preventDefault();
+
+    submitAttempted = true;
+    validateEmail();
+    updatePasswordField();
+    updateConfirmField();
+
+    if (emailError || passError || confirmError) {
+      return;
+    }
+
+    state.email = safeEmailInput.value.trim();
+    state.password = safePasswordInput.value.trim();
+
+    try {
+      await register({
+        username: state.name || '',
+        email: state.email,
+        userSurname: state.surname || '',
+        password: state.password,
+      });
+    } catch (error) {
+      const wrapper = safeEmailInput.closest('.login__field-error-wrapper');
+      const apiError = error as ApiError | undefined;
+
+      if (apiError?.status === 409) {
+        showFieldMessage(wrapper, 'Пользователь с таким email уже существует', 'var(--color-mid)', true);
+        return;
+      }
+
+      if (apiError?.status === 400) {
+        if (apiError?.details?.email) {
+          showFieldMessage(
+            wrapper,
+            getEmailValidationError(safeEmailInput.value) || 'Укажите корректный email',
+            'var(--color-mid)',
+            true,
+          );
+          return;
+        }
+        showFieldMessage(wrapper, apiError.message || 'Проверьте корректность введенных данных', 'var(--color-mid)', true);
+        return;
+      }
+
+      if (apiError?.status && apiError.status >= 500) {
+        showFieldMessage(wrapper, 'Сервер временно недоступен. Попробуйте позже', 'var(--color-mid)', true);
+        return;
+      }
+
+      showFieldMessage(wrapper, 'Не удалось завершить регистрацию. Проверьте соединение и попробуйте снова', 'var(--color-mid)', true);
+      return;
+    }
+
+    onFinish?.();
+  };
+
+  safeEmailInput.addEventListener('input', validateEmail);
+  safePasswordInput.addEventListener('input', updatePasswordField);
+  safePasswordInput.addEventListener('focus', updatePasswordField);
+  safePasswordInput.addEventListener('blur', handlePasswordBlur);
+  safeConfirmInput.addEventListener('input', updateConfirmField);
+  safeConfirmInput.addEventListener('focus', updateConfirmField);
+  safeConfirmInput.addEventListener('blur', handleConfirmBlur);
+  safePrevBtn.addEventListener('click', handlePrevClick);
+  safeNextBtn.addEventListener('click', handleNextClick);
+
+  return () => {
+    safeEmailInput.removeEventListener('input', validateEmail);
+    safePasswordInput.removeEventListener('input', updatePasswordField);
+    safePasswordInput.removeEventListener('focus', updatePasswordField);
+    safePasswordInput.removeEventListener('blur', handlePasswordBlur);
+    safeConfirmInput.removeEventListener('input', updateConfirmField);
+    safeConfirmInput.removeEventListener('focus', updateConfirmField);
+    safeConfirmInput.removeEventListener('blur', handleConfirmBlur);
+    safePrevBtn.removeEventListener('click', handlePrevClick);
+    safeNextBtn.removeEventListener('click', handleNextClick);
+  };
+}
