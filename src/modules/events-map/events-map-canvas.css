@@ -84,7 +84,7 @@
     padding: 14px 16px;
     border: 1px solid var(--ui-filter-shell-border);
     border-radius: 999px;
-    background: rgba(12, 13, 56, 0.08);;
+    background: rgba(12, 13, 56, 0.08);
     box-shadow: var(--ui-filter-shell-shadow);
     backdrop-filter: blur(14px);
 }
