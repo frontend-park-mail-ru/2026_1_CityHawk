@@ -5,9 +5,9 @@ import { getMeOrNull } from '../../api/profile.api.js';
 import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
 import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
-import { localizeCategoryName } from '../../modules/events/category-localization.js';
-import { renderEventListCatalog } from '../../modules/events/event-list-catalog.js';
-import { attachEventListFilters, renderEventListFilters } from '../../modules/events/event-list-filters.js';
+import { localizeCategoryName } from '../../modules/events/common/category-localization.js';
+import { renderEventListCatalog } from '../../modules/events/list/event-list-catalog.js';
+import { attachEventListFilters, renderEventListFilters } from '../../modules/events/list/event-list-filters.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import type { Category, EventCard, Tag, User } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
@@ -296,7 +296,7 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
       }
 
       const detachEventListFilters = attachEventListFilters(root, {
-        onSubmit(form) {
+        onChange(form) {
           const formData = new FormData(form);
           const params = new URLSearchParams();
           const categoryId = String(formData.get('categoryId') || '').trim();

@@ -1,4 +1,13 @@
-<main class="profile">
-    {{> profile-aside}}
-    {{> profile-form}}
-</main>
+<div class="profile-page">
+  <header class="profile-page__header">
+    {{> header}}
+  </header>
+
+  <main class="profile-page__content">
+    <div class="profile-page__container site-header__container">
+      <section class="profile profile--single">
+        {{> profile-overview}}
+      </section>
+    </div>
+  </main>
+</div>

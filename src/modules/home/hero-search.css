@@ -40,6 +40,14 @@
     border: 1px solid rgba(215, 230, 255, 0.12);
     box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
     backdrop-filter: blur(10px);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero-search__form:focus-within {
+    border-color: var(--ui-interactive-border-hover, rgba(183, 213, 245, 0.48));
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.4),
+        var(--ui-interactive-focus-ring, 0 0 0 3px rgba(139, 188, 233, 0.14));
 }
 
 .hero-search__form-wrap {
@@ -79,7 +87,8 @@
     transition:
         background-color 0.2s ease,
         transform 0.2s ease,
-        opacity 0.2s ease;
+        opacity 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .hero-search__button-icon {
@@ -90,9 +99,10 @@
 
 .hero-search__button:hover,
 .hero-search__button:focus-visible {
-    background: var(--color-background-tone-1);
+    background: var(--ui-interactive-bg-hover, rgba(255, 255, 255, 0.14));
     opacity: 1;
-    transform: translateY(-1px);
+    transform: var(--ui-interactive-lift, translateY(-1px));
+    box-shadow: var(--ui-interactive-focus-ring, 0 0 0 3px rgba(139, 188, 233, 0.14));
 }
 
 .hero-search__button:active {
@@ -113,7 +123,7 @@
 
     .hero-search__button:hover,
     .hero-search__button:focus-visible {
-        background: var(--color-accent-3);
+        background: var(--ui-interactive-bg-hover, rgba(255, 255, 255, 0.14));
     }
 
     .hero-search__button:active {

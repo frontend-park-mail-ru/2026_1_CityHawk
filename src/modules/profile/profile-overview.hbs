@@ -1,0 +1,81 @@
+<section class="profile-overview">
+  <div class="profile-overview__wrapper">
+    <section class="profile-hero">
+      <div class="profile-hero__avatar-wrap">
+        {{#if user.avatarUrl}}
+        <img
+          class="profile-hero__avatar"
+          src="{{user.avatarUrl}}"
+          alt="Аватар пользователя"
+        >
+        {{else}}
+        <div class="profile-hero__avatar profile-hero__avatar--fallback" aria-label="Аватар пользователя">
+          <span class="profile-hero__avatar-initials">{{user.initials}}</span>
+        </div>
+        {{/if}}
+      </div>
+
+      <div class="profile-hero__content">
+        <div class="profile-hero__head">
+          <h1 class="profile-hero__name">{{user.name}}</h1>
+          <button class="profile__button profile__button--primary profile-hero__edit" type="button" data-role="profile-edit-button">
+            Редактировать
+          </button>
+        </div>
+        <div class="profile-hero__location">Город: {{user.cityName}}</div>
+        <p class="profile-hero__bio">{{user.bio}}</p>
+
+        <div class="profile-hero__tags">
+          {{#each user.tags}}
+          <span class="profile-hero__tag">{{this}}</span>
+          {{/each}}
+        </div>
+      </div>
+
+      <div class="profile-hero__stats">
+        <div class="profile-stat">
+          <div class="profile-stat__value">{{stats.myEvents}}</div>
+          <div class="profile-stat__label">моих событий</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat__value">{{stats.favorites}}</div>
+          <div class="profile-stat__label">в избранном</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-section profile-section--home-like">
+      <div class="home-events__head">
+        <h2 class="home-events__title">Мои события</h2>
+        <a href="/events" class="home-events__link">показать ещё...</a>
+      </div>
+
+      {{#if myEventCards.length}}
+      <div class="profile-event-grid home-events__grid">
+        {{#each myEventCards}}
+        {{{this}}}
+        {{/each}}
+      </div>
+      {{else}}
+      <p class="profile-section__empty">Пока нет событий. Создай первое мероприятие.</p>
+      {{/if}}
+    </section>
+
+    <section class="profile-section profile-section--home-like">
+      <div class="home-events__head">
+        <h2 class="home-events__title">Избранное</h2>
+        <a href="/events" class="home-events__link">показать ещё...</a>
+      </div>
+
+      {{#if favoriteEventCards.length}}
+      <div class="profile-event-grid home-events__grid">
+        {{#each favoriteEventCards}}
+        {{{this}}}
+        {{/each}}
+      </div>
+      {{else}}
+      <p class="profile-section__empty">Добавляй мероприятия в избранное, чтобы они появились здесь.</p>
+      {{/if}}
+    </section>
+  </div>
+</section>
