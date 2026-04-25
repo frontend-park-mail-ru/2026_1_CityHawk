@@ -1,4 +1,4 @@
-import { renderTemplate } from '../../app/templates/renderer.js';
+import { renderTemplate } from '../../../app/templates/renderer.js';
 
 export interface EventDescriptionState {
   leadText?: string;

@@ -36,8 +36,9 @@
     --form-control-color: var(--color-blank);
     --form-control-bg: var(--color-input-midtone-1);
     --form-placeholder-color: var(--color-placeholder);
-    --form-control-border-hover: var(--color-accent-3);
-    --form-control-border-focus: var(--color-accent-1);
+    --form-control-border-hover: var(--ui-interactive-border-hover, var(--color-accent-3));
+    --form-control-border-focus: var(--ui-interactive-border-hover, var(--color-accent-1));
+    --form-control-focus-ring: var(--ui-interactive-focus-ring, 0 0 0 3px rgba(139, 188, 233, 0.14));
     --form-toggle-color: var(--color-blank);
     --form-select-arrow-color: var(--color-blank);
     --form-error-color: var(--color-mid);
@@ -62,11 +63,12 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .profile__chips-field:hover {
-    border-color: var(--color-accent-3);
+    border-color: var(--ui-interactive-border-hover, var(--color-accent-3));
+    box-shadow: var(--ui-interactive-focus-ring, 0 0 0 3px rgba(139, 188, 233, 0.14));
 }
 
 .profile__chips {
@@ -123,7 +125,7 @@
 
 .profile__password-link:hover,
 .profile__logout-link:hover {
-    color: var(--color-accent-3);
+    color: var(--ui-interactive-text-hover, var(--color-accent-3));
 }
 
 .profile__actions {
@@ -150,8 +152,9 @@
 }
 
 .profile__button--secondary:hover {
-    border-color: var(--color-accent-3);
-    color: var(--color-accent-3);
+    border-color: var(--ui-interactive-border-hover, var(--color-accent-3));
+    background: var(--ui-interactive-bg-hover, rgba(255, 255, 255, 0.14));
+    color: var(--ui-interactive-text-hover, var(--color-accent-3));
 }
 
 .profile__button--primary {
@@ -161,7 +164,7 @@
 }
 
 .profile__button--primary:hover {
-    background: var(--color-accent-3);
+    background: var(--ui-interactive-bg-hover, var(--color-accent-3));
 }
 
 .profile__button:active {

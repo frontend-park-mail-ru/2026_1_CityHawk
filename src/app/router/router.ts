@@ -5,7 +5,9 @@ import type {
   RouteRenderer,
   RouteView,
 } from '../../types/router.js';
+import { getMeOrNull } from '../../api/profile.api.js';
 import {
+  buildAuthPath,
   getCurrentPathWithSearch,
   isAuthPath,
   normalizeReturnTo,
@@ -16,6 +18,15 @@ interface RouterOptions {
   root: HTMLElement;
   routes: Record<string, RouteRenderer>;
   notFound: RouteRenderer;
+}
+
+const PRIVATE_PATH_PATTERNS = [
+  /^\/profile(?:\/|$)/,
+  /^\/events\/my(?:\/|$)/,
+];
+
+function isPrivatePath(pathname: string): boolean {
+  return PRIVATE_PATH_PATTERNS.some((pattern) => pattern.test(pathname));
 }
 
 function escapeRouteSegment(segment: string): string {
@@ -152,6 +163,17 @@ export class Router {
     }
 
     const pathname = getPathname(path);
+
+    if (isPrivatePath(pathname)) {
+      const me = await getMeOrNull().catch(() => null);
+
+      if (!me) {
+        const loginPath = buildAuthPath('/login', getCurrentPathWithSearch());
+        this.navigate(loginPath, { replace: true });
+        return;
+      }
+    }
+
     const match = this.matchRoute(pathname);
     const renderer = match?.renderer || this.notFound;
     const view = await renderer({

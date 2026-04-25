@@ -1,7 +1,7 @@
-import { getCategories } from '../../api/categories.api.js';
-import { getTags } from '../../api/tags.api.js';
-import { localizeCategoryName } from './category-localization.js';
-import type { Category, Tag } from '../../types/api.js';
+import { getCategories } from '../../../api/categories.api.js';
+import { getTags } from '../../../api/tags.api.js';
+import { localizeCategoryName } from '../common/category-localization.js';
+import type { Category, Tag } from '../../../types/api.js';
 
 export interface EventFormSelectOption {
   value: string;

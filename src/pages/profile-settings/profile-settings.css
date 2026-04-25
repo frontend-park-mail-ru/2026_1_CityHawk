@@ -1,0 +1,34 @@
+:root {
+  --profile-aside-width: 36%;
+  --profile-content-width: 64%;
+  --profile-avatar-size: 190px;
+  --profile-menu-icon-size: 48px;
+  --profile-menu-height: 72px;
+  --profile-content-max-width: 580px;
+  --profile-chip-radius: 8px;
+  --profile-panel-radius: 100px;
+  --profile-section-padding-y: 65px;
+  --profile-section-padding-x: 56px;
+}
+
+.profile-settings {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--color-base);
+}
+
+.profile-settings .profile__content {
+  padding-top: 170px;
+}
+
+@media (max-width: 900px) {
+  .profile-settings {
+    flex-direction: column;
+  }
+
+  .profile-settings .profile__content {
+    padding-top: 72px;
+  }
+}

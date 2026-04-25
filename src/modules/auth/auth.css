@@ -250,8 +250,9 @@ main.login {
     --form-control-color: var(--color-accent-1);
     --form-control-bg: var(--color-input-midtone-1);
     --form-placeholder-color: var(--color-placeholder);
-    --form-control-border-hover: var(--color-accent-3);
-    --form-control-border-focus: var(--color-accent-1);
+    --form-control-border-hover: var(--ui-interactive-border-hover, var(--color-accent-3));
+    --form-control-border-focus: var(--ui-interactive-border-hover, var(--color-accent-1));
+    --form-control-focus-ring: var(--ui-interactive-focus-ring, 0 0 0 3px rgba(139, 188, 233, 0.14));
     --form-toggle-color: var(--color-accent-1);
     --form-select-arrow-color: var(--color-accent-1);
     --form-error-color: var(--color-mid);
@@ -383,6 +384,16 @@ main.login {
     border: none;
     border-radius: var(--radius-button);
     cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login__next:hover,
+.login__next:focus-visible,
+.login__prev:hover,
+.login__prev:focus-visible {
+    background: var(--ui-interactive-bg-hover, var(--color-accent-3));
+    transform: var(--ui-interactive-lift, translateY(-1px));
+    box-shadow: var(--ui-interactive-focus-ring, 0 0 0 3px rgba(139, 188, 233, 0.14));
 }
 
 /* ========================================
@@ -391,7 +402,7 @@ main.login {
 
 .login__forgot:hover,
 .login__register:hover {
-    color: var(--color-accent-3);
+    color: var(--ui-interactive-text-hover, var(--color-accent-3));
 }
 
 .login__forgot:active,
@@ -400,11 +411,14 @@ main.login {
 }
 
 .login__submit {
-    transition: background-color 0.3s ease-out;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.login__submit:hover {  
-    background: var(--color-accent-3);
+.login__submit:hover,
+.login__submit:focus-visible {
+    background: var(--ui-interactive-bg-hover, var(--color-accent-3));
+    transform: var(--ui-interactive-lift, translateY(-1px));
+    box-shadow: var(--ui-interactive-focus-ring, 0 0 0 3px rgba(139, 188, 233, 0.14));
 }
 
 .login__submit:active {
@@ -419,6 +433,7 @@ main.login {
 
 .login__oauth-btn:hover {
     transform: translateY(calc(var(--jump--oauth-logos) * -1));
+    filter: brightness(1.05);
 }
 
 .login__oauth-btn:active {
@@ -1037,7 +1052,7 @@ RETURN BUTTON
 }
 
 .login__close:hover {
-    color: var(--color-accent-1);
+    color: var(--ui-interactive-text-hover, var(--color-accent-1));
 }
 
 .login__close:active {
@@ -1093,7 +1108,7 @@ DARK THEME ADDITIONS
     }
 
     .login__close:hover {
-        color: var(--color-blank);
+        color: var(--ui-interactive-text-hover, var(--color-blank));
     }
 
     .login__password-toggle {
@@ -1134,17 +1149,17 @@ DARK THEME ADDITIONS
 
     .form-field__input:active,
     .form-field__select:active {
-        border-color: var(--color-background-tone-1);
+        border-color: var(--ui-interactive-border-hover, var(--color-background-tone-1));
     }
 
     .form-field__input:focus,
     .form-field__select:focus {
-        border-color: var(--color-background-tone-1);
+        border-color: var(--ui-interactive-border-hover, var(--color-background-tone-1));
     }
 
     .form-field__input-wrap .form-field__input:active,
     .form-field__input-wrap .form-field__input:focus {
-        border-color: var(--color-background-tone-1);
+        border-color: var(--ui-interactive-border-hover, var(--color-background-tone-1));
     }
 
     body {

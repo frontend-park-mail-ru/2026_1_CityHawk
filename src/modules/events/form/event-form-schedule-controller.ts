@@ -1,4 +1,4 @@
-import { renderTemplate } from '../../app/templates/renderer.js';
+import { renderTemplate } from '../../../app/templates/renderer.js';
 import type { EventFormValues } from './event-form-payload.js';
 import type { EventFormElements } from './event-form-selectors.js';
 import {

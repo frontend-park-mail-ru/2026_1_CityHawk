@@ -34,7 +34,11 @@
     font-family: var(--form-control-font, var(--font-primary, sans-serif));
     font-size: var(--form-control-size, var(--text-input, 16px));
     outline: none;
-    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease;
     appearance: none;
 }
 
@@ -45,12 +49,15 @@
 
 .form-field__input:hover,
 .form-field__select:hover {
-    border-color: var(--form-control-border-hover, var(--color-accent-3));
+    border-color: var(--form-control-border-hover, var(--ui-interactive-border-hover, var(--color-accent-3)));
 }
 
 .form-field__input:focus,
-.form-field__select:focus {
-    border-color: var(--form-control-border-focus, var(--color-accent-1));
+.form-field__input:focus-visible,
+.form-field__select:focus,
+.form-field__select:focus-visible {
+    border-color: var(--form-control-border-focus, var(--ui-interactive-border-hover, var(--color-accent-1)));
+    box-shadow: var(--form-control-focus-ring, var(--ui-interactive-focus-ring));
 }
 
 .form-field__input-wrap .form-field__input {

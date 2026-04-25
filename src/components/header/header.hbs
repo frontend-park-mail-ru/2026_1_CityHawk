@@ -1,10 +1,53 @@
 <div class="site-header">
   <div class="site-header__container">
     <div class="site-header__row">
-      <a href="/" class="site-header__brand" aria-label="CityHawk">
-        <span class="site-header__brand-mark" aria-hidden="true"></span>
-        <span class="site-header__brand-text">CityHawk</span>
-      </a>
+      <div class="site-header__left">
+        <div class="site-header__menu">
+          <button
+            type="button"
+            class="site-header__menu-trigger"
+            aria-label="Открыть меню"
+            aria-haspopup="menu"
+          >
+            <img src="/public/static/icons/menu.svg" alt="" class="site-header__menu-icon" aria-hidden="true" />
+          </button>
+
+          <aside class="site-header__sidebar" aria-label="Навигационное меню">
+            <nav class="site-header__sidebar-nav">
+              <div class="site-header__sidebar-group">
+                <h3 class="site-header__sidebar-group-title">Навигация</h3>
+                <a href="/" class="site-header__sidebar-link">Главная</a>
+                <a href="/events" class="site-header__sidebar-link">Все события</a>
+                <a href="/events-map" class="site-header__sidebar-link">Карта</a>
+              </div>
+
+              <div class="site-header__sidebar-group">
+                <h3 class="site-header__sidebar-group-title">Личное</h3>
+                <a href="/profile" class="site-header__sidebar-link">Найти друзей</a>
+                <a href="/profile" class="site-header__sidebar-link">Профиль</a>
+                <a href="/profile" class="site-header__sidebar-link">Избранное</a>
+                <a href="/profile" class="site-header__sidebar-link">Мои подборки</a>
+                <a href="/profile/settings" class="site-header__sidebar-link">Настройки</a>
+              </div>
+
+              <div class="site-header__sidebar-group">
+                <h3 class="site-header__sidebar-group-title">Система</h3>
+                <a href="/support" class="site-header__sidebar-link">Поддержка</a>
+                <a href="/organizer/apply" class="site-header__sidebar-link">Стать организатором</a>
+              </div>
+            </nav>
+
+            <div class="site-header__sidebar-footer">
+              <a href="/login" class="site-header__sidebar-link site-header__sidebar-link--exit">Выход</a>
+            </div>
+          </aside>
+        </div>
+
+        <a href="/" class="site-header__brand" aria-label="CityHawk">
+          <span class="site-header__brand-mark" aria-hidden="true"></span>
+          <span class="site-header__brand-text">CityHawk</span>
+        </a>
+      </div>
 
       <div class="site-header__main">
         <div class="site-header__city" data-role="header-city">
