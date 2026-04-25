@@ -5,7 +5,7 @@ import type {
   EventSession,
   EventSessionPayload,
   Tag,
-} from '../../types/api.js';
+} from '../../../types/api.js';
 import type { EventFormSubmitPayload } from './event-form.js';
 
 export type EventFormScheduleMode = 'single' | 'multiple' | 'period';

@@ -1,14 +1,18 @@
 .profile__aside {
     position: relative;
-    flex: 0 0 var(--profile-aside-width);
-    min-width: 250px;
-    background: var(--color-background-tone-1);
-    border-top-right-radius: var(--profile-panel-radius);
-    border-bottom-right-radius: var(--profile-panel-radius);
-    padding: 28px 0 48px;
+    flex: 1 1 0;
+    min-width: 0;
+    background-color: var(--color-background-tone-1);
+    border-top-right-radius: var(--radius-logo, 100px);
+    border-bottom-right-radius: var(--radius-logo, 100px);
+    overflow: hidden;
+    padding-top: var(--paddings-sidebar, 65px);
+    padding-bottom: var(--paddings-sidebar, 65px);
     display: flex;
     flex-direction: column;
+    justify-content: flex-end;
     align-items: center;
+    gap: var(--sidebar-gap, auto);
     color: var(--color-blank);
 }
 
@@ -31,7 +35,7 @@
 }
 
 .profile__aside-close:hover {
-    color: var(--color-blank);
+    color: var(--ui-interactive-text-hover, var(--color-blank));
 }
 
 .profile__aside-close:active {
@@ -119,7 +123,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .profile__avatar-edit svg {
@@ -128,7 +132,8 @@
 }
 
 .profile__avatar-edit:hover {
-    background: var(--color-accent-3);
+    background: var(--ui-interactive-bg-hover, var(--color-accent-3));
+    box-shadow: var(--ui-interactive-focus-ring, 0 0 0 3px rgba(139, 188, 233, 0.14));
 }
 
 .profile__avatar-edit:active {
@@ -167,11 +172,12 @@
 }
 
 .profile__menu-item:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--ui-interactive-bg-hover, rgba(255, 255, 255, 0.14));
+    color: var(--ui-interactive-text-hover, var(--color-blank));
 }
 
 .profile__menu-item--active {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--ui-interactive-bg-hover, rgba(255, 255, 255, 0.14));
 }
 
 .profile__menu-icon {
@@ -192,11 +198,14 @@
 
 @media (max-width: 900px) {
     .profile__aside {
-        min-width: 100%;
+        width: 100%;
+        flex: none;
         border-top-right-radius: 0;
-        border-bottom-left-radius: 60px;
         border-bottom-right-radius: 60px;
-        padding: 42px 0 28px;
+        border-bottom-left-radius: 60px;
+        padding: 50px 40px;
+        justify-content: center;
+        align-items: center;
     }
 
     .profile__aside-close {

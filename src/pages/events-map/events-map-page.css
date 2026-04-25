@@ -1,0 +1,74 @@
+.events-map-page {
+    height: 100vh;
+    color: var(--home-color-text);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at top center, rgba(41, 85, 145, 0.16), transparent 32%),
+        linear-gradient(180deg, #081321 0%, #071426 35%, #081a31 100%);
+}
+
+.events-map-page__header {
+    padding-top: 8px;
+}
+
+.events-map-page__main {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 20px 0;
+}
+
+.events-map-page__layout {
+    width: 100%;
+    max-width: var(--home-content-width);
+    margin: 0 auto;
+    padding: 0 var(--home-side-padding);
+    display: grid;
+    grid-template-columns: minmax(290px, 340px) minmax(0, 1fr);
+    gap: 18px;
+    align-items: stretch;
+    height: 100%;
+}
+
+.events-map-page__moods-slot,
+.events-map-page__map-slot {
+    min-width: 0;
+}
+
+.events-map-page__moods-slot {
+    height: 100%;
+    min-height: 0;
+}
+
+@media (max-width: 1100px) {
+    .events-map-page {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    .events-map-page__main {
+        min-height: auto;
+        padding-bottom: 56px;
+    }
+
+    .events-map-page__layout {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .events-map-page__moods-slot {
+        height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .events-map-page__main {
+        padding-top: 12px;
+    }
+
+    .events-map-page__layout {
+        padding: 0 var(--home-side-padding-mobile);
+    }
+}

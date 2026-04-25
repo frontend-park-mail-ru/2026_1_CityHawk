@@ -1,4 +1,4 @@
-import type { Category } from '../../types/api.js';
+import type { Category } from '../../../types/api.js';
 
 const CATEGORY_RU_BY_SLUG: Record<string, string> = {
   concert: 'Концерт',

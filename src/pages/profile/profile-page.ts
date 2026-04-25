@@ -1,17 +1,14 @@
-import { getMeOrNull, updateProfile, updateProfileMultipart } from '../../api/profile.api.js';
-import { getCities } from '../../api/cities.api.js';
-import { logout } from '../../api/auth.api.js';
+import { getMeOrNull } from '../../api/profile.api.js';
+import { getEvents } from '../../api/events.api.js';
 import './profile.css';
 import '../../modules/profile/profile-aside.css';
-import '../../modules/profile/profile-form.css';
+import '../../modules/profile/profile-overview.css';
+import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
+import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
+import { renderEventCard } from '../../components/event-card/event-card.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
-import { showToast } from '../../app/ui/toast.js';
-import {
-  getEmailValidationError,
-  validatePersonName,
-} from '../../modules/auth/shared/validators.js';
-import type { ApiError, UpdateProfilePayload } from '../../types/api.js';
+import type { EventCard } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
 function getUserInitials(name?: string): string {
@@ -28,280 +25,212 @@ function getUserInitials(name?: string): string {
   return parts.map((part) => part[0]?.toUpperCase() || '').join('');
 }
 
-export async function profilePage({ navigate }: RouteContext): Promise<RouteView> {
-  const [meResult, citiesResult] = await Promise.allSettled([
-    getMeOrNull(),
-    getCities(),
-  ]);
-  const me = meResult.status === 'fulfilled' ? meResult.value : null;
-  const cityItems = citiesResult.status === 'fulfilled' && Array.isArray(citiesResult.value?.items)
-    ? citiesResult.value.items
+function formatBirthday(value?: string): string {
+  const raw = String(value || '').trim();
+
+  if (!raw) {
+    return 'Не указана';
+  }
+
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) {
+    return raw;
+  }
+
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
+
+function formatEventDate(value?: string | null): string {
+  if (!value) {
+    return 'Дата уточняется';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
+
+function mapEventToProfileCard(item: Partial<EventCard> = {}): string {
+  const tags = Array.isArray(item.tags)
+    ? item.tags.map((tag) => String(tag?.name || '').trim()).filter(Boolean).slice(0, 3)
     : [];
-  const cityOptions = cityItems.map((city) => ({
-    value: String(city?.id || ''),
-    label: String(city?.name || '').trim() || 'Без названия',
-    selected: String(city?.id || '') === String(me?.city?.id || ''),
-  })).filter((option) => option.value);
+  const placeText = [
+    String(item.nextSession?.place?.name || '').trim(),
+    String(item.nextSession?.place?.addressLine || '').trim(),
+  ].filter(Boolean).join(', ') || 'Место уточняется';
 
-  const hasSelectedCity = cityOptions.some((option) => option.selected);
-  if (!hasSelectedCity && me?.city?.id) {
-    cityOptions.unshift({
-      value: String(me.city.id),
-      label: String(me.city.name || '').trim() || 'Выберите город',
-      selected: true,
-    });
-  }
+  return renderEventCard({
+    id: item.id || '',
+    imageUrl: item.coverImageUrl || '/public/static/img/concert.jpeg',
+    title: item.title || 'Без названия',
+    textLines: [formatEventDate(item.nextSession?.startAt), placeText],
+    tags,
+    cardClass: 'profile-overview__event-card',
+  });
+}
 
-  if (!cityOptions.length) {
-    cityOptions.push({
-      value: '',
-      label: me?.city?.name || 'Выберите город',
-      selected: true,
-    });
-  }
+function getFallbackEvents(): EventCard[] {
+  return [
+    {
+      id: '',
+      title: 'Futurione',
+      coverImageUrl: '/public/static/img/futurione.jpeg',
+      tags: [{ id: '1', name: 'Digital', slug: 'digital' }],
+      nextSession: {
+        startAt: '2026-05-06T18:00:00Z',
+        place: { name: 'ВДНХ', addressLine: 'Москва' },
+      },
+    },
+    {
+      id: '',
+      title: 'Женский стендап',
+      coverImageUrl: '/public/static/img/standup.png',
+      tags: [{ id: '2', name: 'Comedy', slug: 'comedy' }],
+      nextSession: {
+        startAt: '2026-05-07T19:00:00Z',
+        place: { name: 'Live Арена', addressLine: 'Москва' },
+      },
+    },
+    {
+      id: '',
+      title: 'Ледовое шоу',
+      coverImageUrl: '/public/static/img/navka.jpeg',
+      tags: [{ id: '3', name: 'Show', slug: 'show' }],
+      nextSession: {
+        startAt: '2026-05-11T17:30:00Z',
+        place: { name: 'Навка Арена', addressLine: 'Москва' },
+      },
+    },
+    {
+      id: '',
+      title: 'Балет',
+      coverImageUrl: '/public/static/img/balet.jpg',
+      tags: [{ id: '4', name: 'Театр', slug: 'theatre' }],
+      nextSession: {
+        startAt: '2026-05-18T16:00:00Z',
+        place: { name: 'Большой театр', addressLine: 'Театральная площадь, 1' },
+      },
+    },
+  ];
+}
 
-  const displayName = getHeaderUserDisplayName(me) || 'Имя';
+export async function profilePage({ navigate }: RouteContext): Promise<RouteView> {
+  const me = await getMeOrNull().catch(() => null);
+  const displayName = getHeaderUserDisplayName(me) || 'Пользователь';
+  const fallbackEvents = getFallbackEvents();
+
+  const [myEventsResult, favoriteEventsResult] = await Promise.allSettled([
+    me?.id
+      ? getEvents({ authorId: String(me.id), limit: 4, offset: 0 })
+      : Promise.resolve({ items: fallbackEvents }),
+    getEvents({ limit: 4, offset: 4 }),
+  ]);
+
+  const myEvents = myEventsResult.status === 'fulfilled' && Array.isArray(myEventsResult.value?.items)
+    ? myEventsResult.value.items
+    : fallbackEvents;
+  const favoriteEvents = favoriteEventsResult.status === 'fulfilled'
+    && Array.isArray(favoriteEventsResult.value?.items)
+    ? favoriteEventsResult.value.items
+    : fallbackEvents;
+
   const user = {
+    displayName,
     name: displayName,
-    firstName: me?.username || '',
+    firstName: me?.username || 'Не указано',
     lastName: me?.userSurname || '',
-    email: me?.email || 'address@service.com',
-    birthdate: me?.birthday || '',
-    cityId: me?.city?.id || '',
-    cityName: me?.city?.name || '',
-    cityOptions,
+    email: me?.email || 'Не указан',
+    birthdateLabel: formatBirthday(me?.birthday || ''),
+    cityName: me?.city?.name || 'Не указан',
     initials: getUserInitials(displayName),
     avatarUrl: me?.avatarUrl || '',
+    bio: 'Люблю открывать новые места в городе, ходить на события и сохранять лучшие маршруты.',
+    tags: ['Городские маршруты', 'События', 'Фотолокации'],
   };
 
-  const html = renderTemplate('profile', { user });
+  const html = renderTemplate('profile', {
+    user,
+    headerSearch: { query: '' },
+    myEventCards: myEvents.slice(0, 4).map(mapEventToProfileCard),
+    favoriteEventCards: favoriteEvents.slice(0, 4).map(mapEventToProfileCard),
+    stats: {
+      myEvents: myEvents.length,
+      favorites: favoriteEvents.length,
+    },
+    isProfilePage: true,
+    isSettingsPage: false,
+    enableAvatarUpload: false,
+  });
 
   return {
     html,
     mount(root) {
-      const logoutButton = root.querySelector('.profile__logout-link');
-      const profileForm = root.querySelector('.profile__form');
-      const avatarEditButton = root.querySelector('.profile__avatar-edit');
-      const avatarInput = root.querySelector('[data-role="profile-avatar-input"]');
-      const firstNameInput = root.querySelector('#firstName');
-      const firstNameError = root.querySelector('.profile__name-error');
-      const lastNameInput = root.querySelector('#lastName');
-      const lastNameError = root.querySelector('.profile__surname-error');
-      const emailInput = root.querySelector('#email');
-      const emailError = root.querySelector('.profile__email-error');
+      const editButton = root.querySelector('[data-role="profile-edit-button"]');
+      const headerSearchForm = root.querySelector('[data-role="header-search-form"]');
+      const detachCityPicker = attachHeaderCityPicker(root, { navigate, targetPath: '/events' });
 
-      const setFieldError = (
-        input: Element | null,
-        errorNode: Element | null,
-        message = '',
-      ): void => {
-        const text = String(message || '').trim();
+      const handleEditClick = (): void => {
+        navigate('/profile/settings');
+      };
 
-        if (errorNode instanceof HTMLElement) {
-          errorNode.textContent = text;
+      const navigateByHeaderQuery = (nextQuery: string): void => {
+        const params = new URLSearchParams();
+        if (nextQuery.trim()) {
+          params.set('query', nextQuery.trim());
         }
-
-        const field = input instanceof HTMLInputElement
-          ? input.closest('.profile__field')
-          : null;
-
-        if (field instanceof HTMLElement) {
-          field.classList.toggle('profile__field--error', Boolean(text));
-        }
+        const suffix = params.toString() ? `?${params.toString()}` : '';
+        navigate(`/events${suffix}`);
       };
 
-      const setEmailError = (message = ''): void => {
-        setFieldError(emailInput, emailError, message);
-      };
-
-      const setFirstNameError = (message = ''): void => {
-        setFieldError(firstNameInput, firstNameError, message);
-      };
-
-      const setLastNameError = (message = ''): void => {
-        setFieldError(lastNameInput, lastNameError, message);
-      };
-
-      const handleLogout = async () => {
-        await logout().catch(() => {});
-        navigate('/login', { replace: true });
-      };
-
-      const handleProfileSubmit = async (event: Event) => {
+      const handleHeaderSearchSubmit = (event: SubmitEvent): void => {
         event.preventDefault();
 
-        if (!(profileForm instanceof HTMLFormElement)) {
+        if (!(headerSearchForm instanceof HTMLFormElement)) {
           return;
         }
 
-        const formData = new FormData(profileForm);
-        const email = String(formData.get('email') || '').trim();
-        const firstName = String(formData.get('firstName') || '').trim();
-        const lastName = String(formData.get('lastName') || '').trim();
+        const formData = new FormData(headerSearchForm);
+        const query = String(formData.get('query') || '').trim();
+        navigateByHeaderQuery(query);
+      };
 
-        const firstNameValidationError = validatePersonName(firstName, 'Имя');
-        const lastNameValidationError = validatePersonName(lastName, 'Фамилия');
-        setFirstNameError(firstNameValidationError || '');
-        setLastNameError(lastNameValidationError || '');
-
-        const emailValidationError = getEmailValidationError(email);
-        if (emailValidationError) {
-          setEmailError(emailValidationError);
-          return;
-        }
-        setEmailError('');
-
-        if (firstNameValidationError || lastNameValidationError) {
-          return;
-        }
-
-        const payload: UpdateProfilePayload = {
-          email,
-          username: firstName,
-          userSurname: lastName,
-          birthday: String(formData.get('birthdate') || '').trim(),
-          cityId: String(formData.get('city') || '').trim(),
-        };
-
-        Object.keys(payload).forEach((key) => {
-          const typedKey = key as keyof UpdateProfilePayload;
-          if (!payload[typedKey]) {
-            delete payload[typedKey];
-          }
+      let detachHeaderSuggestions = () => {};
+      if (headerSearchForm instanceof HTMLFormElement) {
+        headerSearchForm.addEventListener('submit', handleHeaderSearchSubmit);
+        detachHeaderSuggestions = attachHeaderSearchSuggestions(headerSearchForm, {
+          onPick(query) {
+            navigateByHeaderQuery(query);
+          },
         });
-
-        try {
-          await updateProfile(payload);
-          navigate('/profile', { replace: true });
-        } catch (error) {
-          const apiError = error as ApiError;
-          const details = apiError?.details || {};
-
-          if (details.username) {
-            setFirstNameError('Имя должно быть от 3 до 32 символов');
-          }
-          if (details.userSurname) {
-            setLastNameError('Фамилия должна быть от 3 до 32 символов');
-          }
-          if (details.email) {
-            setEmailError(getEmailValidationError(email) || 'Введите корректный email');
-          }
-          if (details.username || details.userSurname || details.email) {
-            return;
-          }
-
-          const message = error instanceof Error ? error.message : 'Не удалось обновить профиль';
-          if (String(message).toLowerCase().includes('email')) {
-            setEmailError(message);
-            return;
-          }
-          showToast(message, { type: 'error' });
-        }
-      };
-
-      const handleEmailInput = (): void => {
-        if (!(emailInput instanceof HTMLInputElement)) {
-          return;
-        }
-
-        const email = emailInput.value.trim();
-
-        setEmailError(getEmailValidationError(email) || '');
-      };
-
-      const handleFirstNameInput = (): void => {
-        if (!(firstNameInput instanceof HTMLInputElement)) {
-          return;
-        }
-
-        const message = validatePersonName(firstNameInput.value, 'Имя');
-        setFirstNameError(message || '');
-      };
-
-      const handleLastNameInput = (): void => {
-        if (!(lastNameInput instanceof HTMLInputElement)) {
-          return;
-        }
-
-        const message = validatePersonName(lastNameInput.value, 'Фамилия');
-        setLastNameError(message || '');
-      };
-
-      const handleAvatarClick = (): void => {
-        if (avatarInput instanceof HTMLInputElement) {
-          avatarInput.click();
-        }
-      };
-
-      const handleAvatarChange = async (): Promise<void> => {
-        if (!(avatarInput instanceof HTMLInputElement)) {
-          return;
-        }
-
-        const file = avatarInput.files?.[0];
-
-        if (!file) {
-          return;
-        }
-
-        try {
-          await updateProfileMultipart({}, file);
-          navigate('/profile', { replace: true });
-        } catch (error) {
-          const message = error instanceof Error ? error.message : 'Не удалось обновить аватар';
-          showToast(message, { type: 'error' });
-        } finally {
-          avatarInput.value = '';
-        }
-      };
-
-      if (logoutButton instanceof HTMLElement) {
-        logoutButton.addEventListener('click', handleLogout);
       }
 
-      if (profileForm instanceof HTMLFormElement) {
-        profileForm.addEventListener('submit', handleProfileSubmit);
-      }
-
-      if (avatarEditButton instanceof HTMLButtonElement) {
-        avatarEditButton.addEventListener('click', handleAvatarClick);
-      }
-
-      if (avatarInput instanceof HTMLInputElement) {
-        avatarInput.addEventListener('change', handleAvatarChange);
-      }
-
-      if (emailInput instanceof HTMLInputElement) {
-        emailInput.addEventListener('input', handleEmailInput);
-      }
-      if (firstNameInput instanceof HTMLInputElement) {
-        firstNameInput.addEventListener('input', handleFirstNameInput);
-      }
-      if (lastNameInput instanceof HTMLInputElement) {
-        lastNameInput.addEventListener('input', handleLastNameInput);
+      if (editButton instanceof HTMLButtonElement) {
+        editButton.addEventListener('click', handleEditClick);
       }
 
       return () => {
-        if (logoutButton instanceof HTMLElement) {
-          logoutButton.removeEventListener('click', handleLogout);
+        detachCityPicker();
+        detachHeaderSuggestions();
+
+        if (headerSearchForm instanceof HTMLFormElement) {
+          headerSearchForm.removeEventListener('submit', handleHeaderSearchSubmit);
         }
-        if (profileForm instanceof HTMLFormElement) {
-          profileForm.removeEventListener('submit', handleProfileSubmit);
-        }
-        if (avatarEditButton instanceof HTMLButtonElement) {
-          avatarEditButton.removeEventListener('click', handleAvatarClick);
-        }
-        if (avatarInput instanceof HTMLInputElement) {
-          avatarInput.removeEventListener('change', handleAvatarChange);
-        }
-        if (emailInput instanceof HTMLInputElement) {
-          emailInput.removeEventListener('input', handleEmailInput);
-        }
-        if (firstNameInput instanceof HTMLInputElement) {
-          firstNameInput.removeEventListener('input', handleFirstNameInput);
-        }
-        if (lastNameInput instanceof HTMLInputElement) {
-          lastNameInput.removeEventListener('input', handleLastNameInput);
+
+        if (editButton instanceof HTMLButtonElement) {
+          editButton.removeEventListener('click', handleEditClick);
         }
       };
     },

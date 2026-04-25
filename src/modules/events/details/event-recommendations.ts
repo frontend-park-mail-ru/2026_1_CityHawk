@@ -1,5 +1,5 @@
-import { renderTemplate } from '../../app/templates/renderer.js';
-import { renderEventCard } from '../../components/event-card/event-card.js';
+import { renderTemplate } from '../../../app/templates/renderer.js';
+import { renderEventCard } from '../../../components/event-card/event-card.js';
 
 export interface RecommendationItem {
   id?: string | number;

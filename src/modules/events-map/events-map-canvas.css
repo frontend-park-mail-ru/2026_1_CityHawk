@@ -1,0 +1,261 @@
+.events-map-canvas {
+    border-radius: 26px;
+    background: transparent;
+    box-shadow: none;
+    padding: 12px;
+    height: 100%;
+    min-height: 0;
+}
+
+.events-map-canvas__map {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    border-radius: 24px;
+    background: var(--events-map-surface);
+}
+
+.events-map-canvas__map::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: var(--events-map-surface-before);
+    mix-blend-mode: screen;
+}
+
+.events-map-canvas__map::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: var(--events-map-surface-after);
+    pointer-events: none;
+}
+
+.events-map-canvas__map-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    filter: saturate(0.72) contrast(1.1) brightness(0.76) hue-rotate(6deg);
+}
+
+.events-map-canvas__marker {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--events-map-marker-border);
+    box-shadow: none;
+    background: var(--events-map-marker-bg);
+    transform: translateZ(0);
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.events-map-canvas__marker--active {
+    width: 64px;
+    height: 64px;
+    border-width: 2px;
+    border-color: var(--events-map-marker-border);
+    box-shadow: none;
+}
+
+.events-map-canvas__marker-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.events-map-canvas__toolbar {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    z-index: 3;
+    display: grid;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--ui-filter-shell-border);
+    border-radius: 999px;
+    background: rgba(12, 13, 56, 0.08);;
+    box-shadow: var(--ui-filter-shell-shadow);
+    backdrop-filter: blur(14px);
+}
+
+.events-map-canvas__filters {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.events-map-canvas__filter {
+    position: relative;
+}
+
+.events-map-canvas__input--hidden {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 1px;
+    height: 1px;
+}
+
+.events-map-canvas__custom-select {
+    position: relative;
+    width: 100%;
+}
+
+.events-map-canvas__custom-trigger {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 48px 0 16px;
+    border: 0.5px solid var(--ui-interactive-border, var(--home-color-border));
+    border-radius: 16px;
+    background: var(--ui-interactive-bg);
+    color: var(--home-color-text);
+    box-shadow: inset 0 1px 0 var(--ui-dropdown-inset-highlight);
+    font-size: var(--home-text-5);
+    outline: none;
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease,
+        color 0.2s ease;
+    text-align: left;
+    cursor: pointer;
+    appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--ui-dropdown-arrow-color) 50%),
+        linear-gradient(135deg, var(--ui-dropdown-arrow-color) 50%, transparent 50%);
+    background-position:
+        calc(100% - 24px) calc(50% - 3px),
+        calc(100% - 18px) calc(50% - 3px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+}
+
+.events-map-canvas__custom-trigger--active {
+    color: var(--ui-interactive-text-hover, var(--home-color-brand-light));
+    border-color: var(--form-control-border-active, var(--ui-interactive-border-hover));
+    background: var(--form-control-bg-active, var(--ui-interactive-bg-hover));
+}
+
+.events-map-canvas__custom-trigger:hover {
+    border-color: var(--ui-interactive-border-hover);
+    background: var(--ui-interactive-bg-hover);
+    box-shadow:
+        inset 0 1px 0 var(--ui-dropdown-inset-highlight),
+        var(--ui-interactive-focus-ring);
+}
+
+.events-map-canvas__custom-trigger:focus-visible,
+.events-map-canvas__custom-trigger[aria-expanded='true'] {
+    border-color: var(--ui-interactive-border-hover);
+    background: var(--ui-interactive-bg-hover);
+    box-shadow:
+        inset 0 1px 0 var(--ui-dropdown-inset-highlight),
+        var(--ui-interactive-focus-ring);
+}
+
+.events-map-canvas__custom-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    max-height: 280px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    border-radius: 16px;
+    border: 1px solid var(--home-color-border);
+    background: var(--ui-dropdown-surface);
+    box-shadow: var(--ui-dropdown-shadow);
+    z-index: 20;
+}
+
+.events-map-canvas__custom-option {
+    width: 100%;
+    text-align: left;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--home-color-text);
+    padding: 8px 12px;
+    font-size: var(--home-text-5);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.events-map-canvas__custom-option:hover,
+.events-map-canvas__custom-option:focus-visible {
+    background: var(--ui-interactive-bg-hover);
+}
+
+.events-map-canvas__custom-option:hover,
+.events-map-canvas__custom-option:focus-visible {
+    transform: var(--ui-interactive-lift, translateY(-1px));
+}
+
+.events-map-canvas__custom-option--active {
+    color: var(--ui-interactive-text-hover, var(--home-color-brand-light));
+}
+
+.events-map-canvas__empty {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+    width: min(520px, calc(100% - 32px));
+    padding: 28px;
+    border-radius: 22px;
+    background: var(--events-map-empty-surface);
+    text-align: center;
+}
+
+.events-map-canvas__empty-title {
+    margin: 0 0 8px;
+}
+
+.events-map-canvas__empty-text {
+    margin: 0;
+    color: var(--home-color-text-muted);
+}
+
+@media (max-width: 1100px) {
+    .events-map-canvas__filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .events-map-canvas__map {
+        min-height: 600px;
+        height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .events-map-canvas__map {
+        min-height: 480px;
+    }
+
+    .events-map-canvas__toolbar {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        padding: 16px;
+        border-radius: 24px;
+    }
+
+    .events-map-canvas__filters {
+        grid-template-columns: 1fr;
+    }
+}

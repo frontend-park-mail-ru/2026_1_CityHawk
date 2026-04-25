@@ -1,15 +1,15 @@
 import { createEventMultipart } from '../../api/events.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
-import '../../modules/events/event-editor-screen.css';
-import '../../modules/events/event-form.css';
+import '../../modules/events/form/event-editor-screen.css';
+import '../../modules/events/form/event-form.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
-import { renderEventForm } from '../../modules/events/event-form.js';
+import { renderEventForm } from '../../modules/events/form/event-form.js';
 import {
   attachEventEditorScreen,
   renderEventEditorScreen,
-} from '../../modules/events/event-editor-screen.js';
-import { mapEventFormPayloadToEventPayload } from '../../modules/events/event-form-payload.js';
-import { loadEventFormReferenceData } from '../../modules/events/event-form-reference-data.js';
+} from '../../modules/events/form/event-editor-screen.js';
+import { mapEventFormPayloadToEventPayload } from '../../modules/events/form/event-form-payload.js';
+import { loadEventFormReferenceData } from '../../modules/events/form/event-form-reference-data.js';
 import type { User } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 

@@ -1,21 +1,21 @@
 import './event-page.css';
 import { getEventById, getEvents } from '../../api/events.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
-import '../../modules/events/event-hero.css';
-import '../../modules/events/event-description.css';
-import '../../modules/events/event-gallery.css';
-import '../../modules/events/event-location.css';
-import '../../modules/events/event-recommendations.css';
+import '../../modules/events/details/event-hero.css';
+import '../../modules/events/details/event-description.css';
+import '../../modules/events/details/event-gallery.css';
+import '../../modules/events/details/event-location.css';
+import '../../modules/events/details/event-recommendations.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
 import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
-import { attachEventDescription, renderEventDescription } from '../../modules/events/event-description.js';
-import { renderEventGallery } from '../../modules/events/event-gallery.js';
-import { renderEventHero } from '../../modules/events/event-hero.js';
-import { attachEventLocation, renderEventLocation } from '../../modules/events/event-location.js';
-import { localizeCategoryName } from '../../modules/events/category-localization.js';
-import { renderEventRecommendations } from '../../modules/events/event-recommendations.js';
+import { attachEventDescription, renderEventDescription } from '../../modules/events/details/event-description.js';
+import { renderEventGallery } from '../../modules/events/details/event-gallery.js';
+import { renderEventHero } from '../../modules/events/details/event-hero.js';
+import { attachEventLocation, renderEventLocation } from '../../modules/events/details/event-location.js';
+import { localizeCategoryName } from '../../modules/events/common/category-localization.js';
+import { renderEventRecommendations } from '../../modules/events/details/event-recommendations.js';
 import type {
   EventCard,
   EventDetails,
@@ -45,6 +45,9 @@ interface EventPageViewModel {
   galleryImages: GalleryImageViewModel[];
   mapImageUrl: string;
   mapAlt: string;
+  mapLatitude?: number;
+  mapLongitude?: number;
+  mapTitle: string;
 }
 
 interface RecommendationViewModel {
@@ -156,6 +159,9 @@ function mapEventDetailsToPageViewModel(rawEvent: EventDetailsLike = {}): EventP
     galleryImages,
     mapImageUrl: '/public/static/img/map.jpeg',
     mapAlt: `Карта для ${title}`,
+    mapLatitude: Number(place?.latitude),
+    mapLongitude: Number(place?.longitude),
+    mapTitle: place?.name || title,
   };
 }
 
@@ -178,6 +184,8 @@ function getFallbackEvent(eventId: string): EventDetailsLike {
         place: {
           name: 'ВДНХ',
           addressLine: '2-я Останкинская улица, 3',
+          latitude: 55.829754,
+          longitude: 37.633088,
           city: {
             name: 'Москва',
           },
@@ -319,6 +327,9 @@ export async function eventPage({ navigate, params = {} }: RouteContext): Promis
       paragraphs: event.locationParagraphs,
       mapImageUrl: event.mapImageUrl,
       mapAlt: event.mapAlt,
+      mapLatitude: event.mapLatitude,
+      mapLongitude: event.mapLongitude,
+      mapTitle: event.mapTitle,
     }),
     eventRecommendations: renderEventRecommendations({
       items: recommendations,

@@ -1,13 +1,13 @@
 import { deleteEvent, getEventById } from '../../api/events.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
-import '../../modules/events/event-delete-card.css';
-import '../../modules/events/event-delete-screen.css';
+import '../../modules/events/delete/event-delete-card.css';
+import '../../modules/events/delete/event-delete-screen.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
-import { renderEventDeleteCard } from '../../modules/events/event-delete-card.js';
+import { renderEventDeleteCard } from '../../modules/events/delete/event-delete-card.js';
 import {
   attachEventDeleteScreen,
   renderEventDeleteScreen,
-} from '../../modules/events/event-delete-screen.js';
+} from '../../modules/events/delete/event-delete-screen.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import type { ApiError, User } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';

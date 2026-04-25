@@ -1,0 +1,14 @@
+<aside class="events-mood-sidebar" aria-label="Подборки настроений">
+  <div class="events-mood-sidebar__head">
+    <h2 class="events-mood-sidebar__title">{{heading}}</h2>
+  </div>
+
+  <div class="events-mood-sidebar__grid">
+    {{#each cards}}
+      <a class="mood-card events-mood-sidebar__card" href="{{href}}">
+        <img src="{{imageUrl}}" alt="{{title}}" class="mood-card__image" />
+        <span class="mood-card__tag">{{title}}</span>
+      </a>
+    {{/each}}
+  </div>
+</aside>
