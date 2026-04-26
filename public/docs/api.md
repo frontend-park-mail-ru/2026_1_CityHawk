@@ -4,6 +4,11 @@
 
 API приложения CityHawk построено по REST-подходу.
 
+Статус документа:
+
+- обновлено под текущий frontend (ветка с картой и профилем)
+- последняя актуализация: апрель 2026
+
 Основные принципы:
 
 - backend API использует префикс `/api`
@@ -98,6 +103,24 @@ ok
 ### GET /swagger/
 
 UI для просмотра OpenAPI.
+
+### GET /runtime-config.js
+
+Runtime-конфиг для frontend-клиента.
+
+Успешный ответ:
+
+```javascript
+window.__APP_CONFIG__ = {
+  API_BASE_URL: "http://localhost:8080",
+  YANDEX_MAPS_API_KEY: "<key-or-empty-string>"
+};
+```
+
+Примечания:
+
+- endpoint отдается frontend-server'ом
+- используется для конфигурации базового API URL и ключа Yandex Maps
 
 ## Статические файлы
 
@@ -264,6 +287,17 @@ UI для просмотра OpenAPI.
 
 ## Profile API
 
+Контракт страниц:
+
+- `/profile`:
+  - обязательно: `GET /api/me`
+  - мои события: `GET /api/events?authorId=<me.id>&limit=4&offset=0`
+  - избранное (целевая схема): `GET /api/me/favorites?limit=4&offset=0`
+- `/profile/settings`:
+  - загрузка формы: `GET /api/me` + `GET /api/cities`
+  - сохранение: `PATCH /api/me` (json или multipart с `avatar`)
+  - выход: `POST /api/auth/logout`
+
 ### GET /api/me
 
 Возвращает профиль текущего пользователя.
@@ -362,6 +396,85 @@ avatar=<binary file>
 - `401 Unauthorized`
 - `403 CSRF token mismatch`
 - `403 Invalid origin`
+
+### GET /api/me/favorites
+
+Избранные события текущего пользователя для страницы профиля.
+
+Требование:
+
+- cookie `access_token`
+
+Query параметры:
+
+- `limit` — положительное число, по умолчанию `12`
+- `offset` — неотрицательное число, по умолчанию `0`
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Rock concert",
+      "shortDescription": "Best rock night",
+      "coverImageUrl": "https://example.com/event.jpg",
+      "tags": [],
+      "nextSession": {
+        "startAt": "2026-03-30T19:00:00Z",
+        "place": {
+          "name": "Arena",
+          "addressLine": "Lenina 1"
+        }
+      }
+    }
+  ],
+  "total": 1,
+  "limit": 12,
+  "offset": 0
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+
+### GET /api/me/collections
+
+Подборки текущего пользователя для профиля.
+
+Требование:
+
+- cookie `access_token`
+
+Query параметры:
+
+- `limit` — положительное число, по умолчанию `12`
+- `offset` — неотрицательное число, по умолчанию `0`
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Weekend Picks",
+      "description": "Best events for weekend",
+      "imageUrl": "https://example.com/collection.jpg",
+      "isPublic": true
+    }
+  ],
+  "total": 1,
+  "limit": 12,
+  "offset": 0
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
 
 ## Home API
 
@@ -714,11 +827,33 @@ Query параметры:
 - `query` — минимум 2 символа
 - `limit` — от `5` до `10`, по умолчанию `5`
 
+Элемент подсказки может относиться к:
+
+- событию (`type: event`)
+- категории (`type: category`)
+- тегу (`type: tag`)
+
 Успешный ответ:
 
 ```json
 {
-  "items": ["Rock concert", "rock", "retro"]
+  "items": [
+    {
+      "id": "uuid-event",
+      "type": "event",
+      "label": "Rock concert"
+    },
+    {
+      "id": "uuid-category",
+      "type": "category",
+      "label": "Концерты"
+    },
+    {
+      "id": "uuid-tag",
+      "type": "tag",
+      "label": "Rock"
+    }
+  ]
 }
 ```
 
@@ -767,6 +902,136 @@ Query параметры:
 
 Возможные ошибки:
 
+- `404 Collection not found`
+
+## Map API
+
+Правило страницы карты:
+
+- если подборка не выбрана, пины на карте не отображаются
+- выбор подборки обязателен для загрузки точек
+- фильтры общие и не зависят от конкретной подборки
+
+### GET /api/map/collections
+
+Подборки для боковой панели карты.
+
+Query параметры:
+
+- `cityId` — опционально, фильтр по городу
+- `limit` — опционально, ограничение количества
+
+Успешный ответ:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Городской вайб",
+      "description": "Лучшие городские локации",
+      "imageUrl": "https://example.com/collection.jpg",
+      "eventsCount": 18,
+      "isPublic": true
+    }
+  ]
+}
+```
+
+### GET /api/map/filters
+
+Глобальные фильтры карты (не зависят от выбранной подборки).
+
+Query параметры:
+
+- `cityId` — опционально
+
+Успешный ответ:
+
+```json
+{
+  "tags": [
+    {
+      "id": "uuid",
+      "name": "Urban",
+      "slug": "urban"
+    }
+  ],
+  "datePresets": [
+    {
+      "value": "today",
+      "label": "Сегодня"
+    },
+    {
+      "value": "weekend",
+      "label": "Выходные"
+    }
+  ],
+  "sortOptions": [
+    {
+      "value": "popular",
+      "label": "Сначала популярные"
+    },
+    {
+      "value": "name",
+      "label": "По названию А-Я"
+    }
+  ]
+}
+```
+
+### GET /api/map/collections/{collectionId}/spots
+
+Пины карты для выбранной подборки.
+
+Query параметры:
+
+- `cityId` — опционально
+- `query` — опционально, текстовый поиск
+- `tagId` — опционально
+- `dateFrom` — опционально
+- `dateTo` — опционально
+- `sort` — `popular | name | dateAsc | dateDesc`
+- `limit` — положительное число, по умолчанию `50`
+- `offset` — неотрицательное число, по умолчанию `0`
+
+Успешный ответ:
+
+```json
+{
+  "collection": {
+    "id": "uuid",
+    "title": "Городской вайб"
+  },
+  "items": [
+    {
+      "id": "uuid",
+      "eventId": "uuid",
+      "title": "Патриаршие пруды",
+      "address": "Малая Бронная улица",
+      "latitude": 55.76361,
+      "longitude": 37.595164,
+      "imageUrl": "https://example.com/photo.jpg",
+      "startAt": "2026-05-06T18:00:00Z",
+      "popularity": 98,
+      "tags": [
+        {
+          "id": "uuid",
+          "name": "Urban",
+          "slug": "urban"
+        }
+      ]
+    }
+  ],
+  "total": 18,
+  "limit": 50,
+  "offset": 0
+}
+```
+
+Возможные ошибки:
+
+- `400 Validation failed`
 - `404 Collection not found`
 
 ## Place Lookup API
@@ -1110,16 +1375,16 @@ Query параметры:
 - `400 Validation failed`
 - `401 Unauthorized`
 
-## Минимальный frontend-набор
+## Актуальный frontend-набор
 
-Endpoint'ы, которые чаще всего нужны фронтенду:
+Endpoint'ы, которые реально используются текущим frontend:
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `POST /api/auth/refresh`
 - `POST /api/auth/logout`
 - `GET /api/me`
-- `PATCH /api/me`
+- `PATCH /api/me` (`application/json` и `multipart/form-data`)
 - `GET /api/home`
 - `GET /api/events`
 - `GET /api/events/{eventId}`
@@ -1130,8 +1395,8 @@ Endpoint'ы, которые чаще всего нужны фронтенду:
 - `GET /api/tags`
 - `GET /api/cities`
 - `GET /api/search`
-- `GET /api/collections`
-- `GET /api/collections/{collectionId}`
+- `GET /api/place-suggestions`
+- `POST /api/places/resolve`
 - `POST /api/support/tickets`
 - `GET /api/support/tickets`
 - `GET /api/support/tickets/{ticketId}`
@@ -1140,3 +1405,31 @@ Endpoint'ы, которые чаще всего нужны фронтенду:
 - `GET /api/support/tickets/{ticketId}/messages`
 - `POST /api/support/tickets/{ticketId}/messages`
 - `GET /api/support/stats`
+
+Профиль:
+
+- текущая реализация блока "избранное" на `/profile` временно использует `GET /api/events`
+- целевой API для профиля: `GET /api/me/favorites` и `GET /api/me/collections`
+
+Примечание по карте:
+
+- страница `/events-map` использует Yandex Maps API v3 через `YANDEX_MAPS_API_KEY`
+- целевая backend-схема для карты описана в разделе `Map API`
+
+## Планируемый API-бэклог
+
+Endpoint'ы для следующих итераций (когда избранное/подборки/друзья будут расширяться в профиле):
+
+- `GET /api/me/favorites`
+- `POST /api/me/favorites/{eventId}`
+- `DELETE /api/me/favorites/{eventId}`
+- `GET /api/me/collections`
+- `POST /api/me/collections`
+- `PATCH /api/me/collections/{collectionId}`
+- `DELETE /api/me/collections/{collectionId}`
+- `POST /api/me/collections/{collectionId}/events/{eventId}`
+- `DELETE /api/me/collections/{collectionId}/events/{eventId}`
+- `GET /api/users?query=...` (поиск пользователей)
+- `GET /api/me/friends`
+- `POST /api/me/friends/{userId}`
+- `DELETE /api/me/friends/{userId}`

@@ -1,7 +1,15 @@
 import { request } from './client.js';
 
+export interface SearchSuggestionItem {
+  id?: string;
+  type?: string;
+  label?: string;
+  title?: string;
+  name?: string;
+}
+
 export interface SearchResultsResponse {
-  items: string[];
+  items: Array<string | SearchSuggestionItem>;
 }
 
 export async function searchAll(query: string, limit = 5): Promise<SearchResultsResponse> {

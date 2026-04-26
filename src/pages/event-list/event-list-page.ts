@@ -3,6 +3,7 @@ import { getCategories } from '../../api/categories.api.js';
 import { getTags } from '../../api/tags.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
 import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
+import type { HeaderSearchSuggestion } from '../../components/header/header-search-suggestions.js';
 import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { localizeCategoryName } from '../../modules/events/common/category-localization.js';
@@ -335,13 +336,23 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
         },
       });
 
-      const navigateByHeaderQuery = (nextQuery: string) => {
+      const navigateByHeaderQuery = (nextQuery: string, suggestion?: HeaderSearchSuggestion) => {
         const params = new URLSearchParams(window.location.search);
+        const type = String(suggestion?.type || '').trim().toLowerCase();
+        const suggestionID = String(suggestion?.id || '').trim();
 
         if (nextQuery) {
           params.set('query', nextQuery);
         } else {
           params.delete('query');
+        }
+
+        if (isUuid(suggestionID) && (type === 'category' || type === 'категория')) {
+          params.set('categoryId', suggestionID);
+          params.delete('tagId');
+        } else if (isUuid(suggestionID) && (type === 'tag' || type === 'тег')) {
+          params.set('tagId', suggestionID);
+          params.delete('categoryId');
         }
 
         const suffix = params.toString() ? '?' + params.toString() : '';
@@ -364,8 +375,8 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
       if (headerSearchForm instanceof HTMLFormElement) {
         headerSearchForm.addEventListener('submit', handleHeaderSearchSubmit);
         detachHeaderSuggestions = attachHeaderSearchSuggestions(headerSearchForm, {
-          onPick(query) {
-            navigateByHeaderQuery(query);
+          onPick(query, suggestion) {
+            navigateByHeaderQuery(query, suggestion);
           },
         });
       }

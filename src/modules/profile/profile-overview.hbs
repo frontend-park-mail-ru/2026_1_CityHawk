@@ -18,9 +18,6 @@
       <div class="profile-hero__content">
         <div class="profile-hero__head">
           <h1 class="profile-hero__name">{{user.name}}</h1>
-          <button class="profile__button profile__button--primary profile-hero__edit" type="button" data-role="profile-edit-button">
-            Редактировать
-          </button>
         </div>
         <div class="profile-hero__location">Город: {{user.cityName}}</div>
         <p class="profile-hero__bio">{{user.bio}}</p>
@@ -33,14 +30,19 @@
       </div>
 
       <div class="profile-hero__stats">
-        <div class="profile-stat">
-          <div class="profile-stat__value">{{stats.myEvents}}</div>
-          <div class="profile-stat__label">моих событий</div>
+        <div class="profile-hero__stats-row">
+          <div class="profile-stat">
+            <div class="profile-stat__value">{{stats.myEvents}}</div>
+            <div class="profile-stat__label">подписчики</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat__value">{{stats.favorites}}</div>
+            <div class="profile-stat__label">подписки</div>
+          </div>
         </div>
-        <div class="profile-stat">
-          <div class="profile-stat__value">{{stats.favorites}}</div>
-          <div class="profile-stat__label">в избранном</div>
-        </div>
+        <button class="profile__button profile__button--primary profile-hero__edit" type="button" data-role="profile-edit-button">
+          Редактировать
+        </button>
       </div>
     </section>
 
