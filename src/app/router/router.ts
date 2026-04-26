@@ -6,6 +6,7 @@ import type {
   RouteView,
 } from '../../types/router.js';
 import { getMeOrNull } from '../../api/profile.api.js';
+import { attachEventCardFavorites } from '../../components/event-card/event-card-favorite.js';
 import {
   buildAuthPath,
   getCurrentPathWithSearch,
@@ -185,13 +186,20 @@ export class Router {
 
     this.root.innerHTML = html;
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    const detachEventCardFavorites = attachEventCardFavorites(this.root);
 
     if (view && typeof view !== 'string' && typeof view.mount === 'function') {
       const cleanup = view.mount(this.root);
       if (typeof cleanup === 'function') {
-        this.cleanup = cleanup;
+        this.cleanup = () => {
+          detachEventCardFavorites();
+          cleanup();
+        };
+        return;
       }
     }
+
+    this.cleanup = detachEventCardFavorites;
   }
 
   matchRoute(path: string): RouteMatch | null {

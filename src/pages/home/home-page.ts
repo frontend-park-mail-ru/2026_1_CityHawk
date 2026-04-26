@@ -17,6 +17,7 @@ interface HomeEventCardViewModel {
   tags: string[];
   dateText: string;
   placeText: string;
+  isFavorite: boolean;
 }
 
 interface MoodViewModel {
@@ -69,6 +70,7 @@ function mapFeaturedEventToCardViewModel(event: Partial<EventCard> = {}): HomeEv
     tags,
     dateText: formatEventDate(event.nextSession?.startAt),
     placeText: placeParts.join(', '),
+    isFavorite: Boolean(event.isFavorite),
   };
 }
 

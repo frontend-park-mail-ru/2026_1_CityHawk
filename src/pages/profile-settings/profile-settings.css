@@ -20,7 +20,11 @@
 }
 
 .profile-settings .profile__content {
-  padding-top: 170px;
+  padding-top: 80px;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
 }
 
 @media (max-width: 900px) {

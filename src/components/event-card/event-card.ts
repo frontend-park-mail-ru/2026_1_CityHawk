@@ -7,6 +7,7 @@ export interface EventCardRenderState {
   textLines?: string[];
   tags?: string[];
   cardClass?: string;
+  isFavorite?: boolean;
 }
 
 export function renderEventCard(state: EventCardRenderState = {}): string {
@@ -17,5 +18,6 @@ export function renderEventCard(state: EventCardRenderState = {}): string {
     textLines: Array.isArray(state.textLines) ? state.textLines.filter(Boolean) : [],
     tags: Array.isArray(state.tags) ? state.tags : [],
     cardClass: state.cardClass || '',
+    isFavorite: Boolean(state.isFavorite),
   });
 }

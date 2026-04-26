@@ -31,14 +31,14 @@
 
       <div class="profile-hero__stats">
         <div class="profile-hero__stats-row">
-          <div class="profile-stat">
+          <button class="profile-stat profile-stat--button" type="button" data-role="profile-open-follows" data-tab="followers">
             <div class="profile-stat__value">{{stats.myEvents}}</div>
             <div class="profile-stat__label">подписчики</div>
-          </div>
-          <div class="profile-stat">
+          </button>
+          <button class="profile-stat profile-stat--button" type="button" data-role="profile-open-follows" data-tab="following">
             <div class="profile-stat__value">{{stats.favorites}}</div>
             <div class="profile-stat__label">подписки</div>
-          </div>
+          </button>
         </div>
         <button class="profile__button profile__button--primary profile-hero__edit" type="button" data-role="profile-edit-button">
           Редактировать
@@ -78,6 +78,26 @@
       {{else}}
       <p class="profile-section__empty">Добавляй мероприятия в избранное, чтобы они появились здесь.</p>
       {{/if}}
+    </section>
+  </div>
+
+  <div class="profile-follows-modal" data-role="profile-follows-modal" hidden>
+    <div class="profile-follows-modal__backdrop" data-role="profile-follows-close"></div>
+    <section class="profile-follows-modal__dialog" role="dialog" aria-modal="true" aria-label="Подписки и подписчики">
+      <header class="profile-follows-modal__header">
+        <div class="profile-follows-modal__tabs">
+          <button type="button" class="profile-follows-modal__tab" data-role="profile-follows-tab" data-tab="followers">
+            Подписчики
+          </button>
+          <button type="button" class="profile-follows-modal__tab" data-role="profile-follows-tab" data-tab="following">
+            Подписки
+          </button>
+        </div>
+        <button type="button" class="profile-follows-modal__close" data-role="profile-follows-close" aria-label="Закрыть">
+          ×
+        </button>
+      </header>
+      <div class="profile-follows-modal__list" data-role="profile-follows-list"></div>
     </section>
   </div>
 </section>

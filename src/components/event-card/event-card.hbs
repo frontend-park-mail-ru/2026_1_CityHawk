@@ -1,5 +1,15 @@
 {{#if id}}
   <a href="/events/{{id}}" class="event-card {{cardClass}}">
+    <button
+      type="button"
+      class="event-card__favorite{{#if isFavorite}} event-card__favorite--active{{/if}}"
+      data-role="event-card-favorite"
+      data-event-id="{{id}}"
+      aria-label="{{#if isFavorite}}Убрать из избранного{{else}}Добавить в избранное{{/if}}"
+      aria-pressed="{{#if isFavorite}}true{{else}}false{{/if}}"
+    >
+      <img src="/public/static/icons/favorite.svg" alt="" />
+    </button>
     <img
       src="{{imageUrl}}"
       alt="{{title}}"
@@ -25,6 +35,16 @@
   </a>
 {{else}}
   <div class="event-card {{cardClass}}">
+    <button
+      type="button"
+      class="event-card__favorite{{#if isFavorite}} event-card__favorite--active{{/if}}"
+      data-role="event-card-favorite"
+      data-event-id="{{id}}"
+      aria-label="{{#if isFavorite}}Убрать из избранного{{else}}Добавить в избранное{{/if}}"
+      aria-pressed="{{#if isFavorite}}true{{else}}false{{/if}}"
+    >
+      <img src="/public/static/icons/favorite.svg" alt="" />
+    </button>
     <img
       src="{{imageUrl}}"
       alt="{{title}}"

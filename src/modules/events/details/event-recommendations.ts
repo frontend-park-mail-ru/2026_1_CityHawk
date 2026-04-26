@@ -7,6 +7,7 @@ export interface RecommendationItem {
   title?: string;
   description?: string;
   tags?: string[];
+  isFavorite?: boolean;
 }
 
 export interface EventRecommendationsState {

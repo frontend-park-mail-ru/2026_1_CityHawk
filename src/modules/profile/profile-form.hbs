@@ -3,6 +3,34 @@
         <h1 class="profile__title">Настройки профиля</h1>
 
         <form class="profile__form" method="post" action="/profile/settings">
+            <div class="profile__avatar-section">
+                <div class="profile__avatar-wrapper profile__avatar-wrapper--form">
+                    {{#if user.avatarUrl}}
+                    <img
+                        class="profile__avatar profile__avatar--form"
+                        src="{{user.avatarUrl}}"
+                        alt="Аватар пользователя"
+                    >
+                    {{else}}
+                    <div class="profile__avatar profile__avatar--fallback profile__avatar--form" aria-label="Аватар пользователя">
+                        <span class="profile__avatar-initials">{{user.initials}}</span>
+                    </div>
+                    {{/if}}
+                </div>
+
+                {{#if enableAvatarUpload}}
+                <button class="profile__avatar-edit profile__avatar-edit--form" type="button">
+                    Изменить фото
+                </button>
+                <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    data-role="profile-avatar-input"
+                />
+                {{/if}}
+            </div>
+
             <div class="profile__grid profile__grid--two">
                 {{> form-input
                     fieldClass="profile__field"
@@ -57,6 +85,41 @@
                     options=user.cityOptions
                 }}
             </div>
+
+            <label class="profile__field profile__field--full">
+                <span class="profile__label">Описание</span>
+                <textarea
+                    class="profile__textarea"
+                    id="bio"
+                    name="bio"
+                    placeholder="Расскажите о себе"
+                >{{user.bio}}</textarea>
+            </label>
+
+            <label class="profile__field profile__field--full">
+                <span class="profile__label">Интересы</span>
+                <div class="profile__interests" data-role="profile-interests-picker">
+                    <input
+                        type="text"
+                        class="profile__interests-input"
+                        data-role="profile-interests-input"
+                        list="profile-interest-options"
+                        placeholder="Выберите интересы из списка"
+                    />
+                    <div class="profile__interests-selected" data-role="profile-interests-selected"></div>
+                    <input
+                        type="hidden"
+                        name="interests"
+                        data-role="profile-interests-hidden"
+                        value="{{user.interestIdsCsv}}"
+                    />
+                </div>
+                <datalist id="profile-interest-options" data-role="profile-interest-options">
+                    {{#each user.interestOptions}}
+                    <option value="{{this.label}}" data-id="{{this.value}}"></option>
+                    {{/each}}
+                </datalist>
+            </label>
 
             <div class="profile__account-actions">
                 <button class="profile__logout-link" type="button">Выйти из аккаунта</button>

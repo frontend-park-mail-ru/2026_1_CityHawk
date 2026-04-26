@@ -56,6 +56,7 @@ interface RecommendationViewModel {
   title: string;
   description: string;
   tags: string[];
+  isFavorite: boolean;
 }
 
 interface LoosePlace extends Partial<Omit<Place, 'city'>> {
@@ -219,6 +220,7 @@ function mapEventToRecommendationViewModel(item: Partial<EventCard> = {}): Recom
     title: item.title || 'Мероприятие',
     description: [dateText, placeText].filter(Boolean).join(' · ') || 'Подробности скоро появятся',
     tags,
+    isFavorite: Boolean(item.isFavorite),
   };
 }
 
@@ -244,6 +246,7 @@ function mapRecommendationsToViewModel(
       title: 'Женский стендап',
       description: '27 марта · Live Арена, Москва',
       tags: ['Comedy'],
+      isFavorite: false,
     },
     {
       id: '',
@@ -251,6 +254,7 @@ function mapRecommendationsToViewModel(
       title: 'Ледовое шоу Татьяны Навки',
       description: '10 февраля · Навка Арена, Москва',
       tags: ['Show', 'Ice'],
+      isFavorite: false,
     },
     {
       id: '',
@@ -258,6 +262,7 @@ function mapRecommendationsToViewModel(
       title: 'Балет Щелкунчик',
       description: '14 марта · Большой театр, Москва',
       tags: ['Ballet'],
+      isFavorite: false,
     },
     {
       id: '',
@@ -265,6 +270,7 @@ function mapRecommendationsToViewModel(
       title: 'Вечерний концерт',
       description: 'Суббота · Центр города',
       tags: ['Music'],
+      isFavorite: false,
     },
   ];
 }

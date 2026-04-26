@@ -20,6 +20,7 @@ interface CatalogCardViewModel {
   tags: string[];
   dateText: string;
   placeText: string;
+  isFavorite: boolean;
 }
 
 interface CatalogData {
@@ -76,6 +77,7 @@ function mapEventToCatalogCardViewModel(event: Partial<EventCard> = {}): Catalog
     tags,
     dateText: formatEventDate(event.nextSession?.startAt),
     placeText,
+    isFavorite: Boolean(event.isFavorite),
   };
 }
 

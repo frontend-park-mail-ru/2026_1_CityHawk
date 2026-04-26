@@ -41,6 +41,7 @@ export interface EventCard {
   coverImageUrl?: string;
   tags: Tag[];
   nextSession?: EventNextSession | null;
+  isFavorite?: boolean;
 }
 
 export interface EventAuthor {
@@ -166,6 +167,22 @@ export interface User {
   avatarUrl?: string;
   city?: City | null;
   createdAt?: string;
+}
+
+export interface FollowUser {
+  id: string;
+  username: string;
+  userSurname?: string;
+  avatarUrl?: string | null;
+  city?: City | null;
+  isFollowing?: boolean;
+}
+
+export interface FollowListResponse {
+  items: FollowUser[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface LoginPayload {
