@@ -1,0 +1,27 @@
+<form class="support-form" data-role="support-ticket-form">
+  <label class="support-field">
+    <span class="support-field__label">Категория</span>
+    <select class="support-field__control" name="category" required>
+      <option value="">Выберите категорию</option>
+      {{#each categories}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+      {{/each}}
+    </select>
+    <span class="support-field__error" data-error-for="category"></span>
+  </label>
+
+  <label class="support-field">
+    <span class="support-field__label">Тема</span>
+    <input class="support-field__control" name="title" type="text" value="{{title}}" required />
+    <span class="support-field__error" data-error-for="title"></span>
+  </label>
+
+  <label class="support-field">
+    <span class="support-field__label">Сообщение</span>
+    <textarea class="support-field__control support-field__control--textarea" name="message" rows="5" required>{{message}}</textarea>
+    <span class="support-field__error" data-error-for="message"></span>
+  </label>
+
+  <button class="support-button support-button--primary" type="submit">{{submitText}}</button>
+  <p class="support-form__message" data-role="support-ticket-form-message"></p>
+</form>

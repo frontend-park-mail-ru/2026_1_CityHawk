@@ -1,5 +1,6 @@
 import { Router } from './router/router.js';
 import { loadTemplates, renderTemplate } from './templates/renderer.js';
+import { initSupportLauncher } from '../components/support-launcher/support-launcher.js';
 import type { RouteRenderer } from '../types/router.js';
 
 const rootNode = document.getElementById('root');
@@ -59,6 +60,11 @@ async function startApp(): Promise<void> {
     '/profile': lazyRoute(() => import('../pages/profile/profile-page.js'), 'profilePage'),
     '/password_reset': lazyRoute(() => import('../pages/password_reset/password_reset-page.js'), 'passwordResetPage'),
     '/register': lazyRoute(() => import('../pages/register/register-page.js'), 'registerPage'),
+    '/support-widget': lazyRoute(() => import('../pages/support-widget/support-widget-page.js'), 'supportWidgetPage'),
+    '/support-widget/new': lazyRoute(() => import('../pages/support-widget/support-widget-page.js'), 'supportWidgetPage'),
+    '/support-widget/tickets': lazyRoute(() => import('../pages/support-widget/support-widget-page.js'), 'supportWidgetPage'),
+    '/support-widget/tickets/:id': lazyRoute(() => import('../pages/support-widget/support-widget-page.js'), 'supportWidgetPage'),
+    '/support/statistics': lazyRoute(() => import('../pages/support-statistics/support-statistics-page.js'), 'supportStatisticsPage'),
   };
 
   const router = new Router({
@@ -68,6 +74,7 @@ async function startApp(): Promise<void> {
   });
 
   router.start();
+  initSupportLauncher();
 }
 
 startApp().catch((error: Error | null | undefined) => {

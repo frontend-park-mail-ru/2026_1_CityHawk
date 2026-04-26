@@ -7,6 +7,7 @@ import './components/form-controls/form-controls.css';
 import './components/event-card/event-card.css';
 import './components/header/header.css';
 import './components/footer/footer.css';
+import './components/support-launcher/support-launcher.css';
 import './modules/home/hero-search.css';
 import './modules/home/home-events-section.css';
 import './modules/home/home-mood-section.css';

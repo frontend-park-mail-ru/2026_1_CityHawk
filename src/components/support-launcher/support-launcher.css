@@ -1,0 +1,85 @@
+.support-launcher {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1000;
+  font-family: var(--font-primary);
+}
+
+.support-launcher__button {
+  min-width: 132px;
+  min-height: 46px;
+  border-radius: 8px;
+  background: var(--home-color-brand);
+  box-shadow: 0 14px 30px var(--home-color-shadow);
+  color: var(--color-blank);
+  font-size: 15px;
+  font-weight: 800;
+  padding: 12px 18px;
+}
+
+.support-launcher__panel {
+  width: min(420px, calc(100vw - 32px));
+  height: min(680px, calc(100vh - 32px));
+  overflow: hidden;
+  border: 1px solid var(--home-color-border);
+  border-radius: 8px;
+  background: var(--home-color-surface);
+  box-shadow: 0 20px 60px var(--home-color-shadow);
+}
+
+.support-launcher__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  border-bottom: 1px solid var(--home-color-border);
+  color: var(--home-color-text);
+  font-size: 15px;
+  font-weight: 800;
+  padding: 0 12px 0 16px;
+}
+
+.support-launcher__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--home-color-text);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.support-launcher__state {
+  position: absolute;
+  left: 16px;
+  top: 60px;
+  color: var(--home-color-text-muted);
+  font-size: 14px;
+}
+
+.support-launcher__iframe {
+  display: block;
+  width: 100%;
+  height: calc(100% - 48px);
+  background: var(--home-color-background);
+}
+
+@media (max-width: 520px) {
+  .support-launcher {
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  .support-launcher__button {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .support-launcher__panel {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+}

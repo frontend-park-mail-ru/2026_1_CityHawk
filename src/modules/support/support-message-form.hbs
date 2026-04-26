@@ -1,0 +1,11 @@
+<form class="support-form support-form--message" data-role="support-message-form">
+  <label class="support-field">
+    <span class="support-field__label">Новое сообщение</span>
+    <textarea class="support-field__control support-field__control--textarea" name="body" rows="4" required {{#if disabled}}disabled{{/if}}></textarea>
+    <span class="support-field__error" data-error-for="body"></span>
+  </label>
+  <button class="support-button support-button--primary" type="submit" {{#if disabled}}disabled{{/if}}>Отправить</button>
+  <p class="support-form__message" data-role="support-message-form-message">
+    {{#if disabled}}Обращение закрыто. Новые сообщения недоступны.{{/if}}
+  </p>
+</form>

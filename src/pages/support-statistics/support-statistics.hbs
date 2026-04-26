@@ -1,0 +1,35 @@
+<main class="support-statistics">
+  <section class="support-statistics__hero">
+    <div class="support-statistics__container">
+      <a class="support-statistics__back" href="/">← На главную</a>
+      <h1 class="support-statistics__title">Статистика обращений</h1>
+      <p class="support-statistics__subtitle">Сводка по статусам и категориям техподдержки.</p>
+    </div>
+  </section>
+
+  <section class="support-statistics__content">
+    <div class="support-statistics__container">
+      {{#if forbidden}}
+        <p class="support-statistics__alert">Недостаточно прав для просмотра статистики.</p>
+      {{else}}
+        <form class="support-statistics__filters" data-role="support-stats-filter">
+          <label>
+            <span>С</span>
+            <input type="datetime-local" name="from" value="{{from}}" />
+          </label>
+          <label>
+            <span>По</span>
+            <input type="datetime-local" name="to" value="{{to}}" />
+          </label>
+          <button type="submit">Показать</button>
+        </form>
+
+        {{#if errorMessage}}
+          <p class="support-statistics__alert">{{errorMessage}}</p>
+        {{/if}}
+
+        {{{content}}}
+      {{/if}}
+    </div>
+  </section>
+</main>

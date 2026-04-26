@@ -1,0 +1,15 @@
+<div class="support-messages">
+  {{#if hasMessages}}
+    {{#each messages}}
+      <article class="support-message support-message--{{authorRole}}">
+        <div class="support-message__meta">
+          <span>{{authorLabel}}</span>
+          <time>{{createdAtText}}</time>
+        </div>
+        <p class="support-message__body">{{body}}</p>
+      </article>
+    {{/each}}
+  {{else}}
+    <p class="support-empty">Сообщений пока нет.</p>
+  {{/if}}
+</div>

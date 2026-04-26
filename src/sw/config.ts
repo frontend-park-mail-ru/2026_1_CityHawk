@@ -33,6 +33,11 @@ const TEMPLATE_URLS = [
   '/src/modules/home/home-mood-section.hbs',
   '/src/modules/profile/profile-aside.hbs',
   '/src/modules/profile/profile-form.hbs',
+  '/src/modules/support/support-message-form.hbs',
+  '/src/modules/support/support-messages.hbs',
+  '/src/modules/support/support-status-badge.hbs',
+  '/src/modules/support/support-ticket-form.hbs',
+  '/src/modules/support/support-ticket-list.hbs',
   '/src/app/app-error.hbs',
   '/src/pages/event/event.hbs',
   '/src/pages/event-list/event-list.hbs',
@@ -42,6 +47,8 @@ const TEMPLATE_URLS = [
   '/src/pages/password_reset/password_reset.hbs',
   '/src/pages/profile/profile.hbs',
   '/src/pages/register/register.hbs',
+  '/src/pages/support-statistics/support-statistics.hbs',
+  '/src/pages/support-widget/support-widget.hbs',
 ];
 
 export const APP_SHELL_URLS = [

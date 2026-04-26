@@ -260,7 +260,7 @@ UI для просмотра OpenAPI.
 Успешный callback:
 
 - выставляет `access_token`, `refresh_token`, `csrf_token`
-- возвращает JSON с сообщением об успешном логине
+- перенаправляет пользователя на главную страницу фронтенда из `FRONTEND_ORIGIN`
 
 ## Profile API
 
@@ -280,6 +280,7 @@ UI для просмотра OpenAPI.
   "email": "user@mail.com",
   "username": "Alice",
   "userSurname": "Ivanova",
+  "role": "user",
   "birthday": "2004-01-12",
   "avatarUrl": "http://example.com/uploads/avatars/file.png",
   "city": {
@@ -848,6 +849,267 @@ Query параметры:
 - `400 invalid place suggestion`
 - `401 Unauthorized`
 
+## Support API
+
+API техподдержки используется iframe-фронтендом и обычными страницами сервиса. Все endpoint'ы требуют авторизации через cookie `access_token`. Изменяющие запросы дополнительно требуют CSRF:
+
+- cookie `csrf_token`
+- header `X-CSRF-Token`
+
+Права доступа:
+
+- `user` создает обращения, видит только свои обращения, редактирует только свои незакрытые обращения и пишет сообщения только в свои обращения;
+- `admin` видит все обращения, меняет статус любого обращения, пишет в любую переписку и получает статистику;
+- роль хранится в `user_account.role`, временно меняется вручную через `psql`.
+
+Временно выдать роль администратора можно так:
+
+```sql
+UPDATE user_account
+SET role = 'admin'
+WHERE email = 'admin@mail.com';
+```
+
+Вернуть обычную роль:
+
+```sql
+UPDATE user_account
+SET role = 'user'
+WHERE email = 'admin@mail.com';
+```
+
+Категории обращений:
+
+- `bug` — баг;
+- `suggestion` — предложение;
+- `product_complaint` — продуктовая жалоба;
+- `other` — другое.
+
+Статусы обращений:
+
+- `open` — открыто;
+- `in_progress` — в работе;
+- `closed` — закрыто.
+
+### POST /api/support/tickets
+
+Создает обращение текущего пользователя.
+
+Тело запроса:
+
+```json
+{
+  "category": "bug",
+  "title": "Не открывается карточка события",
+  "message": "При клике на событие появляется пустой экран."
+}
+```
+
+Успешный ответ `201 Created`:
+
+```json
+{
+  "id": "uuid",
+  "category": "bug",
+  "status": "open",
+  "title": "Не открывается карточка события",
+  "message": "При клике на событие появляется пустой экран.",
+  "createdAt": "2026-04-25T10:00:00Z",
+  "updatedAt": "2026-04-25T10:00:00Z",
+  "closedAt": null
+}
+```
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+- `403 CSRF token mismatch`
+
+### GET /api/support/tickets
+
+Возвращает обращения текущего пользователя. Для `admin` возвращает все обращения.
+
+Query параметры:
+
+- `status` — опционально, один из `open`, `in_progress`, `closed`
+- `category` — опционально, один из `bug`, `suggestion`, `product_complaint`, `other`
+- `limit` — по умолчанию `20`, максимум `100`
+- `offset` — по умолчанию `0`
+
+Успешный ответ:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "category": "bug",
+      "status": "open",
+      "title": "Не открывается карточка события",
+      "message": "При клике на событие появляется пустой экран.",
+      "createdAt": "2026-04-25T10:00:00Z",
+      "updatedAt": "2026-04-25T10:00:00Z",
+      "closedAt": null
+    }
+  ],
+  "limit": 20,
+  "offset": 0
+}
+```
+
+### GET /api/support/tickets/{ticketId}
+
+Возвращает одно обращение текущего пользователя. Для `admin` может вернуть любое обращение.
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+- `404 Support ticket not found`
+
+### PATCH /api/support/tickets/{ticketId}
+
+Редактирует обращение текущего пользователя. Закрытые обращения редактировать нельзя.
+
+Тело запроса:
+
+```json
+{
+  "category": "product_complaint",
+  "title": "Некорректная информация о событии",
+  "message": "В карточке указано неправильное время начала."
+}
+```
+
+Все поля опциональны, но должен быть передан хотя бы один параметр.
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+- `403 CSRF token mismatch`
+- `404 Support ticket not found`
+- `409 Support ticket is closed`
+
+### PATCH /api/support/tickets/{ticketId}/status
+
+Меняет статус обращения. Доступно только пользователю с ролью `admin`.
+
+Тело запроса:
+
+```json
+{
+  "status": "in_progress"
+}
+```
+
+Правила:
+
+- при статусе `closed` backend выставляет `closedAt`;
+- при переходе из `closed` обратно в `open` или `in_progress` backend сбрасывает `closedAt`.
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+- `403 CSRF token mismatch`
+- `403 Forbidden`
+- `404 Support ticket not found`
+
+### GET /api/support/tickets/{ticketId}/messages
+
+Возвращает переписку по обращению текущего пользователя. Для `admin` доступна переписка любого обращения.
+
+Успешный ответ:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "ticketId": "uuid",
+      "authorUserId": "uuid",
+      "authorRole": "user",
+      "body": "Проблема повторяется после перезагрузки страницы.",
+      "createdAt": "2026-04-25T10:05:00Z"
+    }
+  ]
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+- `404 Support ticket not found`
+
+### POST /api/support/tickets/{ticketId}/messages
+
+Добавляет сообщение в переписку по обращению. Для `admin` можно добавить сообщение в любое обращение, в ответе `authorRole` будет `admin`.
+
+Тело запроса:
+
+```json
+{
+  "body": "Проблема повторяется после перезагрузки страницы."
+}
+```
+
+Успешный ответ `201 Created`:
+
+```json
+{
+  "id": "uuid",
+  "ticketId": "uuid",
+  "authorUserId": "uuid",
+  "authorRole": "user",
+  "body": "Проблема повторяется после перезагрузки страницы.",
+  "createdAt": "2026-04-25T10:05:00Z"
+}
+```
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+- `403 CSRF token mismatch`
+- `404 Support ticket not found`
+
+### GET /api/support/stats
+
+Возвращает статистику обращений. Endpoint доступен только пользователю с ролью `admin`.
+
+Query параметры:
+
+- `from` — опционально, RFC3339 timestamp
+- `to` — опционально, RFC3339 timestamp
+
+Успешный ответ:
+
+```json
+{
+  "total": 42,
+  "byStatus": {
+    "open": 10,
+    "in_progress": 12,
+    "closed": 20
+  },
+  "byCategory": {
+    "bug": 18,
+    "suggestion": 8,
+    "product_complaint": 12,
+    "other": 4
+  },
+  "openTotal": 10,
+  "inProgressTotal": 12,
+  "closedTotal": 20
+}
+```
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+
 ## Минимальный frontend-набор
 
 Endpoint'ы, которые чаще всего нужны фронтенду:
@@ -870,3 +1132,11 @@ Endpoint'ы, которые чаще всего нужны фронтенду:
 - `GET /api/search`
 - `GET /api/collections`
 - `GET /api/collections/{collectionId}`
+- `POST /api/support/tickets`
+- `GET /api/support/tickets`
+- `GET /api/support/tickets/{ticketId}`
+- `PATCH /api/support/tickets/{ticketId}`
+- `PATCH /api/support/tickets/{ticketId}/status`
+- `GET /api/support/tickets/{ticketId}/messages`
+- `POST /api/support/tickets/{ticketId}/messages`
+- `GET /api/support/stats`

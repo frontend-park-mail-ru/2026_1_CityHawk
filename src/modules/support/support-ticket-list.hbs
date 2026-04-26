@@ -1,0 +1,23 @@
+<div class="support-list">
+  {{#if hasTickets}}
+    {{#each tickets}}
+      <article class="support-ticket">
+        <div class="support-ticket__main">
+          <div class="support-ticket__meta">
+            <span>#{{shortId}}</span>
+            <span>{{categoryLabel}}</span>
+            <span>{{createdAtText}}</span>
+          </div>
+          <h3 class="support-ticket__title">{{title}}</h3>
+          <p class="support-ticket__message">{{message}}</p>
+        </div>
+        <div class="support-ticket__side">
+          {{{statusBadge}}}
+          <a class="support-link" href="/support-widget/tickets/{{id}}">Открыть</a>
+        </div>
+      </article>
+    {{/each}}
+  {{else}}
+    <p class="support-empty">Обращений пока нет.</p>
+  {{/if}}
+</div>

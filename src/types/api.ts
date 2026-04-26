@@ -161,6 +161,7 @@ export interface User {
   name?: string;
   username?: string;
   userSurname?: string;
+  role?: 'user' | 'admin';
   birthday?: string;
   avatarUrl?: string;
   city?: City | null;
@@ -206,4 +207,75 @@ export interface AuthUser {
 
 export interface AuthOkResponse {
   ok: true;
+}
+
+export type SupportCategory = 'bug' | 'suggestion' | 'product_complaint' | 'other';
+
+export type SupportStatus = 'open' | 'in_progress' | 'closed';
+
+export interface SupportTicket {
+  id: string;
+  category: SupportCategory;
+  status: SupportStatus;
+  title: string;
+  message: string;
+  createdAt: string;
+  updatedAt: string;
+  closedAt: string | null;
+}
+
+export interface SupportTicketListResponse {
+  items: SupportTicket[];
+  limit: number;
+  offset: number;
+}
+
+export interface SupportTicketQueryParams {
+  status?: SupportStatus;
+  category?: SupportCategory;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateSupportTicketPayload {
+  category: SupportCategory;
+  title: string;
+  message: string;
+}
+
+export type UpdateSupportTicketPayload = Partial<CreateSupportTicketPayload>;
+
+export interface UpdateSupportTicketStatusPayload {
+  status: SupportStatus;
+}
+
+export interface SupportMessage {
+  id: string;
+  ticketId: string;
+  authorUserId: string;
+  authorRole: 'user' | 'admin';
+  body: string;
+  createdAt: string;
+}
+
+export interface SupportMessageListResponse {
+  items: SupportMessage[];
+}
+
+export interface CreateSupportMessagePayload {
+  body: string;
+}
+
+export interface SupportStats {
+  total: number;
+  byStatus: Record<SupportStatus, number>;
+  byCategory: Record<SupportCategory, number>;
+  openTotal: number;
+  inProgressTotal: number;
+  closedTotal: number;
+}
+
+export interface SupportStatsQueryParams {
+  from?: string;
+  to?: string;
 }
