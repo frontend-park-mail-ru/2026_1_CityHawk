@@ -12,13 +12,21 @@
       </div>
 
       <div class="event-location__map" data-role="event-location-map" data-latitude="{{mapLatitude}}" data-longitude="{{mapLongitude}}" data-map-title="{{mapTitle}}">
-        {{#if hasMapCoordinates}}
-          <div class="event-location__map-canvas" data-role="event-location-map-canvas" aria-label="{{mapAlt}}"></div>
-        {{else}}
-          <img src="{{mapImageUrl}}" alt="{{mapAlt}}" class="event-location__map-image" />
-          <span class="event-location__map-pin"></span>
-        {{/if}}
+        <img src="{{mapImageUrl}}" alt="{{mapAlt}}" class="event-location__map-image" />
+        <span class="event-location__map-pin"></span>
       </div>
     </div>
+  </div>
+
+  <div class="event-location__modal" data-role="event-location-modal" hidden>
+    <button type="button" class="event-location__modal-backdrop" data-role="event-location-modal-close" aria-label="Закрыть карту"></button>
+    <section class="event-location__modal-dialog" role="dialog" aria-modal="true" aria-label="Карта события">
+      <button type="button" class="event-location__modal-close" data-role="event-location-modal-close" aria-label="Закрыть карту">×</button>
+      {{#if hasMapCoordinates}}
+        <div class="event-location__modal-canvas" data-role="event-location-modal-canvas" aria-label="{{mapAlt}}"></div>
+      {{else}}
+        <img src="{{mapImageUrl}}" alt="{{mapAlt}}" class="event-location__modal-image" />
+      {{/if}}
+    </section>
   </div>
 </section>
