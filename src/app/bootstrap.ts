@@ -1,6 +1,5 @@
 import { Router } from './router/router.js';
 import { loadTemplates, renderTemplate } from './templates/renderer.js';
-import { initSupportLauncher } from '../components/support-launcher/support-launcher.js';
 import type { RouteRenderer } from '../types/router.js';
 
 const rootNode = document.getElementById('root');
@@ -82,7 +81,6 @@ async function startApp(): Promise<void> {
   });
 
   router.start();
-  initSupportLauncher();
 }
 
 startApp().catch((error: Error | null | undefined) => {

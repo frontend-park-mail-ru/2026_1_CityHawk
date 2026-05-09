@@ -44,6 +44,7 @@
 }
 
 .events-map-canvas__marker {
+    position: relative;
     width: 48px;
     height: 48px;
     border-radius: 12px;
@@ -55,7 +56,15 @@
     transition:
         transform 0.2s ease,
         box-shadow 0.2s ease,
-        border-color 0.2s ease;
+        border-color 0.2s ease,
+        z-index 0.2s ease;
+    cursor: pointer;
+    z-index: 20;
+}
+
+.events-map-canvas__marker:hover {
+    transform: scale(1.16) translateY(-2px);
+    z-index: 260;
 }
 
 .events-map-canvas__marker--active {
@@ -64,6 +73,7 @@
     border-width: 2px;
     border-color: var(--events-map-marker-border);
     box-shadow: none;
+    z-index: 240;
 }
 
 .events-map-canvas__marker-image {
@@ -71,6 +81,35 @@
     height: 100%;
     object-fit: cover;
     display: block;
+}
+
+.events-map-canvas__marker-title {
+    position: absolute;
+    left: 50%;
+    bottom: -10px;
+    transform: translate(-50%, 100%);
+    width: max-content;
+    max-width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 6px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--ui-filter-shell-border);
+    background: var(--ui-dropdown-surface);
+    color: var(--home-color-text);
+    box-shadow: var(--ui-dropdown-shadow);
+    font-size: 12px;
+    line-height: 1.2;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.events-map-canvas__marker:hover .events-map-canvas__marker-title,
+.events-map-canvas__marker--active .events-map-canvas__marker-title {
+    opacity: 1;
+    transform: translate(-50%, calc(100% + 2px));
 }
 
 .events-map-canvas__toolbar {
@@ -179,7 +218,7 @@
     border: 1px solid var(--home-color-border);
     background: var(--ui-dropdown-surface);
     box-shadow: var(--ui-dropdown-shadow);
-    z-index: 20;
+    z-index: 1400;
 }
 
 .events-map-canvas__custom-option {
@@ -193,6 +232,9 @@
     font-size: var(--home-text-5);
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .events-map-canvas__custom-option:hover,
@@ -232,8 +274,20 @@
 }
 
 @media (max-width: 1100px) {
+    .events-map-canvas__toolbar {
+        overflow-x: auto;
+        overflow-y: visible;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .events-map-canvas__toolbar::-webkit-scrollbar {
+        display: none;
+    }
+
     .events-map-canvas__filters {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(170px, 1fr));
+        min-width: max-content;
     }
 
     .events-map-canvas__map {
@@ -251,11 +305,45 @@
         top: 10px;
         left: 10px;
         right: 10px;
-        padding: 16px;
-        border-radius: 24px;
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        backdrop-filter: none;
     }
 
     .events-map-canvas__filters {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 8px;
+        min-width: max-content;
+        padding: 2px 2px 6px;
+    }
+
+    .events-map-canvas__filter {
+        flex: 0 0 auto;
+    }
+
+    .events-map-canvas__custom-select {
+        width: auto;
+    }
+
+    .events-map-canvas__custom-trigger {
+        width: auto;
+        min-height: 34px;
+        padding: 0 34px 0 14px;
+        border-radius: 999px;
+        font-size: 14px;
+        max-width: 170px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: max-width 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .events-map-canvas__custom-trigger--active {
+        max-width: 240px;
     }
 }

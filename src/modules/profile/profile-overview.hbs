@@ -40,8 +40,11 @@
             <div class="profile-stat__label">подписки</div>
           </button>
         </div>
-        <button class="profile__button profile__button--primary profile-hero__edit" type="button" data-role="profile-edit-button">
+        <button class="profile__button profile__button--primary profile-hero__edit ui-button ui-button--primary ui-button--pill" type="button" data-role="profile-edit-button">
           Редактировать
+        </button>
+        <button class="profile__button profile__button--secondary profile-hero__find ui-button ui-button--ghost ui-button--pill" type="button" data-role="profile-open-friends">
+          Найти друзей
         </button>
       </div>
     </section>
@@ -66,7 +69,7 @@
     <section class="profile-section profile-section--home-like">
       <div class="home-events__head">
         <h2 class="home-events__title">Избранное</h2>
-        <a href="/events" class="home-events__link">показать ещё...</a>
+        <a href="{{favoriteMoreHref}}" class="home-events__link">{{favoriteMoreLabel}}</a>
       </div>
 
       {{#if favoriteEventCards.length}}
@@ -86,10 +89,10 @@
     <section class="profile-follows-modal__dialog" role="dialog" aria-modal="true" aria-label="Подписки и подписчики">
       <header class="profile-follows-modal__header">
         <div class="profile-follows-modal__tabs">
-          <button type="button" class="profile-follows-modal__tab" data-role="profile-follows-tab" data-tab="followers">
+          <button type="button" class="profile-follows-modal__tab ui-button ui-button--ghost" data-role="profile-follows-tab" data-tab="followers">
             Подписчики
           </button>
-          <button type="button" class="profile-follows-modal__tab" data-role="profile-follows-tab" data-tab="following">
+          <button type="button" class="profile-follows-modal__tab ui-button ui-button--ghost" data-role="profile-follows-tab" data-tab="following">
             Подписки
           </button>
         </div>
@@ -97,6 +100,15 @@
           ×
         </button>
       </header>
+      <div class="profile-follows-modal__search-row">
+        <input
+          type="text"
+          class="profile-follows-modal__search-input"
+          data-role="profile-follows-search"
+          placeholder="Поиск друзей по имени или городу"
+          autocomplete="off"
+        />
+      </div>
       <div class="profile-follows-modal__list" data-role="profile-follows-list"></div>
     </section>
   </div>

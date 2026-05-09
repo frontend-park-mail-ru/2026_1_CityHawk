@@ -80,6 +80,13 @@
 }
 
 .profile__avatar-edit--form {
+    position: static;
+    right: auto;
+    bottom: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
     width: auto;
     min-width: 170px;
     height: 44px;
@@ -287,37 +294,24 @@
 .profile__button {
     width: var(--width-button-half, 230px);
     height: var(--height-button, 54px);
-    border-radius: var(--radius-button, 40px);
     font-family: var(--font-primary, sans-serif);
     font-size: var(--text-button, 16px);
-    cursor: pointer;
-    transition: all 0.2s ease;
+    --ui-button-height: var(--height-button, 54px);
+    --ui-button-radius: var(--radius-button, 40px);
 }
 
 .profile__button--secondary {
-    background: transparent;
-    color: var(--color-blank);
-    border: 2px solid var(--color-background-tone-1);
-}
-
-.profile__button--secondary:hover {
-    border-color: var(--ui-interactive-border-hover, var(--color-accent-3));
-    background: var(--ui-interactive-bg-hover, rgba(255, 255, 255, 0.14));
-    color: var(--ui-interactive-text-hover, var(--color-accent-3));
+    --ui-button-border: var(--color-background-tone-1);
+    --ui-button-bg: transparent;
+    --ui-button-bg-hover: var(--ui-interactive-bg-hover, rgba(255, 255, 255, 0.14));
+    --ui-button-text: var(--color-blank);
 }
 
 .profile__button--primary {
-    background: var(--color-background-tone-1);
-    color: var(--color-blank);
-    border: none;
-}
-
-.profile__button--primary:hover {
-    background: var(--ui-interactive-bg-hover, var(--color-accent-3));
-}
-
-.profile__button:active {
-    transform: scale(0.98);
+    --ui-button-border: var(--color-background-tone-1);
+    --ui-button-bg: var(--color-background-tone-1);
+    --ui-button-bg-hover: var(--ui-interactive-bg-hover, var(--color-accent-3));
+    --ui-button-text: var(--color-blank);
 }
 
 .profile__field--error .form-field__input {

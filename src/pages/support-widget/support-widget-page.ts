@@ -137,35 +137,6 @@ function postParentMessage(type: string): void {
   }
 }
 
-async function getWidgetHomeContent(): Promise<string> {
-  let latestTickets: SupportTicket[] = [];
-  let errorMessage = '';
-
-  try {
-    const response = await getSupportTickets({ limit: 5, offset: 0 });
-    latestTickets = Array.isArray(response.items) ? response.items : [];
-  } catch (error) {
-    errorMessage = getSupportErrorMessage(error, 'Не удалось загрузить обращения');
-  }
-
-  return [
-    '<section class="support-section">',
-    '<div class="support-section__head">',
-    '<h2 class="support-section__title">Поддержка CityHawk</h2>',
-    '<a class="support-button support-button--small" href="/support-widget/new">Создать</a>',
-    '</div>',
-    '<p class="support-empty">Создайте новое обращение или откройте историю переписки по уже созданным заявкам.</p>',
-    '</section>',
-    '<section class="support-section">',
-    '<div class="support-section__head">',
-    '<h2 class="support-section__title">Последние обращения</h2>',
-    '<a class="support-link" href="/support-widget/tickets">Все</a>',
-    '</div>',
-    errorMessage ? `<p class="support-alert support-alert--error">${escapeHtml(errorMessage)}</p>` : renderTicketList(latestTickets),
-    '</section>',
-  ].join('');
-}
-
 async function getTicketListContent(): Promise<string> {
   const response = await getSupportTickets({ limit: 100, offset: 0 });
   const tickets = Array.isArray(response.items) ? response.items : [];
@@ -281,9 +252,8 @@ function renderWidget(content: string, path: string, errorMessage = ''): string 
   return renderTemplate('support-widget', {
     content,
     errorMessage,
-    isHome: path === '/support-widget',
     isNew: path === '/support-widget/new',
-    isTickets: path.startsWith('/support-widget/tickets'),
+    isTickets: path === '/support-widget' || path.startsWith('/support-widget/tickets'),
   });
 }
 
@@ -293,11 +263,9 @@ export async function supportWidgetPage(context: RouteContext): Promise<RouteVie
   let errorMessage = '';
 
   try {
-    if (path === '/support-widget' || path === '/support-widget/new') {
-      content = path === '/support-widget'
-        ? await getWidgetHomeContent()
-        : `<section class="support-section"><h2 class="support-section__title">Новое обращение</h2>${renderTicketForm()}</section>`;
-    } else if (path === '/support-widget/tickets') {
+    if (path === '/support-widget/new') {
+      content = `<section class="support-section"><h2 class="support-section__title">Новое обращение</h2>${renderTicketForm()}</section>`;
+    } else if (path === '/support-widget' || path === '/support-widget/tickets') {
       content = await getTicketListContent();
     } else {
       content = await getTicketDetailsContent(params.id || '');

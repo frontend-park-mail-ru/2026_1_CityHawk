@@ -27,9 +27,17 @@
 
     {{#if tags.length}}
       <div class="event-card__meta">
-        {{#each tags}}
-          <span class="event-card__tag">{{this}}</span>
-        {{/each}}
+        <div class="event-card__tags-full">
+          {{#each tags}}
+            <span class="event-card__tag">{{this}}</span>
+          {{/each}}
+        </div>
+        <div class="event-card__tags-mobile{{#if extraTagsCount}} event-card__tags-mobile--with-count{{/if}}">
+          <span class="event-card__tag">{{primaryTag}}</span>
+          {{#if extraTagsCount}}
+            <span class="event-card__tag event-card__tag--count">+{{extraTagsCount}}</span>
+          {{/if}}
+        </div>
       </div>
     {{/if}}
   </a>
@@ -62,9 +70,17 @@
 
     {{#if tags.length}}
       <div class="event-card__meta">
-        {{#each tags}}
-          <span class="event-card__tag">{{this}}</span>
-        {{/each}}
+        <div class="event-card__tags-full">
+          {{#each tags}}
+            <span class="event-card__tag">{{this}}</span>
+          {{/each}}
+        </div>
+        <div class="event-card__tags-mobile{{#if extraTagsCount}} event-card__tags-mobile--with-count{{/if}}">
+          <span class="event-card__tag">{{primaryTag}}</span>
+          {{#if extraTagsCount}}
+            <span class="event-card__tag event-card__tag--count">+{{extraTagsCount}}</span>
+          {{/if}}
+        </div>
       </div>
     {{/if}}
   </div>

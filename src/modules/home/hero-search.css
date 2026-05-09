@@ -147,7 +147,7 @@
     }
 
     .hero-search__content {
-        padding-top: 120px;
+        padding-top: 84px;
     }
 
     .hero-search__title {
@@ -157,6 +157,12 @@
     .hero-search__subtitle {
         margin-bottom: 28px;
         font-size: var(--home-text-hero-subtitle-mobile);
+    }
+
+    .hero-search__form-wrap,
+    .hero-search__form {
+        max-width: 520px;
+        margin: 0 auto;
     }
 
     .hero-search__input {

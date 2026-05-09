@@ -70,9 +70,15 @@
 }
 
 .support-statistics__filters button {
-  background: var(--home-color-brand);
-  color: var(--color-blank);
-  font-weight: 800;
+  --ui-button-height: 44px;
+  --ui-button-padding-x: 12px;
+  --ui-button-radius: 8px;
+  --ui-button-border: var(--home-color-brand);
+  --ui-button-bg: var(--home-color-brand);
+  --ui-button-bg-hover: var(--ui-interactive-bg-hover);
+  --ui-button-text: var(--color-blank);
+  --ui-button-font-size: 15px;
+  --ui-button-font-weight: 800;
 }
 
 .support-statistics__alert {

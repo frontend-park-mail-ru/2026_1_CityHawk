@@ -1,5 +1,7 @@
 import { getMeOrNull } from '../../api/profile.api.js';
 import { getEvents } from '../../api/events.api.js';
+import { getMyFavorites } from '../../api/favorites.api.js';
+import { getTags } from '../../api/tags.api.js';
 import {
   followUser,
   getMyFollowers,
@@ -141,6 +143,36 @@ function getFollowDisplayName(user: Partial<FollowUser>): string {
   return [first, last].filter(Boolean).join(' ') || 'Пользователь';
 }
 
+function normalizeInterestValues(raw: unknown): string[] {
+  if (Array.isArray(raw)) {
+    return raw
+      .map((item) => {
+        if (typeof item === 'string' || typeof item === 'number') {
+          return String(item).trim();
+        }
+
+        if (item && typeof item === 'object') {
+          const source = item as Record<string, unknown>;
+          const id = String(source.id || source.tagId || '').trim();
+          const name = String(source.name || source.label || '').trim();
+          return id || name;
+        }
+
+        return '';
+      })
+      .filter(Boolean);
+  }
+
+  if (typeof raw === 'string') {
+    return raw
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
 function getFallbackFollowers(): FollowUser[] {
   return [
     {
@@ -184,19 +216,24 @@ function getFallbackFollowing(): FollowUser[] {
 }
 
 export async function profilePage({ navigate }: RouteContext): Promise<RouteView> {
+  const searchParams = new URLSearchParams(window.location.search);
+  const showAllFavorites = String(searchParams.get('favorites') || '').trim() === 'all';
+  const favoriteLimit = showAllFavorites ? 24 : 4;
+
   const me = await getMeOrNull().catch(() => null);
   const displayName = getHeaderUserDisplayName(me) || 'Пользователь';
   const fallbackEvents = getFallbackEvents();
   const fallbackFollowers = getFallbackFollowers();
   const fallbackFollowing = getFallbackFollowing();
 
-  const [myEventsResult, favoriteEventsResult, followersResult, followingResult] = await Promise.allSettled([
+  const [myEventsResult, favoriteEventsResult, followersResult, followingResult, tagsResult] = await Promise.allSettled([
     me?.id
       ? getEvents({ authorId: String(me.id), limit: 4, offset: 0 })
       : Promise.resolve({ items: fallbackEvents }),
-    getEvents({ limit: 4, offset: 4 }),
+    getMyFavorites(favoriteLimit, 0),
     getMyFollowers(100, 0),
     getMyFollowing(100, 0),
+    getTags(),
   ]);
 
   const myEvents = myEventsResult.status === 'fulfilled' && Array.isArray(myEventsResult.value?.items)
@@ -205,7 +242,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
   const favoriteEvents = favoriteEventsResult.status === 'fulfilled'
     && Array.isArray(favoriteEventsResult.value?.items)
     ? favoriteEventsResult.value.items
-    : fallbackEvents;
+    : [];
   const followers = followersResult.status === 'fulfilled'
     && Array.isArray(followersResult.value?.items)
     ? followersResult.value.items
@@ -214,6 +251,24 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
     && Array.isArray(followingResult.value?.items)
     ? followingResult.value.items
     : fallbackFollowing;
+  const tagItems = tagsResult.status === 'fulfilled' && Array.isArray(tagsResult.value?.items)
+    ? tagsResult.value.items
+    : [];
+
+  const interestIdToLabel = new Map<string, string>(
+    tagItems
+      .map((tag) => [String(tag?.id || '').trim(), String(tag?.name || '').trim()] as const)
+      .filter(([id, name]) => Boolean(id && name)),
+  );
+  const rawInterestValues = normalizeInterestValues((me as { interestTagIds?: unknown; interests?: unknown } | null)?.interestTagIds)
+    .concat(normalizeInterestValues((me as { interestTagIds?: unknown; interests?: unknown } | null)?.interests));
+  const interestLabels = Array.from(new Set(
+    rawInterestValues
+      .map((value) => interestIdToLabel.get(value) || value)
+      .map((value) => String(value || '').trim())
+      .filter(Boolean),
+  ));
+  const bio = String((me as { bio?: string } | null)?.bio || '').trim();
 
   const user = {
     displayName,
@@ -225,15 +280,17 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
     cityName: me?.city?.name || 'Не указан',
     initials: getUserInitials(displayName),
     avatarUrl: me?.avatarUrl || '',
-    bio: 'Люблю открывать новые места в городе, ходить на события и сохранять лучшие маршруты.',
-    tags: ['Городские маршруты', 'События', 'Фотолокации'],
+    bio: bio || 'Описание пока не добавлено',
+    tags: interestLabels,
   };
 
   const html = renderTemplate('profile', {
     user,
     headerSearch: { query: '' },
     myEventCards: myEvents.slice(0, 4).map(mapEventToProfileCard),
-    favoriteEventCards: favoriteEvents.slice(0, 4).map(mapEventToProfileCard),
+    favoriteEventCards: favoriteEvents.slice(0, favoriteLimit).map(mapEventToProfileCard),
+    favoriteMoreHref: showAllFavorites ? '/profile' : '/profile?favorites=all',
+    favoriteMoreLabel: showAllFavorites ? 'свернуть' : 'показать ещё...',
     stats: {
       myEvents: followers.length,
       favorites: following.length,
@@ -250,6 +307,8 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       const headerSearchForm = root.querySelector('[data-role="header-search-form"]');
       const followsModal = root.querySelector<HTMLElement>('[data-role="profile-follows-modal"]');
       const followsList = root.querySelector<HTMLElement>('[data-role="profile-follows-list"]');
+      const followsSearchInput = root.querySelector<HTMLInputElement>('[data-role="profile-follows-search"]');
+      const openFriendsButton = root.querySelector<HTMLButtonElement>('[data-role="profile-open-friends"]');
       const openFollowsButtons = Array.from(
         root.querySelectorAll<HTMLButtonElement>('[data-role="profile-open-follows"]'),
       );
@@ -265,6 +324,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       let followersState = Array.isArray(followers) ? [...followers] : [];
       let followingState = Array.isArray(following) ? [...following] : [];
       let activeFollowTab: 'followers' | 'following' = 'followers';
+      let followsSearchQuery = '';
       let pendingFollowUserId = '';
 
       const handleEditClick = (): void => {
@@ -332,15 +392,25 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           return;
         }
 
-        const items = activeFollowTab === 'followers' ? followersState : followingState;
+        const sourceItems = activeFollowTab === 'followers' ? followersState : followingState;
+        const normalizedQuery = followsSearchQuery.trim().toLowerCase();
+        const items = normalizedQuery
+          ? sourceItems.filter((item) => {
+            const name = getFollowDisplayName(item).toLowerCase();
+            const city = String(item.city?.name || '').trim().toLowerCase();
+            return name.includes(normalizedQuery) || city.includes(normalizedQuery);
+          })
+          : sourceItems;
         followsList.innerHTML = '';
 
         if (!items.length) {
           const empty = document.createElement('p');
           empty.className = 'profile-follows-modal__empty';
-          empty.textContent = activeFollowTab === 'followers'
-            ? 'Пока нет подписчиков'
-            : 'Пока нет подписок';
+          empty.textContent = normalizedQuery
+            ? 'Ничего не найдено по этому запросу'
+            : activeFollowTab === 'followers'
+              ? 'Пока нет подписчиков'
+              : 'Пока нет подписок';
           followsList.append(empty);
           return;
         }
@@ -379,7 +449,9 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
             const isFollowingUser = Boolean(item.isFollowing);
             const actionButton = document.createElement('button');
             actionButton.type = 'button';
-            actionButton.className = `profile-follows-item__button${isFollowingUser ? ' profile-follows-item__button--ghost' : ''}`;
+            actionButton.className = `profile-follows-item__button ui-button ui-button--pill ${
+              isFollowingUser ? 'ui-button--ghost profile-follows-item__button--ghost' : 'ui-button--primary'
+            }`;
             actionButton.dataset.role = 'profile-follow-toggle';
             actionButton.dataset.userId = userId;
             actionButton.dataset.following = isFollowingUser ? '1' : '0';
@@ -398,9 +470,20 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         }
 
         setFollowTab(tab);
+        followsSearchQuery = '';
+        if (followsSearchInput instanceof HTMLInputElement) {
+          followsSearchInput.value = '';
+        }
         renderFollows();
         followsModal.hidden = false;
         document.body.style.overflow = 'hidden';
+      };
+
+      const openFriendsModal = (): void => {
+        openFollowsModal('followers');
+        if (followsSearchInput instanceof HTMLInputElement) {
+          followsSearchInput.focus();
+        }
       };
 
       const closeFollowsModal = (): void => {
@@ -435,6 +518,14 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
 
       const handleFollowsCloseClick = (): void => {
         closeFollowsModal();
+      };
+
+      const handleFollowsSearchInput = (): void => {
+        if (!(followsSearchInput instanceof HTMLInputElement)) {
+          return;
+        }
+        followsSearchQuery = String(followsSearchInput.value || '');
+        renderFollows();
       };
 
       const handleWindowKeydown = (event: KeyboardEvent): void => {
@@ -515,9 +606,15 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       if (editButton instanceof HTMLButtonElement) {
         editButton.addEventListener('click', handleEditClick);
       }
+      if (openFriendsButton instanceof HTMLButtonElement) {
+        openFriendsButton.addEventListener('click', openFriendsModal);
+      }
       openFollowsButtons.forEach((button) => button.addEventListener('click', handleOpenFollowsClick));
       followsTabButtons.forEach((button) => button.addEventListener('click', handleFollowsTabClick));
       closeFollowsButtons.forEach((button) => button.addEventListener('click', handleFollowsCloseClick));
+      if (followsSearchInput instanceof HTMLInputElement) {
+        followsSearchInput.addEventListener('input', handleFollowsSearchInput);
+      }
       if (followsList instanceof HTMLElement) {
         followsList.addEventListener('click', handleFollowsListClick);
       }
@@ -536,10 +633,16 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         if (editButton instanceof HTMLButtonElement) {
           editButton.removeEventListener('click', handleEditClick);
         }
+        if (openFriendsButton instanceof HTMLButtonElement) {
+          openFriendsButton.removeEventListener('click', openFriendsModal);
+        }
 
         openFollowsButtons.forEach((button) => button.removeEventListener('click', handleOpenFollowsClick));
         followsTabButtons.forEach((button) => button.removeEventListener('click', handleFollowsTabClick));
         closeFollowsButtons.forEach((button) => button.removeEventListener('click', handleFollowsCloseClick));
+        if (followsSearchInput instanceof HTMLInputElement) {
+          followsSearchInput.removeEventListener('input', handleFollowsSearchInput);
+        }
         if (followsList instanceof HTMLElement) {
           followsList.removeEventListener('click', handleFollowsListClick);
         }

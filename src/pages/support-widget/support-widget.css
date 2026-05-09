@@ -130,21 +130,8 @@
   font-size: 13px;
 }
 
-.support-button,
-.support-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 800;
-  min-height: 40px;
-  padding: 9px 14px;
-}
-
 .support-button {
-  background: var(--home-color-brand);
-  color: var(--color-blank);
+  min-width: 140px;
 }
 
 .support-button:disabled {
@@ -153,11 +140,13 @@
 }
 
 .support-button--small {
-  min-height: 34px;
-  padding: 7px 12px;
+  min-width: 112px;
 }
 
 .support-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--home-color-brand-light);
 }
 

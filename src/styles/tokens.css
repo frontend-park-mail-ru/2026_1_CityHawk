@@ -76,14 +76,14 @@
     --home-text-3: 24px;
     --home-text-4: 20px;
     --home-text-5: 16px;
-    --home-text-logo: 40px;
+    --home-text-logo: 32px;
     --home-text-hero-title-tablet: 58px;
-    --home-text-logo-mobile: 40px;
+    --home-text-logo-mobile: 20px;
     --home-text-hero-title-mobile: 42px;
-    --home-text-hero-subtitle-mobile: 18px;
+    --home-text-hero-subtitle-mobile: 16px;
     --home-text-input-mobile: 16px;
-    --home-text-search-button-mobile: 24px;
-    --home-text-section-title-mobile: 26px;
+    --home-text-search-button-mobile: 20px;
+    --home-text-section-title-mobile: 24px;
 
     --home-content-width: 1240px;
     --home-side-padding: 24px;

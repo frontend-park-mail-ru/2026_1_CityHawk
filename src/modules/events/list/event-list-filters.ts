@@ -92,6 +92,26 @@ function attachCustomDropdowns(form: HTMLFormElement): () => void {
   const selects = Array.from(form.querySelectorAll<HTMLSelectElement>('select.event-list-filters__input'));
   const detachList: Array<() => void> = [];
   let openMenu: HTMLElement | null = null;
+  const defaultMenuParent = new WeakMap<HTMLElement, HTMLElement>();
+
+  const placeMenu = (menu: HTMLElement, trigger: HTMLButtonElement) => {
+    const rect = trigger.getBoundingClientRect();
+    menu.style.position = 'fixed';
+    menu.style.left = `${Math.round(rect.left)}px`;
+    menu.style.top = `${Math.round(rect.bottom + 8)}px`;
+    menu.style.width = `${Math.round(rect.width)}px`;
+  };
+
+  const restoreMenu = (menu: HTMLElement) => {
+    const parent = defaultMenuParent.get(menu);
+    if (parent instanceof HTMLElement) {
+      parent.append(menu);
+    }
+    menu.style.position = '';
+    menu.style.left = '';
+    menu.style.top = '';
+    menu.style.width = '';
+  };
 
   const closeOpenMenu = () => {
     if (!openMenu) {
@@ -101,6 +121,7 @@ function attachCustomDropdowns(form: HTMLFormElement): () => void {
     const trigger = openMenu.closest('.event-list-filters__custom-select')
       ?.querySelector<HTMLButtonElement>('.event-list-filters__custom-trigger');
     openMenu.hidden = true;
+    restoreMenu(openMenu);
     trigger?.setAttribute('aria-expanded', 'false');
     openMenu = null;
   };
@@ -140,6 +161,7 @@ function attachCustomDropdowns(form: HTMLFormElement): () => void {
     });
 
     custom.append(trigger, menu);
+    defaultMenuParent.set(menu, custom);
     field.append(custom);
     select.classList.add('event-list-filters__input--hidden');
 
@@ -164,6 +186,10 @@ function attachCustomDropdowns(form: HTMLFormElement): () => void {
       }
 
       if (menu.hidden) {
+        if (menu.parentElement !== document.body) {
+          document.body.append(menu);
+        }
+        placeMenu(menu, trigger);
         menu.hidden = false;
         trigger.setAttribute('aria-expanded', 'true');
         openMenu = menu;
@@ -211,6 +237,12 @@ function attachCustomDropdowns(form: HTMLFormElement): () => void {
       }
     };
 
+    const handleWindowChange = () => {
+      if (openMenu === menu) {
+        placeMenu(menu, trigger);
+      }
+    };
+
     const handleSelectChange = () => {
       sync();
     };
@@ -219,6 +251,8 @@ function attachCustomDropdowns(form: HTMLFormElement): () => void {
     menu.addEventListener('click', handleMenuClick);
     document.addEventListener('click', handleDocumentClick);
     document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('scroll', handleWindowChange, true);
+    window.addEventListener('resize', handleWindowChange);
     select.addEventListener('change', handleSelectChange);
 
     detachList.push(() => {
@@ -226,8 +260,11 @@ function attachCustomDropdowns(form: HTMLFormElement): () => void {
       menu.removeEventListener('click', handleMenuClick);
       document.removeEventListener('click', handleDocumentClick);
       document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('scroll', handleWindowChange, true);
+      window.removeEventListener('resize', handleWindowChange);
       select.removeEventListener('change', handleSelectChange);
       select.classList.remove('event-list-filters__input--hidden');
+      restoreMenu(menu);
       custom.remove();
       if (openMenu === menu) {
         openMenu = null;

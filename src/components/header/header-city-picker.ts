@@ -8,6 +8,7 @@ interface HeaderCityPickerOptions {
 
 let cachedCities: City[] | null = null;
 let cachedCitiesPromise: Promise<City[]> | null = null;
+const DEFAULT_CITY_NAME = 'Москва';
 
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -54,7 +55,7 @@ function getInitialCityState(): { cityId: string; cityName: string } {
 
   return {
     cityId,
-    cityName,
+    cityName: cityName || DEFAULT_CITY_NAME,
   };
 }
 
@@ -82,7 +83,7 @@ export function attachHeaderCityPicker(
   let selected = getInitialCityState();
 
   const setLabel = () => {
-    label.textContent = selected.cityName || 'Все города';
+    label.textContent = selected.cityName || DEFAULT_CITY_NAME;
   };
 
   const closeMenu = () => {
@@ -115,9 +116,11 @@ export function attachHeaderCityPicker(
     const cityButtons = Array.from(menu.querySelectorAll<HTMLButtonElement>('[data-role="header-city-option"]'));
     cityButtons.forEach((button) => {
       const buttonCityId = String(button.dataset.cityId || '').trim();
+      const buttonCityName = String(button.dataset.cityName || '').trim().toLowerCase();
+      const selectedCityName = String(selected.cityName || '').trim().toLowerCase();
       const isSelected = selected.cityId
         ? buttonCityId === selected.cityId
-        : buttonCityId === '';
+        : Boolean(selectedCityName && buttonCityName === selectedCityName);
 
       button.classList.toggle('site-header__city-option--active', isSelected);
       button.setAttribute('aria-selected', isSelected ? 'true' : 'false');
@@ -138,15 +141,18 @@ export function attachHeaderCityPicker(
     optionsRoot.innerHTML = cities.map(buildOptionHTML).join('');
     loaded = true;
 
-    if (!selected.cityName && selected.cityId) {
-      const matchedCity = cities.find((city) => city.id === selected.cityId);
-      if (matchedCity) {
-        selected = {
-          cityId: matchedCity.id,
-          cityName: matchedCity.name,
-        };
-        setLabel();
-      }
+    const selectedCityName = String(selected.cityName || '').trim().toLowerCase();
+    const matchedCity = cities.find((city) => (
+      (selected.cityId && city.id === selected.cityId)
+      || (!selected.cityId && selectedCityName && city.name.trim().toLowerCase() === selectedCityName)
+    ));
+
+    if (matchedCity) {
+      selected = {
+        cityId: matchedCity.id,
+        cityName: matchedCity.name,
+      };
+      setLabel();
     }
 
     markSelectedOption();

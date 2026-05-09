@@ -38,21 +38,6 @@
 
 .event-card--catalog {
     min-width: 0;
-    padding: 12px;
-    border: 1px solid rgba(142, 160, 176, 0.16);
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.08);
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.event-card--catalog:hover,
-.event-card--catalog:focus-within {
-    transform: translateY(-4px);
-    border-color: var(--home-color-border);
-    box-shadow: 0 14px 30px var(--home-color-shadow);
 }
 
 .event-list-catalog__empty {
@@ -82,7 +67,7 @@
 
 @media (max-width: 768px) {
     .event-list-catalog__grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .event-list-catalog__head {

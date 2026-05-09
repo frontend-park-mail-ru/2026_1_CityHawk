@@ -113,9 +113,49 @@ function mapEventImagesToGalleryViewModel(rawEvent: EventDetailsLike): GalleryIm
   ];
 }
 
+function toFiniteCoordinate(value: unknown): number | undefined {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function resolveEventMapCoordinates(rawEvent: EventDetailsLike): { latitude?: number; longitude?: number } {
+  const sessions = Array.isArray(rawEvent.sessions) ? rawEvent.sessions : [];
+  const firstSessionPlace = sessions[0]?.place as LoosePlace | null | undefined;
+  const nextSessionPlace = (rawEvent as unknown as { nextSession?: { place?: LoosePlace | null } })
+    .nextSession?.place;
+
+  const fromFirstSession = {
+    latitude: toFiniteCoordinate(firstSessionPlace?.latitude),
+    longitude: toFiniteCoordinate(firstSessionPlace?.longitude),
+  };
+  if (fromFirstSession.latitude !== undefined && fromFirstSession.longitude !== undefined) {
+    return fromFirstSession;
+  }
+
+  const fromNextSession = {
+    latitude: toFiniteCoordinate(nextSessionPlace?.latitude),
+    longitude: toFiniteCoordinate(nextSessionPlace?.longitude),
+  };
+  if (fromNextSession.latitude !== undefined && fromNextSession.longitude !== undefined) {
+    return fromNextSession;
+  }
+
+  for (const session of sessions) {
+    const sessionPlace = session?.place as LoosePlace | null | undefined;
+    const latitude = toFiniteCoordinate(sessionPlace?.latitude);
+    const longitude = toFiniteCoordinate(sessionPlace?.longitude);
+    if (latitude !== undefined && longitude !== undefined) {
+      return { latitude, longitude };
+    }
+  }
+
+  return {};
+}
+
 function mapEventDetailsToPageViewModel(rawEvent: EventDetailsLike = {}): EventPageViewModel {
   const firstSession = Array.isArray(rawEvent.sessions) ? rawEvent.sessions[0] : null;
   const place: LoosePlace | null = firstSession?.place || rawEvent.place || null;
+  const mapCoordinates = resolveEventMapCoordinates(rawEvent);
   const title = rawEvent.title || 'Futurione';
   const description = rawEvent.fullDescription || '';
   const paragraphs = description
@@ -160,8 +200,8 @@ function mapEventDetailsToPageViewModel(rawEvent: EventDetailsLike = {}): EventP
     galleryImages,
     mapImageUrl: '/public/static/img/map.jpeg',
     mapAlt: `Карта для ${title}`,
-    mapLatitude: Number(place?.latitude),
-    mapLongitude: Number(place?.longitude),
+    mapLatitude: mapCoordinates.latitude,
+    mapLongitude: mapCoordinates.longitude,
     mapTitle: place?.name || title,
   };
 }

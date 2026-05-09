@@ -13,59 +13,54 @@ function getWidgetSrc(): string {
   return `${window.location.origin}${SUPPORT_WIDGET_PATH}`;
 }
 
-export function initSupportLauncher(): void {
-  if (isSupportRoute() || document.querySelector('[data-role="support-launcher"]')) {
+let state: SupportIframeState = localStorage.getItem(STORAGE_KEY) === '1' ? 'opening' : 'closed';
+let root: HTMLDivElement | null = null;
+
+const render = (): void => {
+  if (!(root instanceof HTMLDivElement)) {
     return;
   }
 
-  let state: SupportIframeState = localStorage.getItem(STORAGE_KEY) === '1' ? 'opening' : 'closed';
-  const root = document.createElement('div');
+  const isOpen = state !== 'closed';
+  root.innerHTML = isOpen
+    ? [
+      `<section class="support-launcher__panel support-launcher__panel--${state}" aria-label="Поддержка">`,
+      '<div class="support-launcher__bar">',
+      '<span>Поддержка</span>',
+      '<button class="support-launcher__close" type="button" data-action="support-close" aria-label="Закрыть поддержку">×</button>',
+      '</div>',
+      state === 'opening' ? '<p class="support-launcher__state">Загрузка...</p>' : '',
+      state === 'load_error' ? '<p class="support-launcher__state">Не удалось загрузить поддержку.</p>' : '',
+      `<iframe class="support-launcher__iframe" src="${getWidgetSrc()}" title="Поддержка CityHawk" data-role="support-iframe"></iframe>`,
+      '</section>',
+    ].join('')
+    : '';
+};
+
+const open = (): void => {
+  state = 'opening';
+  localStorage.setItem(STORAGE_KEY, '1');
+  render();
+};
+
+const close = (): void => {
+  state = 'closed';
+  localStorage.removeItem(STORAGE_KEY);
+  render();
+};
+
+function ensureSupportLauncher(): void {
+  if (isSupportRoute() || root instanceof HTMLDivElement) {
+    return;
+  }
+
+  root = document.createElement('div');
   root.className = 'support-launcher';
   root.dataset.role = 'support-launcher';
 
-  const render = (): void => {
-    const isOpen = state !== 'closed';
-    const panelHtml = isOpen
-      ? [
-        `<section class="support-launcher__panel support-launcher__panel--${state}" aria-label="Поддержка">`,
-        '<div class="support-launcher__bar">',
-        '<span>Поддержка</span>',
-        '<button class="support-launcher__close" type="button" data-action="support-close" aria-label="Закрыть поддержку">×</button>',
-        '</div>',
-        state === 'opening' ? '<p class="support-launcher__state">Загрузка...</p>' : '',
-        state === 'load_error' ? '<p class="support-launcher__state">Не удалось загрузить поддержку.</p>' : '',
-        `<iframe class="support-launcher__iframe" src="${getWidgetSrc()}" title="Поддержка CityHawk" data-role="support-iframe"></iframe>`,
-        '</section>',
-      ].join('')
-      : '';
-
-    root.innerHTML = [
-      `<button class="support-launcher__button" type="button" data-action="support-open" ${isOpen ? 'hidden' : ''}>Поддержка</button>`,
-      panelHtml,
-    ].join('');
-  };
-
-  const open = (): void => {
-    state = 'opening';
-    localStorage.setItem(STORAGE_KEY, '1');
-    render();
-  };
-
-  const close = (): void => {
-    state = 'closed';
-    localStorage.removeItem(STORAGE_KEY);
-    render();
-  };
-
   root.addEventListener('click', (event) => {
     const target = event.target;
-
     if (!(target instanceof Element)) {
-      return;
-    }
-
-    if (target.closest('[data-action="support-open"]')) {
-      open();
       return;
     }
 
@@ -74,31 +69,39 @@ export function initSupportLauncher(): void {
     }
   });
 
-  root.addEventListener('load', (event) => {
-    const target = event.target;
-    if (target instanceof HTMLIFrameElement && target.dataset.role === 'support-iframe') {
-      if (state !== 'opened') {
-        state = 'opened';
+  root.addEventListener(
+    'load',
+    (event) => {
+      const target = event.target;
+      if (target instanceof HTMLIFrameElement && target.dataset.role === 'support-iframe') {
+        if (state !== 'opened') {
+          state = 'opened';
+          render();
+        }
+      }
+    },
+    true,
+  );
+
+  root.addEventListener(
+    'error',
+    (event) => {
+      const target = event.target;
+      if (target instanceof HTMLIFrameElement && target.dataset.role === 'support-iframe') {
+        state = 'load_error';
         render();
       }
-    }
-  }, true);
+    },
+    true,
+  );
 
-  root.addEventListener('error', (event) => {
-    const target = event.target;
-    if (target instanceof HTMLIFrameElement && target.dataset.role === 'support-iframe') {
-      state = 'load_error';
-      render();
-    }
-  }, true);
-
-  const handleKeydown = (event: KeyboardEvent): void => {
+  document.addEventListener('keydown', (event: KeyboardEvent) => {
     if (event.key === 'Escape' && state !== 'closed') {
       close();
     }
-  };
+  });
 
-  const handleMessage = (event: MessageEvent): void => {
+  window.addEventListener('message', (event: MessageEvent) => {
     if (event.origin !== window.location.origin) {
       return;
     }
@@ -110,10 +113,25 @@ export function initSupportLauncher(): void {
     if (data?.type === 'support:ticket-created') {
       showToast('Обращение создано', { type: 'success' });
     }
-  };
+  });
 
-  document.addEventListener('keydown', handleKeydown);
-  window.addEventListener('message', handleMessage);
   document.body.append(root);
   render();
+}
+
+export function initSupportLauncher(): void {
+  ensureSupportLauncher();
+}
+
+export function openSupportLauncher(): void {
+  ensureSupportLauncher();
+  if (!isSupportRoute()) {
+    open();
+  }
+}
+
+export function closeSupportLauncher(): void {
+  if (root instanceof HTMLDivElement) {
+    close();
+  }
 }

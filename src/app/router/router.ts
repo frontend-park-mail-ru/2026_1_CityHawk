@@ -7,6 +7,7 @@ import type {
 } from '../../types/router.js';
 import { getMeOrNull } from '../../api/profile.api.js';
 import { attachEventCardFavorites } from '../../components/event-card/event-card-favorite.js';
+import { attachHeaderMenu } from '../../components/header/header-menu.js';
 import {
   buildAuthPath,
   getCurrentPathWithSearch,
@@ -187,19 +188,24 @@ export class Router {
     this.root.innerHTML = html;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const detachEventCardFavorites = attachEventCardFavorites(this.root);
+    const detachHeaderMenu = attachHeaderMenu(this.root);
 
     if (view && typeof view !== 'string' && typeof view.mount === 'function') {
       const cleanup = view.mount(this.root);
       if (typeof cleanup === 'function') {
         this.cleanup = () => {
           detachEventCardFavorites();
+          detachHeaderMenu();
           cleanup();
         };
         return;
       }
     }
 
-    this.cleanup = detachEventCardFavorites;
+    this.cleanup = () => {
+      detachEventCardFavorites();
+      detachHeaderMenu();
+    };
   }
 
   matchRoute(path: string): RouteMatch | null {
