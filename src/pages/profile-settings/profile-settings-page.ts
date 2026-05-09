@@ -22,7 +22,11 @@ function animateLoginAside(root: HTMLElement): void {
     return;
   }
 
-  setTimeout(() => loginEl.classList.add('loaded'), 100);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      loginEl.classList.add('loaded');
+    });
+  });
 }
 
 function getUserInitials(name?: string): string {

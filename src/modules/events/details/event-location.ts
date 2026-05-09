@@ -23,11 +23,11 @@ declare global {
   }
 }
 
-let yandexMapsLoadPromise: Promise<YMaps3Global | null> | null = null;
+let yandexMapsLoadPromise: Promise<YMaps3Global> | null = null;
 
-function loadYandexMapsApiV3(apiKey: string): Promise<YMaps3Global | null> {
+function loadYandexMapsApiV3(apiKey: string): Promise<YMaps3Global> {
   if (!apiKey) {
-    return Promise.resolve(null);
+    return Promise.reject(new Error('YANDEX_MAPS_API_KEY is empty'));
   }
 
   if (window.ymaps3) {
@@ -38,13 +38,22 @@ function loadYandexMapsApiV3(apiKey: string): Promise<YMaps3Global | null> {
     return yandexMapsLoadPromise;
   }
 
-  yandexMapsLoadPromise = new Promise((resolve) => {
+  yandexMapsLoadPromise = new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = `https://api-maps.yandex.ru/v3/?apikey=${encodeURIComponent(apiKey)}&lang=ru_RU`;
     script.async = true;
-    script.onload = () => resolve(window.ymaps3 || null);
-    script.onerror = () => resolve(null);
+    script.onload = () => {
+      if (window.ymaps3) {
+        resolve(window.ymaps3);
+        return;
+      }
+      reject(new Error('Yandex Maps API loaded but ymaps3 is unavailable'));
+    };
+    script.onerror = () => reject(new Error('Failed to load Yandex Maps API'));
     document.head.append(script);
+  }).catch((error) => {
+    yandexMapsLoadPromise = null;
+    throw error;
   });
 
   return yandexMapsLoadPromise;
@@ -115,48 +124,47 @@ export function attachEventLocation(root: ParentNode): () => void {
     }
   };
 
-  const ensureModalMap = () => {
+  const ensureModalMap = async () => {
     if (!(modalCanvas instanceof HTMLElement) || latitude === null || longitude === null || modalMap) {
       return;
     }
 
-    void loadYandexMapsApiV3(YANDEX_MAPS_API_KEY).then(async (ymaps3) => {
-      if (disposed || !ymaps3 || latitude === null || longitude === null || modalMap) {
-        return;
-      }
+    const ymaps3 = await loadYandexMapsApiV3(YANDEX_MAPS_API_KEY);
+    if (disposed || latitude === null || longitude === null || modalMap) {
+      return;
+    }
 
-      await ymaps3.ready;
-      if (disposed || latitude === null || longitude === null || modalMap) {
-        return;
-      }
+    await ymaps3.ready;
+    if (disposed || latitude === null || longitude === null || modalMap) {
+      return;
+    }
 
-      modalMap = new ymaps3.YMap(modalCanvas, {
-        location: {
-          center: [longitude, latitude],
-          zoom: 14,
-        },
-        behaviors: ['drag', 'pinchZoom', 'scrollZoom'],
-        controls: [],
-        mode: 'vector',
-        theme: 'dark',
-      });
-
-      modalMap
-        .addChild?.(new ymaps3.YMapDefaultSchemeLayer({ theme: 'dark' }))
-        .addChild?.(new ymaps3.YMapDefaultFeaturesLayer({}));
-
-      const markerElement = document.createElement('div');
-      markerElement.className = 'event-location__marker';
-      const marker = new ymaps3.YMapMarker(
-        {
-          coordinates: [longitude, latitude],
-          zIndex: 120,
-        },
-        markerElement,
-      );
-
-      modalMap.addChild?.(marker);
+    modalMap = new ymaps3.YMap(modalCanvas, {
+      location: {
+        center: [longitude, latitude],
+        zoom: 14,
+      },
+      behaviors: ['drag', 'pinchZoom', 'scrollZoom'],
+      controls: [],
+      mode: 'vector',
+      theme: 'dark',
     });
+
+    modalMap
+      .addChild?.(new ymaps3.YMapDefaultSchemeLayer({ theme: 'dark' }))
+      .addChild?.(new ymaps3.YMapDefaultFeaturesLayer({}));
+
+    const markerElement = document.createElement('div');
+    markerElement.className = 'event-location__marker';
+    const marker = new ymaps3.YMapMarker(
+      {
+        coordinates: [longitude, latitude],
+        zIndex: 120,
+      },
+      markerElement,
+    );
+
+    modalMap.addChild?.(marker);
   };
 
   const openModal = () => {
@@ -165,7 +173,9 @@ export function attachEventLocation(root: ParentNode): () => void {
     }
     modal.hidden = false;
     lockBodyScroll();
-    ensureModalMap();
+    ensureModalMap().catch(() => {
+      // Silent fallback: keep static map preview when API failed to load.
+    });
   };
 
   if (mapBlock instanceof HTMLElement && mapBlock.dataset.latitude && mapBlock.dataset.longitude) {
