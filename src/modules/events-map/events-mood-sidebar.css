@@ -55,71 +55,18 @@
         height: auto;
         max-height: none;
         overflow: visible;
-        padding: 0;
-        gap: 10px;
     }
 
     .events-mood-sidebar__grid {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        gap: 8px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        align-items: center;
-        padding: 2px 2px 6px;
-    }
-
-    .events-mood-sidebar__grid::-webkit-scrollbar {
-        display: none;
-    }
-
-    .events-mood-sidebar__card {
-        min-height: auto !important;
-        height: auto !important;
-        flex: 0 0 auto;
-        width: auto;
-        display: inline-flex;
-        align-items: center;
-        border-radius: 999px;
-        border: 1px solid var(--ui-interactive-border);
-        background: var(--ui-interactive-bg);
-        box-shadow: none;
-        padding: 0;
-        overflow: visible;
-    }
-
-    .events-mood-sidebar__card .mood-card__image {
-        display: none;
-    }
-
-    .events-mood-sidebar__card .mood-card__tag {
-        position: static;
-        display: inline-flex;
-        align-items: center;
-        min-height: 34px;
-        height: 34px;
-        max-width: none;
-        padding: 0 14px;
-        border-radius: 999px;
-        background: transparent;
-        box-shadow: none;
-        font-size: 14px;
-        white-space: nowrap;
-    }
-
-    .events-mood-sidebar__card:hover,
-    .events-mood-sidebar__card:focus-within,
-    .events-mood-sidebar__card:active {
-        transform: none;
-        box-shadow: none;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
     }
 }
 
 @media (max-width: 768px) {
-    .events-mood-sidebar__head {
-        display: none;
+    .events-mood-sidebar__grid {
+        display: grid;
+        grid-template-columns: 1fr;
     }
 }

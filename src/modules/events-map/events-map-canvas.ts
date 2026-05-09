@@ -92,12 +92,7 @@ function loadYandexMapsApiV3(apiKey: string): Promise<YMaps3Global | null> {
 function createMarkerElement(pin: EventsMapPin): HTMLElement {
   const marker = document.createElement('div');
   marker.className = `events-map-canvas__marker ${pin.active ? 'events-map-canvas__marker--active' : ''}`;
-  marker.title = pin.title;
-  marker.setAttribute('aria-label', pin.title);
-  marker.innerHTML = [
-    `<img src="${pin.imageUrl}" alt="${pin.title}" class="events-map-canvas__marker-image" />`,
-    `<span class="events-map-canvas__marker-title">${pin.title}</span>`,
-  ].join('');
+  marker.innerHTML = `<img src="${pin.imageUrl}" alt="${pin.title}" class="events-map-canvas__marker-image" />`;
   return marker;
 }
 
@@ -311,26 +306,6 @@ function attachMapCustomDropdowns(host: HTMLElement): () => void {
   const selects = Array.from(host.querySelectorAll<HTMLSelectElement>('select.events-map-canvas__input'));
   const detachList: Array<() => void> = [];
   let openMenu: HTMLElement | null = null;
-  const defaultMenuParent = new WeakMap<HTMLElement, HTMLElement>();
-
-  const placeMenu = (menu: HTMLElement, trigger: HTMLButtonElement) => {
-    const rect = trigger.getBoundingClientRect();
-    menu.style.position = 'fixed';
-    menu.style.left = `${Math.round(rect.left)}px`;
-    menu.style.top = `${Math.round(rect.bottom + 8)}px`;
-    menu.style.width = `${Math.round(rect.width)}px`;
-  };
-
-  const restoreMenu = (menu: HTMLElement) => {
-    const parent = defaultMenuParent.get(menu);
-    if (parent instanceof HTMLElement) {
-      parent.append(menu);
-    }
-    menu.style.position = '';
-    menu.style.left = '';
-    menu.style.top = '';
-    menu.style.width = '';
-  };
 
   const closeOpenMenu = () => {
     if (!openMenu) {
@@ -340,7 +315,6 @@ function attachMapCustomDropdowns(host: HTMLElement): () => void {
     const trigger = openMenu.closest('.events-map-canvas__custom-select')
       ?.querySelector<HTMLButtonElement>('.events-map-canvas__custom-trigger');
     openMenu.hidden = true;
-    restoreMenu(openMenu);
     trigger?.setAttribute('aria-expanded', 'false');
     openMenu = null;
   };
@@ -380,7 +354,6 @@ function attachMapCustomDropdowns(host: HTMLElement): () => void {
     });
 
     custom.append(trigger, menu);
-    defaultMenuParent.set(menu, custom);
     field.append(custom);
     select.classList.add('events-map-canvas__input--hidden');
 
@@ -405,10 +378,6 @@ function attachMapCustomDropdowns(host: HTMLElement): () => void {
       }
 
       if (menu.hidden) {
-        if (menu.parentElement !== document.body) {
-          document.body.append(menu);
-        }
-        placeMenu(menu, trigger);
         menu.hidden = false;
         trigger.setAttribute('aria-expanded', 'true');
         openMenu = menu;
@@ -458,18 +427,10 @@ function attachMapCustomDropdowns(host: HTMLElement): () => void {
       sync();
     };
 
-    const handleWindowChange = () => {
-      if (openMenu === menu) {
-        placeMenu(menu, trigger);
-      }
-    };
-
     trigger.addEventListener('click', handleTriggerClick);
     menu.addEventListener('click', handleMenuClick);
     document.addEventListener('click', handleDocumentClick);
     document.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('scroll', handleWindowChange, true);
-    window.addEventListener('resize', handleWindowChange);
     select.addEventListener('change', handleSelectChange);
 
     detachList.push(() => {
@@ -477,11 +438,8 @@ function attachMapCustomDropdowns(host: HTMLElement): () => void {
       menu.removeEventListener('click', handleMenuClick);
       document.removeEventListener('click', handleDocumentClick);
       document.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('scroll', handleWindowChange, true);
-      window.removeEventListener('resize', handleWindowChange);
       select.removeEventListener('change', handleSelectChange);
       select.classList.remove('events-map-canvas__input--hidden');
-      restoreMenu(menu);
       custom.remove();
       if (openMenu === menu) {
         openMenu = null;

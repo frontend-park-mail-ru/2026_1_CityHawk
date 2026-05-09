@@ -1,7 +1,6 @@
 import './events-map-page.css';
 import '../../modules/events-map/events-map-canvas.css';
 import '../../modules/events-map/events-mood-sidebar.css';
-import { getEvents } from '../../api/events.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
 import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
 import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
@@ -14,11 +13,27 @@ import {
   type EventsMapPin,
 } from '../../modules/events-map/events-map-canvas.js';
 import { renderEventsMapMoodSidebar } from '../../modules/events-map/events-mood-sidebar.js';
-import type { EventCard, Tag, User } from '../../types/api.js';
+import type { User } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
 type SortValue = 'popular' | 'name';
 type FilterSelectName = 'district' | 'style' | 'season' | 'sort';
+
+interface PhotoSpot {
+  id: string;
+  title: string;
+  imageUrl: string;
+  district: string;
+  districtLabel: string;
+  style: string;
+  styleLabel: string;
+  season: string;
+  seasonLabel: string;
+  address: string;
+  popularity: number;
+  latitude: number;
+  longitude: number;
+}
 
 interface FilterState {
   query: string;
@@ -27,23 +42,6 @@ interface FilterState {
   season: string;
   sort: SortValue;
   active: string;
-  cityId: string;
-}
-
-interface MapSpot {
-  id: string;
-  title: string;
-  imageUrl: string;
-  address: string;
-  district: string;
-  districtLabel: string;
-  style: string;
-  styleLabel: string;
-  season: string;
-  seasonLabel: string;
-  popularity: number;
-  latitude: number;
-  longitude: number;
 }
 
 interface MoodCard {
@@ -53,12 +51,68 @@ interface MoodCard {
 }
 
 const ROUTE_PATH = '/events-map';
-const FALLBACK_MOOD_IMAGES = [
-  '/public/static/img/photo.jpeg',
-  '/public/static/img/futurione.jpeg',
-  '/public/static/img/art.png',
-  '/public/static/img/concert.jpeg',
-  '/public/static/img/navka.jpeg',
+
+const SPOTS: PhotoSpot[] = [
+  {
+    id: 'patriarshie-prudy',
+    title: 'Патриаршие пруды',
+    imageUrl: '/public/static/img/photo.jpeg',
+    district: 'cao',
+    districtLabel: 'ЦАО',
+    style: 'urban',
+    styleLabel: 'Городской',
+    season: 'summer',
+    seasonLabel: 'Лето',
+    address: 'Малая Бронная улица',
+    popularity: 98,
+    latitude: 55.76361,
+    longitude: 37.595164,
+  },
+  {
+    id: 'moscow-city',
+    title: 'Москва-Сити',
+    imageUrl: '/public/static/img/futurione.jpeg',
+    district: 'cao',
+    districtLabel: 'ЦАО',
+    style: 'modern',
+    styleLabel: 'Современный',
+    season: 'all',
+    seasonLabel: 'Круглый год',
+    address: 'Пресненская набережная',
+    popularity: 95,
+    latitude: 55.749704,
+    longitude: 37.537734,
+  },
+  {
+    id: 'kolomenskoye',
+    title: 'Коломенское',
+    imageUrl: '/public/static/img/art.png',
+    district: 'sao',
+    districtLabel: 'ЮАО',
+    style: 'nature',
+    styleLabel: 'Природа',
+    season: 'autumn',
+    seasonLabel: 'Осень',
+    address: 'Проспект Андропова, 39',
+    popularity: 91,
+    latitude: 55.667896,
+    longitude: 37.668975,
+  },
+  {
+    id: 'sokolniki-park',
+    title: 'Парк Сокольники',
+    imageUrl: '/public/static/img/concert.jpeg',
+    district: 'eao',
+    districtLabel: 'ВАО',
+    style: 'nature',
+    styleLabel: 'Природа',
+    season: 'winter',
+    seasonLabel: 'Зима',
+    address: 'Сокольнический Вал, 1',
+    popularity: 86,
+    latitude: 55.793246,
+    longitude: 37.679826,
+  },
 ];
 
 function getFilterStateFromLocation(): FilterState {
@@ -72,7 +126,6 @@ function getFilterStateFromLocation(): FilterState {
     season: String(params.get('season') || '').trim(),
     sort: rawSort === 'name' ? 'name' : 'popular',
     active: String(params.get('active') || '').trim(),
-    cityId: String(params.get('cityId') || '').trim(),
   };
 }
 
@@ -92,87 +145,7 @@ function buildPagePath(updates: Record<string, string | null | undefined>): stri
   return `${ROUTE_PATH}${suffix}`;
 }
 
-function toNumber(value: unknown): number | null {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function resolveSeason(value: string): { value: string; label: string } {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return { value: 'all', label: 'Круглый год' };
-  }
-
-  const month = date.getMonth() + 1;
-  if (month === 12 || month <= 2) {
-    return { value: 'winter', label: 'Зима' };
-  }
-  if (month >= 3 && month <= 5) {
-    return { value: 'spring', label: 'Весна' };
-  }
-  if (month >= 6 && month <= 8) {
-    return { value: 'summer', label: 'Лето' };
-  }
-  return { value: 'autumn', label: 'Осень' };
-}
-
-function normalizeStyle(tag?: Tag | null): { value: string; label: string } {
-  const value = String(tag?.id || '').trim();
-  const label = String(tag?.name || '').trim();
-  return {
-    value: value || 'other',
-    label: label || 'Без тега',
-  };
-}
-
-function extractMapSpot(event: EventCard, index: number): MapSpot | null {
-  const source = event as unknown as Record<string, unknown>;
-  const sessions = Array.isArray(source.sessions) ? source.sessions : [];
-  const firstSession = sessions[0] as Record<string, unknown> | undefined;
-  const sessionPlace = firstSession?.place as Record<string, unknown> | undefined;
-  const nextSession = source.nextSession as Record<string, unknown> | undefined;
-  const nextSessionPlace = nextSession?.place as Record<string, unknown> | undefined;
-
-  const latitude = toNumber(sessionPlace?.latitude) ?? toNumber(nextSessionPlace?.latitude);
-  const longitude = toNumber(sessionPlace?.longitude) ?? toNumber(nextSessionPlace?.longitude);
-
-  if (latitude === null || longitude === null) {
-    console.debug('[events-map] skip event without coords', {
-      eventId: event.id,
-      title: event.title,
-      latitude: sessionPlace?.latitude,
-      longitude: sessionPlace?.longitude,
-    });
-    return null;
-  }
-
-  const citySource = sessionPlace?.city ?? nextSessionPlace?.city;
-  const cityName = String(citySource && typeof citySource === 'object'
-    ? ((citySource as Record<string, unknown>).name || '')
-    : '').trim();
-  const placeName = String(sessionPlace?.name || nextSessionPlace?.name || '').trim();
-  const address = String(sessionPlace?.addressLine || nextSessionPlace?.addressLine || '').trim();
-  const season = resolveSeason(String(firstSession?.startAt || event.nextSession?.startAt || ''));
-  const style = normalizeStyle(Array.isArray(event.tags) ? event.tags[0] : null);
-
-  return {
-    id: String(event.id || '').trim(),
-    title: String(event.title || '').trim() || 'Без названия',
-    imageUrl: String(event.coverImageUrl || '').trim() || '/public/static/img/photo.jpeg',
-    address: [placeName, address].filter(Boolean).join(', ') || 'Адрес не указан',
-    district: cityName.toLowerCase() || 'other',
-    districtLabel: cityName || 'Другой город',
-    style: style.value,
-    styleLabel: style.label,
-    season: season.value,
-    seasonLabel: season.label,
-    popularity: Math.max(1, 1000 - index),
-    latitude,
-    longitude,
-  };
-}
-
-function matchesFilters(spot: MapSpot, filters: FilterState): boolean {
+function matchesFilters(spot: PhotoSpot, filters: FilterState): boolean {
   if (filters.district && spot.district !== filters.district) {
     return false;
   }
@@ -200,7 +173,7 @@ function matchesFilters(spot: MapSpot, filters: FilterState): boolean {
   return haystack.includes(filters.query.toLowerCase());
 }
 
-function sortSpots(items: MapSpot[], sort: SortValue): MapSpot[] {
+function sortSpots(items: PhotoSpot[], sort: SortValue): PhotoSpot[] {
   const normalized = [...items];
 
   if (sort === 'name') {
@@ -211,7 +184,7 @@ function sortSpots(items: MapSpot[], sort: SortValue): MapSpot[] {
 }
 
 function buildOptions(
-  spots: MapSpot[],
+  spots: PhotoSpot[],
   key: 'district' | 'style' | 'season',
   selectedValue: string,
 ): EventsMapFilterOption[] {
@@ -241,56 +214,29 @@ function buildOptions(
 }
 
 function resolveMoodHeading(filters: FilterState): string {
-  if (filters.style) {
-    return 'Подборка по тегу';
+  const byStyle: Record<string, string> = {
+    urban: 'Городской вайб',
+    modern: 'Футуризм',
+    nature: 'Природа',
+  };
+  const bySeason: Record<string, string> = {
+    summer: 'Летние кадры',
+    winter: 'Зимняя атмосфера',
+  };
+
+  if (filters.style && byStyle[filters.style]) {
+    return byStyle[filters.style];
   }
 
-  if (filters.season) {
-    return 'Подборка по сезону';
+  if (filters.season && bySeason[filters.season]) {
+    return bySeason[filters.season];
   }
 
-  return 'Подборки';
-}
-
-function buildMoodCards(spots: MapSpot[]): MoodCard[] {
-  const stats = new Map<string, { title: string; count: number; imageUrl: string }>();
-
-  spots.forEach((spot) => {
-    const entry = stats.get(spot.style);
-    if (entry) {
-      entry.count += 1;
-      if (!entry.imageUrl && spot.imageUrl) {
-        entry.imageUrl = spot.imageUrl;
-      }
-      return;
-    }
-
-    stats.set(spot.style, {
-      title: spot.styleLabel,
-      count: 1,
-      imageUrl: spot.imageUrl,
-    });
-  });
-
-  const cards = Array.from(stats.entries())
-    .sort((a, b) => b[1].count - a[1].count || a[1].title.localeCompare(b[1].title, 'ru'))
-    .slice(0, 5)
-    .map(([style, value], index) => ({
-      title: value.title,
-      imageUrl: value.imageUrl || FALLBACK_MOOD_IMAGES[index % FALLBACK_MOOD_IMAGES.length],
-      href: `${ROUTE_PATH}?style=${encodeURIComponent(style)}`,
-    }));
-
-  return cards;
+  return 'Название подборки';
 }
 
 export async function eventsMapPage({ navigate }: RouteContext): Promise<RouteView> {
   const filters = getFilterStateFromLocation();
-  console.debug('[events-map] enter page', {
-    path: window.location.pathname,
-    search: window.location.search,
-    filters,
-  });
   const me = await getMeOrNull().catch(() => null);
   const user: (User & { displayName: string }) | null = me
     ? {
@@ -299,32 +245,7 @@ export async function eventsMapPage({ navigate }: RouteContext): Promise<RouteVi
     }
     : null;
 
-  const response = await getEvents({
-    query: filters.query || undefined,
-    cityId: filters.cityId || undefined,
-    limit: 200,
-    offset: 0,
-  }).catch((error) => {
-    console.debug('[events-map] getEvents failed', error);
-    return { items: [], total: 0, limit: 0, offset: 0 };
-  });
-  console.debug('[events-map] getEvents response', {
-    total: response.total,
-    limit: response.limit,
-    offset: response.offset,
-    itemsCount: Array.isArray(response.items) ? response.items.length : 0,
-  });
-
-  const allSpots = (Array.isArray(response.items) ? response.items : [])
-    .map((event, index) => extractMapSpot(event, index))
-    .filter((spot): spot is MapSpot => Boolean(spot));
-
-  const filtered = sortSpots(allSpots.filter((spot) => matchesFilters(spot, filters)), filters.sort);
-  console.debug('[events-map] mapped spots', {
-    allSpots: allSpots.length,
-    filteredSpots: filtered.length,
-    sort: filters.sort,
-  });
+  const filtered = sortSpots(SPOTS.filter((spot) => matchesFilters(spot, filters)), filters.sort);
   const activeId = filtered.some((spot) => spot.id === filters.active)
     ? filters.active
     : (filtered[0]?.id || '');
@@ -339,12 +260,38 @@ export async function eventsMapPage({ navigate }: RouteContext): Promise<RouteVi
     active: spot.id === activeId,
   }));
 
-  const moodCards = buildMoodCards(allSpots);
+  const moodCards: MoodCard[] = [
+    {
+      title: 'Городской вайб',
+      imageUrl: '/public/static/img/photo.jpeg',
+      href: `${ROUTE_PATH}?style=urban`,
+    },
+    {
+      title: 'Футуризм',
+      imageUrl: '/public/static/img/futurione.jpeg',
+      href: `${ROUTE_PATH}?style=modern`,
+    },
+    {
+      title: 'Природа',
+      imageUrl: '/public/static/img/art.png',
+      href: `${ROUTE_PATH}?style=nature`,
+    },
+    {
+      title: 'Летние кадры',
+      imageUrl: '/public/static/img/concert.jpeg',
+      href: `${ROUTE_PATH}?season=summer`,
+    },
+    {
+      title: 'Зимняя атмосфера',
+      imageUrl: '/public/static/img/navka.jpeg',
+      href: `${ROUTE_PATH}?season=winter`,
+    },
+  ];
 
   const eventsMapCanvas = renderEventsMapCanvas({
-    districtOptions: buildOptions(allSpots, 'district', filters.district),
-    styleOptions: buildOptions(allSpots, 'style', filters.style),
-    seasonOptions: buildOptions(allSpots, 'season', filters.season),
+    districtOptions: buildOptions(SPOTS, 'district', filters.district),
+    styleOptions: buildOptions(SPOTS, 'style', filters.style),
+    seasonOptions: buildOptions(SPOTS, 'season', filters.season),
     sortOptions: [
       { value: 'popular', label: 'Сначала популярные', selected: filters.sort === 'popular' },
       { value: 'name', label: 'По названию А-Я', selected: filters.sort === 'name' },
@@ -376,9 +323,6 @@ export async function eventsMapPage({ navigate }: RouteContext): Promise<RouteVi
             [name as FilterSelectName]: value || null,
             active: null,
           }));
-        },
-        onPinPick(pinId) {
-          navigate(`/events/${encodeURIComponent(pinId)}`);
         },
       });
 
