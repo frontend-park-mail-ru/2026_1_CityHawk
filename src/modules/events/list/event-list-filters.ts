@@ -1,4 +1,4 @@
-import { renderTemplate } from '../../app/templates/renderer.js';
+import { renderTemplate } from '../../../app/templates/renderer.js';
 
 export interface SelectOption {
   value: string;
@@ -15,6 +15,7 @@ export interface EventListFiltersState {
 
 export interface EventListFiltersOptions {
   onSubmit?: (form: HTMLFormElement) => void;
+  onChange?: (form: HTMLFormElement) => void;
 }
 
 export function renderEventListFilters(state: EventListFiltersState = {}): string {
@@ -53,8 +54,28 @@ export function attachEventListFilters(
     }
   };
 
+  const handleChange = (event: Event) => {
+    if (!(form instanceof HTMLFormElement)) {
+      return;
+    }
+
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) {
+      return;
+    }
+
+    if (!target.classList.contains('event-list-filters__input')) {
+      return;
+    }
+
+    if (typeof options.onChange === 'function') {
+      options.onChange(form);
+    }
+  };
+
   if (form instanceof HTMLFormElement) {
     form.addEventListener('submit', handleSubmit);
+    form.addEventListener('change', handleChange);
   }
 
   return () => {
@@ -62,6 +83,7 @@ export function attachEventListFilters(
 
     if (form instanceof HTMLFormElement) {
       form.removeEventListener('submit', handleSubmit);
+      form.removeEventListener('change', handleChange);
     }
   };
 }
@@ -124,6 +146,7 @@ function attachCustomDropdowns(form: HTMLFormElement): () => void {
     const sync = () => {
       const selectedOption = select.selectedOptions.item(0);
       trigger.textContent = selectedOption?.textContent || optionItems[0]?.label || '';
+      trigger.classList.toggle('event-list-filters__custom-trigger--active', select.value !== '');
 
       Array.from(menu.querySelectorAll<HTMLButtonElement>('.event-list-filters__custom-option'))
         .forEach((button) => {

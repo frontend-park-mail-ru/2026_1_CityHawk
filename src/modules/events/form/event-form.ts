@@ -1,6 +1,6 @@
-import { renderTemplate } from '../../app/templates/renderer.js';
-import { showToast } from '../../app/ui/toast.js';
-import { getPlaceSuggestions, resolvePlaceSuggestion } from '../../api/places.api.js';
+import { renderTemplate } from '../../../app/templates/renderer.js';
+import { showToast } from '../../../app/ui/toast.js';
+import { getPlaceSuggestions, resolvePlaceSuggestion } from '../../../api/places.api.js';
 import type {
   EventFormInitialValues,
   EventFormScheduleMode,

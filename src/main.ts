@@ -10,8 +10,8 @@ import './components/footer/footer.css';
 import './modules/home/hero-search.css';
 import './modules/home/home-events-section.css';
 import './modules/home/home-mood-section.css';
-import './modules/events/event-list-filters.css';
-import './modules/events/event-list-catalog.css';
+import './modules/events/list/event-list-filters.css';
+import './modules/events/list/event-list-catalog.css';
 
 import './app/bootstrap.js';
 import { registerServiceWorker } from './app/register-service-worker.js';

@@ -74,6 +74,7 @@ docker compose up --build
 
 - `PORT` — порт frontend-сервера (по умолчанию `3000`)
 - `API_BASE_URL` — базовый URL backend API (по умолчанию `http://localhost:8080`)
+- `YANDEX_MAPS_API_KEY` — ключ JavaScript API Яндекс Карт для страницы `/events-map`
 
 `API_BASE_URL` прокидывается во фронтенд через `/runtime-config.js`.
 

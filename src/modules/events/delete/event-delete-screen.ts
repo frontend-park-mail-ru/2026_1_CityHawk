@@ -1,7 +1,7 @@
-import { renderTemplate } from '../../app/templates/renderer.js';
-import type { User } from '../../types/api.js';
-import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
-import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
+import { renderTemplate } from '../../../app/templates/renderer.js';
+import type { User } from '../../../types/api.js';
+import { attachHeaderSearchSuggestions } from '../../../components/header/header-search-suggestions.js';
+import { attachHeaderCityPicker } from '../../../components/header/header-city-picker.js';
 
 type HeaderSearchState = {
   query?: string;

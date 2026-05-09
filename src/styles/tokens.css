@@ -88,6 +88,52 @@
     --home-content-width: 1240px;
     --home-side-padding: 24px;
     --home-side-padding-mobile: 16px;
+
+    /*
+     * ========================================
+     * INTERACTION TOKENS
+     * ========================================
+     */
+
+    --ui-interactive-text-hover: var(--home-color-brand-light);
+    --ui-interactive-bg: rgba(255, 255, 255, 0.08);
+    --ui-interactive-bg-hover: rgba(255, 255, 255, 0.14);
+    --ui-interactive-bg-active: rgba(255, 255, 255, 0.2);
+    --ui-interactive-border: rgba(139, 188, 233, 0.22);
+    --ui-interactive-border-hover: rgba(183, 213, 245, 0.48);
+    --ui-interactive-focus-ring: 0 0 0 3px rgba(139, 188, 233, 0.14);
+    --ui-interactive-lift: translateY(-1px);
+    --form-control-border-active: rgba(137, 188, 244, 0.8);
+    --form-control-bg-active: rgba(72, 129, 198, 0.22);
+    --ui-dropdown-surface: rgba(22, 34, 53, 0.94);
+    --ui-dropdown-border-soft: rgba(215, 230, 255, 0.16);
+    --ui-dropdown-arrow-color: rgba(255, 255, 255, 0.75);
+    --ui-dropdown-inset-highlight: rgba(255, 255, 255, 0.04);
+    --ui-dropdown-shadow: 0 16px 34px rgba(0, 0, 0, 0.26);
+
+    --ui-filter-shell-border: rgba(142, 160, 176, 0.2);
+    --ui-filter-shell-bg: rgba(255, 255, 255, 0.08);
+    --ui-filter-shell-shadow: 0 14px 28px rgba(0, 0, 0, 0.26);
+
+    --ui-surface-shadow-soft: 0 10px 20px rgba(0, 0, 0, 0.18);
+    --ui-surface-shadow-hover: 0 14px 24px rgba(0, 0, 0, 0.22);
+    --ui-sidebar-shadow: 0 26px 52px rgba(0, 0, 0, 0.42);
+    --ui-dropdown-shadow-large: 0 20px 38px rgba(0, 0, 0, 0.32);
+    --ui-search-shell-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+    --ui-search-shell-shadow-focus: 0 18px 40px rgba(0, 0, 0, 0.4);
+    --ui-danger-soft: #ffb8b8;
+
+    --events-map-surface: linear-gradient(180deg, rgba(7, 14, 28, 0.3), rgba(7, 14, 28, 0.54)),
+      radial-gradient(circle at 50% 45%, rgba(72, 106, 179, 0.2), transparent 38%),
+      #0c1627;
+    --events-map-surface-before: radial-gradient(circle at 50% 45%, rgba(84, 128, 214, 0.17), transparent 44%),
+      radial-gradient(circle at 8% 92%, rgba(26, 48, 88, 0.55), transparent 42%),
+      radial-gradient(circle at 92% 10%, rgba(20, 34, 64, 0.45), transparent 34%);
+    --events-map-surface-after: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 24%, rgba(255, 255, 255, 0.015)),
+      radial-gradient(circle at 50% 50%, transparent 58%, rgba(3, 7, 14, 0.44) 100%);
+    --events-map-marker-border: #4da3ff;
+    --events-map-marker-bg: #0c1627;
+    --events-map-empty-surface: rgba(8, 15, 28, 0.8);
 }
 
 /* 

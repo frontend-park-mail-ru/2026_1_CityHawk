@@ -51,12 +51,20 @@ async function startApp(): Promise<void> {
   const routes: Record<string, RouteRenderer> = {
     '/': lazyRoute(() => import('../pages/home/home-page.js'), 'homePage'),
     '/events': lazyRoute(() => import('../pages/event-list/event-list-page.js'), 'eventListPage'),
+    '/events-map': lazyRoute(
+      () => import('../pages/events-map/events-map-page.js'),
+      'eventsMapPage',
+    ),
     '/events/new': lazyRoute(() => import('../pages/event-create/event-create-page.js'), 'eventCreatePage'),
     '/events/:eventId/edit': lazyRoute(() => import('../pages/event-edit/event-edit-page.js'), 'eventEditPage'),
     '/events/:eventId/delete': lazyRoute(() => import('../pages/event-delete/event-delete-page.js'), 'eventDeletePage'),
     '/events/:eventId': lazyRoute(() => import('../pages/event/event-page.js'), 'eventPage'),
     '/login': lazyRoute(() => import('../pages/login/login-page.js'), 'loginPage'),
     '/profile': lazyRoute(() => import('../pages/profile/profile-page.js'), 'profilePage'),
+    '/profile/settings': lazyRoute(
+      () => import('../pages/profile-settings/profile-settings-page.js'),
+      'profileSettingsPage',
+    ),
     '/password_reset': lazyRoute(() => import('../pages/password_reset/password_reset-page.js'), 'passwordResetPage'),
     '/register': lazyRoute(() => import('../pages/register/register-page.js'), 'registerPage'),
   };

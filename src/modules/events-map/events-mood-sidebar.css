@@ -1,0 +1,72 @@
+.events-mood-sidebar {
+    border-radius: 26px;
+    background: transparent;
+    box-shadow: none;
+    padding: 18px;
+    min-height: 744px;
+    height: 100%;
+    max-height: 100%;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 14px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.events-mood-sidebar__head {
+    display: grid;
+    gap: 6px;
+}
+
+.events-mood-sidebar__title {
+    margin: 0;
+    font-family: var(--font-display, serif);
+    font-size: var(--home-text-2);
+    line-height: 1.2;
+}
+
+.events-mood-sidebar__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.events-mood-sidebar__card {
+    min-height: 140px;
+    flex: 0 0 auto;
+}
+
+.events-mood-sidebar__card .mood-card__tag {
+    font-size: var(--home-text-5);
+}
+
+.events-mood-sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.events-mood-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+}
+
+@media (max-width: 1100px) {
+    .events-mood-sidebar {
+        min-height: 0;
+        height: auto;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .events-mood-sidebar__grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .events-mood-sidebar__grid {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+}
