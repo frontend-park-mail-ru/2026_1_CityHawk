@@ -386,29 +386,63 @@
   }
 
   .profile-hero {
-    grid-template-columns: 1fr;
-    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) minmax(132px, 42%);
+    gap: 14px;
+    align-items: start;
   }
 
   .profile-hero__avatar-wrap {
     width: 112px;
     height: 112px;
+    grid-column: 1;
+    grid-row: 1;
   }
 
   .profile-hero__head {
     align-items: flex-start;
   }
 
+  .profile-hero__content {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .profile-hero__stats {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    gap: 10px;
+  }
+
   .profile-hero__stats-row {
-    gap: 18px;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
   }
 
   .profile-hero__edit {
     width: 100%;
+    min-height: 40px;
+    font-size: 16px;
+    padding: 0 12px;
+  }
+
+  .profile-hero__find {
+    min-height: 40px;
+    font-size: 16px;
+    padding: 0 12px;
   }
 
   .profile-hero__name {
-    font-size: 30px;
+    font-size: 26px;
+  }
+
+  .profile-stat__value {
+    font-size: 24px;
+  }
+
+  .profile-stat__label {
+    font-size: 16px;
   }
 
   .profile-event-grid {

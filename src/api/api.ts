@@ -10,3 +10,4 @@ export { getPlaceSuggestions, resolvePlaceSuggestion } from './places.api.js';
 export { getMe, getMeOrNull } from './profile.api.js';
 export { addEventToFavorites, removeEventFromFavorites } from './favorites.api.js';
 export { getMyFollowers, getMyFollowing, followUser, unfollowUser } from './follows.api.js';
+export { createOrganizerApplication } from './organizer.api.js';

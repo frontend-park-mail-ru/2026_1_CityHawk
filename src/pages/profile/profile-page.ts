@@ -8,6 +8,7 @@ import {
   getMyFollowing,
   unfollowUser,
 } from '../../api/follows.api.js';
+import { searchAll } from '../../api/search.api.js';
 import './profile.css';
 import '../../modules/profile/profile-aside.css';
 import '../../modules/profile/profile-overview.css';
@@ -141,6 +142,37 @@ function getFollowDisplayName(user: Partial<FollowUser>): string {
   const first = String(user.username || '').trim();
   const last = String(user.userSurname || '').trim();
   return [first, last].filter(Boolean).join(' ') || 'Пользователь';
+}
+
+function normalizeSearchUserItem(item: unknown): FollowUser | null {
+  if (!item || typeof item !== 'object') {
+    return null;
+  }
+
+  const source = item as Record<string, unknown>;
+  const type = String(source.type || '').trim().toLowerCase();
+  if (type && type !== 'user') {
+    return null;
+  }
+
+  const id = String(source.id || '').trim();
+  if (!id) {
+    return null;
+  }
+
+  const title = String(source.title || source.name || source.label || '').trim();
+  const [first = '', second = ''] = title.split(/\s+/, 2);
+
+  return {
+    id,
+    username: first || title || 'Пользователь',
+    userSurname: second || '',
+    avatarUrl: String(source.avatarUrl || '').trim() || null,
+    city: source.city && typeof source.city === 'object'
+      ? (source.city as FollowUser['city'])
+      : null,
+    isFollowing: Boolean(source.isFollowing),
+  };
 }
 
 function normalizeInterestValues(raw: unknown): string[] {
@@ -325,6 +357,9 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       let followingState = Array.isArray(following) ? [...following] : [];
       let activeFollowTab: 'followers' | 'following' = 'followers';
       let followsSearchQuery = '';
+      let searchResults: FollowUser[] = [];
+      let searchRequestSeq = 0;
+      let searchDebounceTimer: number | null = null;
       let pendingFollowUserId = '';
 
       const handleEditClick = (): void => {
@@ -394,13 +429,14 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
 
         const sourceItems = activeFollowTab === 'followers' ? followersState : followingState;
         const normalizedQuery = followsSearchQuery.trim().toLowerCase();
-        const items = normalizedQuery
+        const localFilteredItems = normalizedQuery
           ? sourceItems.filter((item) => {
-            const name = getFollowDisplayName(item).toLowerCase();
-            const city = String(item.city?.name || '').trim().toLowerCase();
-            return name.includes(normalizedQuery) || city.includes(normalizedQuery);
-          })
+              const name = getFollowDisplayName(item).toLowerCase();
+              const city = String(item.city?.name || '').trim().toLowerCase();
+              return name.includes(normalizedQuery) || city.includes(normalizedQuery);
+            })
           : sourceItems;
+        const items = normalizedQuery ? searchResults : localFilteredItems;
         followsList.innerHTML = '';
 
         if (!items.length) {
@@ -471,6 +507,11 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
 
         setFollowTab(tab);
         followsSearchQuery = '';
+        searchResults = [];
+        if (searchDebounceTimer !== null) {
+          window.clearTimeout(searchDebounceTimer);
+          searchDebounceTimer = null;
+        }
         if (followsSearchInput instanceof HTMLInputElement) {
           followsSearchInput.value = '';
         }
@@ -525,7 +566,44 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           return;
         }
         followsSearchQuery = String(followsSearchInput.value || '');
-        renderFollows();
+        const query = followsSearchQuery.trim();
+
+        if (searchDebounceTimer !== null) {
+          window.clearTimeout(searchDebounceTimer);
+          searchDebounceTimer = null;
+        }
+
+        if (!query) {
+          searchResults = [];
+          renderFollows();
+          return;
+        }
+
+        searchDebounceTimer = window.setTimeout(async () => {
+          const requestId = ++searchRequestSeq;
+          try {
+            const result = await searchAll(query, 10);
+            if (requestId !== searchRequestSeq) {
+              return;
+            }
+
+            const items = Array.isArray(result?.items) ? result.items : [];
+            searchResults = items
+              .map((item) => normalizeSearchUserItem(item))
+              .filter((item): item is FollowUser => Boolean(item))
+              .map((item) => {
+                const userId = String(item.id || '').trim();
+                const isFollowingFromState = followingState.some((f) => String(f.id || '') === userId);
+                return { ...item, isFollowing: isFollowingFromState || Boolean(item.isFollowing) };
+              });
+          } catch {
+            searchResults = [];
+          } finally {
+            if (requestId === searchRequestSeq) {
+              renderFollows();
+            }
+          }
+        }, 280);
       };
 
       const handleWindowKeydown = (event: KeyboardEvent): void => {
@@ -580,6 +658,11 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
             } as FollowUser;
 
           ensureFollowingState(userId, !isFollowingUser, sourceUser);
+          searchResults = searchResults.map((item) => (
+            String(item.id || '') === userId
+              ? { ...item, isFollowing: !isFollowingUser }
+              : item
+          ));
           syncFollowCounters();
           renderFollows();
         } catch (error) {
@@ -642,6 +725,10 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         closeFollowsButtons.forEach((button) => button.removeEventListener('click', handleFollowsCloseClick));
         if (followsSearchInput instanceof HTMLInputElement) {
           followsSearchInput.removeEventListener('input', handleFollowsSearchInput);
+        }
+        if (searchDebounceTimer !== null) {
+          window.clearTimeout(searchDebounceTimer);
+          searchDebounceTimer = null;
         }
         if (followsList instanceof HTMLElement) {
           followsList.removeEventListener('click', handleFollowsListClick);

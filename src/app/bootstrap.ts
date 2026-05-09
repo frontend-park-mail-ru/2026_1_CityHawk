@@ -65,6 +65,10 @@ async function startApp(): Promise<void> {
       () => import('../pages/profile-settings/profile-settings-page.js'),
       'profileSettingsPage',
     ),
+    '/organizer/apply': lazyRoute(
+      () => import('../pages/organizer-apply/organizer-apply-page.js'),
+      'organizerApplyPage',
+    ),
     '/password_reset': lazyRoute(() => import('../pages/password_reset/password_reset-page.js'), 'passwordResetPage'),
     '/register': lazyRoute(() => import('../pages/register/register-page.js'), 'registerPage'),
     '/support-widget': lazyRoute(() => import('../pages/support-widget/support-widget-page.js'), 'supportWidgetPage'),

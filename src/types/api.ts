@@ -162,7 +162,7 @@ export interface User {
   name?: string;
   username?: string;
   userSurname?: string;
-  role?: 'user' | 'admin';
+  role?: 'user' | 'organizer' | 'admin';
   birthday?: string;
   avatarUrl?: string;
   city?: City | null;

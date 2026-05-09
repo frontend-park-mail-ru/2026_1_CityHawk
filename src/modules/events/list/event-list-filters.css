@@ -65,7 +65,7 @@
     background-size: 6px 6px, 6px 6px;
     background-repeat: no-repeat;
     text-align: left;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .event-list-filters__custom-trigger--active {
@@ -117,7 +117,7 @@
     background: transparent;
     color: var(--home-color-text);
     padding: 8px 12px;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.2s ease;
 }

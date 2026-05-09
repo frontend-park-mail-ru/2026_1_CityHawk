@@ -259,6 +259,246 @@ window.__APP_CONFIG__ = {
 }
 ```
 
+## Social API (Followers & Friends)
+
+Раздел для подписок пользователей друг на друга и поиска друзей.
+
+### GET /api/me/followers
+
+Список пользователей, которые подписаны на текущего пользователя.
+
+Query-параметры:
+
+- `limit` (number, optional, default: `100`)
+- `offset` (number, optional, default: `0`)
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "username": "Мария",
+      "userSurname": "Соколова",
+      "avatarUrl": "https://.../avatar.jpg",
+      "city": {
+        "id": "uuid",
+        "name": "Москва",
+        "countryName": "Россия",
+        "timezone": "Europe/Moscow"
+      },
+      "isFollowing": true
+    }
+  ],
+  "total": 1,
+  "limit": 100,
+  "offset": 0
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+
+### GET /api/me/following
+
+Список пользователей, на которых подписан текущий пользователь.
+
+Query-параметры:
+
+- `limit` (number, optional, default: `100`)
+- `offset` (number, optional, default: `0`)
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [],
+  "total": 0,
+  "limit": 100,
+  "offset": 0
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+
+### POST /api/users/{userId}/follow
+
+Подписаться на пользователя.
+
+Path-параметры:
+
+- `userId` (uuid|string, required)
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "ok": true
+}
+```
+
+Возможные ошибки:
+
+- `400 Invalid userId`
+- `401 Unauthorized`
+- `404 User not found`
+- `409 Already following`
+
+### DELETE /api/users/{userId}/follow
+
+Отписаться от пользователя.
+
+Path-параметры:
+
+- `userId` (uuid|string, required)
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "ok": true
+}
+```
+
+Возможные ошибки:
+
+- `400 Invalid userId`
+- `401 Unauthorized`
+- `404 User not found`
+
+## Search API
+
+### GET /api/search
+
+Поиск по пользователям и событиям для строки поиска (используется в хедере и для поиска друзей).
+
+Query-параметры:
+
+- `query` (string, required)
+- `limit` (number, optional, default: `5`)
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "type": "user",
+      "title": "Мария Соколова",
+      "label": "@maria"
+    },
+    {
+      "id": "uuid",
+      "type": "event",
+      "title": "Futurione",
+      "label": "Выставка"
+    }
+  ]
+}
+```
+
+Примечания для backend:
+
+- `items` может содержать как объекты, так и строки (для совместимости со старым клиентом).
+- Для `type=user` желательно возвращать `id`, чтобы frontend мог переходить на профиль.
+- Для `type=event` желательно возвращать `id`, чтобы frontend мог переходить на страницу события.
+
+## Organizer Applications API (draft)
+
+Раздел для страницы `/organizer/apply`.
+
+### POST /api/organizer/applications
+
+Создать заявку на роль организатора.
+
+Тело запроса:
+
+```json
+{
+  "name": "Иван Петров",
+  "email": "ivan@example.com",
+  "phone": "+79000000000",
+  "city": "Москва",
+  "projectName": "North Art Lab",
+  "categories": "Концерты, Выставки",
+  "links": "https://example.com",
+  "about": "Организуем события 2 года...",
+  "consent": true
+}
+```
+
+Успешный ответ `201 Created`:
+
+```json
+{
+  "id": "uuid",
+  "status": "pending",
+  "createdAt": "2026-05-09T10:00:00Z"
+}
+```
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+- `409 Active application already exists`
+
+Frontend integration (текущее поведение клиента):
+
+- страница `/organizer/apply` отправляет `POST /api/organizer/applications`
+- валидация обязательных полей делается нативно в браузере (`required`)
+- при `201` форма скрывается и показывается блок "Заявка отправлена"
+- при ошибке backend текст из поля `error` показывается пользователю через toast
+
+### GET /api/organizer/applications/me
+
+Получить текущую заявку авторизованного пользователя.
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "id": "uuid",
+  "status": "pending",
+  "name": "Иван Петров",
+  "email": "ivan@example.com",
+  "phone": "+79000000000",
+  "city": "Москва",
+  "projectName": "North Art Lab",
+  "categories": "Концерты, Выставки",
+  "links": "https://example.com",
+  "about": "Организуем события 2 года...",
+  "reviewComment": "",
+  "createdAt": "2026-05-09T10:00:00Z",
+  "updatedAt": "2026-05-09T10:00:00Z"
+}
+```
+
+### PATCH /api/admin/organizer/applications/{applicationId}
+
+Админ меняет статус заявки.
+
+Тело запроса:
+
+```json
+{
+  "status": "approved",
+  "reviewComment": "Проверено, можно открывать доступ."
+}
+```
+
+Поддерживаемые `status`:
+
+- `pending`
+- `needs_info`
+- `approved`
+- `rejected`
+
 Побочные эффекты:
 
 - сервер очищает `access_token`, `refresh_token`, `csrf_token`
