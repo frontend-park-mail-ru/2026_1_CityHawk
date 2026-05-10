@@ -8,7 +8,7 @@ import {
   getMyFollowing,
   unfollowUser,
 } from '../../api/follows.api.js';
-import { searchAll } from '../../api/search.api.js';
+import { searchUsers } from '../../api/search.api.js';
 import './profile.css';
 import '../../modules/profile/profile-aside.css';
 import '../../modules/profile/profile-overview.css';
@@ -142,37 +142,6 @@ function getFollowDisplayName(user: Partial<FollowUser>): string {
   const first = String(user.username || '').trim();
   const last = String(user.userSurname || '').trim();
   return [first, last].filter(Boolean).join(' ') || 'Пользователь';
-}
-
-function normalizeSearchUserItem(item: unknown): FollowUser | null {
-  if (!item || typeof item !== 'object') {
-    return null;
-  }
-
-  const source = item as Record<string, unknown>;
-  const type = String(source.type || '').trim().toLowerCase();
-  if (type && type !== 'user') {
-    return null;
-  }
-
-  const id = String(source.id || '').trim();
-  if (!id) {
-    return null;
-  }
-
-  const title = String(source.title || source.name || source.label || '').trim();
-  const [first = '', second = ''] = title.split(/\s+/, 2);
-
-  return {
-    id,
-    username: first || title || 'Пользователь',
-    userSurname: second || '',
-    avatarUrl: String(source.avatarUrl || '').trim() || null,
-    city: source.city && typeof source.city === 'object'
-      ? (source.city as FollowUser['city'])
-      : null,
-    isFollowing: Boolean(source.isFollowing),
-  };
 }
 
 function normalizeInterestValues(raw: unknown): string[] {
@@ -355,7 +324,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       const detachCityPicker = attachHeaderCityPicker(root, { navigate, targetPath: '/events' });
       let followersState = Array.isArray(followers) ? [...followers] : [];
       let followingState = Array.isArray(following) ? [...following] : [];
-      let activeFollowTab: 'followers' | 'following' = 'followers';
+      let activeFollowTab: 'discover' | 'followers' | 'following' = 'followers';
       let followsSearchQuery = '';
       let searchResults: FollowUser[] = [];
       let searchRequestSeq = 0;
@@ -396,12 +365,22 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         }
       };
 
-      const setFollowTab = (tab: 'followers' | 'following'): void => {
+      const setSearchPlaceholder = (): void => {
+        if (!(followsSearchInput instanceof HTMLInputElement)) {
+          return;
+        }
+        followsSearchInput.placeholder = activeFollowTab === 'discover'
+          ? 'Найти друзей по имени'
+          : 'Поиск по имени или городу';
+      };
+
+      const setFollowTab = (tab: 'discover' | 'followers' | 'following'): void => {
         activeFollowTab = tab;
         followsTabButtons.forEach((button) => {
           const isActive = String(button.dataset.tab || '') === tab;
           button.classList.toggle('profile-follows-modal__tab--active', isActive);
         });
+        setSearchPlaceholder();
       };
 
       const ensureFollowingState = (userId: string, shouldFollow: boolean, user: FollowUser): void => {
@@ -427,26 +406,38 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           return;
         }
 
-        const sourceItems = activeFollowTab === 'followers' ? followersState : followingState;
+        const sourceItems = activeFollowTab === 'followers'
+          ? followersState
+          : activeFollowTab === 'following'
+            ? followingState
+            : [];
         const normalizedQuery = followsSearchQuery.trim().toLowerCase();
-        const localFilteredItems = normalizedQuery
+        const localFilteredItems = activeFollowTab === 'discover'
+          ? []
+          : normalizedQuery
           ? sourceItems.filter((item) => {
               const name = getFollowDisplayName(item).toLowerCase();
               const city = String(item.city?.name || '').trim().toLowerCase();
               return name.includes(normalizedQuery) || city.includes(normalizedQuery);
             })
           : sourceItems;
-        const items = normalizedQuery ? searchResults : localFilteredItems;
+        const items = activeFollowTab === 'discover' ? searchResults : localFilteredItems;
         followsList.innerHTML = '';
 
         if (!items.length) {
           const empty = document.createElement('p');
           empty.className = 'profile-follows-modal__empty';
-          empty.textContent = normalizedQuery
-            ? 'Ничего не найдено по этому запросу'
-            : activeFollowTab === 'followers'
-              ? 'Пока нет подписчиков'
-              : 'Пока нет подписок';
+          if (activeFollowTab === 'discover') {
+            empty.textContent = normalizedQuery
+              ? 'По запросу никого не найдено'
+              : 'Введи имя, чтобы найти друзей';
+          } else {
+            empty.textContent = normalizedQuery
+              ? 'Ничего не найдено по этому запросу'
+              : activeFollowTab === 'followers'
+                ? 'Пока нет подписчиков'
+                : 'Пока нет подписок';
+          }
           followsList.append(empty);
           return;
         }
@@ -500,7 +491,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         });
       };
 
-      const openFollowsModal = (tab: 'followers' | 'following'): void => {
+      const openFollowsModal = (tab: 'discover' | 'followers' | 'following'): void => {
         if (!(followsModal instanceof HTMLElement)) {
           return;
         }
@@ -521,7 +512,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       };
 
       const openFriendsModal = (): void => {
-        openFollowsModal('followers');
+        openFollowsModal('discover');
         if (followsSearchInput instanceof HTMLInputElement) {
           followsSearchInput.focus();
         }
@@ -542,7 +533,12 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           return;
         }
 
-        const tab = String(target.dataset.tab || '') === 'following' ? 'following' : 'followers';
+        const tabName = String(target.dataset.tab || '').trim();
+        const tab = tabName === 'following'
+          ? 'following'
+          : tabName === 'discover'
+            ? 'discover'
+            : 'followers';
         openFollowsModal(tab);
       };
 
@@ -552,7 +548,12 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           return;
         }
 
-        const tab = String(target.dataset.tab || '') === 'following' ? 'following' : 'followers';
+        const tabName = String(target.dataset.tab || '').trim();
+        const tab = tabName === 'following'
+          ? 'following'
+          : tabName === 'discover'
+            ? 'discover'
+            : 'followers';
         setFollowTab(tab);
         renderFollows();
       };
@@ -573,7 +574,18 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           searchDebounceTimer = null;
         }
 
+        if (activeFollowTab !== 'discover') {
+          searchResults = [];
+          renderFollows();
+          return;
+        }
+
         if (!query) {
+          searchResults = [];
+          renderFollows();
+          return;
+        }
+        if (query.length < 2) {
           searchResults = [];
           renderFollows();
           return;
@@ -582,15 +594,12 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         searchDebounceTimer = window.setTimeout(async () => {
           const requestId = ++searchRequestSeq;
           try {
-            const result = await searchAll(query, 10);
+            const users = await searchUsers(query, 10);
             if (requestId !== searchRequestSeq) {
               return;
             }
 
-            const items = Array.isArray(result?.items) ? result.items : [];
-            searchResults = items
-              .map((item) => normalizeSearchUserItem(item))
-              .filter((item): item is FollowUser => Boolean(item))
+            searchResults = users
               .map((item) => {
                 const userId = String(item.id || '').trim();
                 const isFollowingFromState = followingState.some((f) => String(f.id || '') === userId);

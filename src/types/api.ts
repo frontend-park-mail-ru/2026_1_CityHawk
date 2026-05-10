@@ -296,3 +296,53 @@ export interface SupportStatsQueryParams {
   from?: string;
   to?: string;
 }
+
+export interface MapCollection {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  eventsCount: number;
+  isPublic: boolean;
+}
+
+export interface MapCollectionsResponse {
+  items: MapCollection[];
+}
+
+export interface MapOption {
+  value: string;
+  label: string;
+}
+
+export interface MapFiltersResponse {
+  tags: Tag[];
+  datePresets: MapOption[];
+  sortOptions: MapOption[];
+}
+
+export interface MapSpot {
+  id: string;
+  eventId: string;
+  title: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  imageUrl?: string;
+  startAt: string;
+  popularity: number;
+  tags: Tag[];
+}
+
+export interface MapCollectionMeta {
+  id: string;
+  title: string;
+}
+
+export interface MapCollectionSpotsResponse {
+  collection: MapCollectionMeta;
+  items: MapSpot[];
+  total: number;
+  limit: number;
+  offset: number;
+}

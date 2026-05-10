@@ -227,7 +227,7 @@
 .profile-follows-modal__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   padding: 14px 16px;
   border-bottom: 1px solid rgba(173, 214, 251, 0.24);
@@ -236,6 +236,7 @@
 .profile-follows-modal__tabs {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .profile-follows-modal__tab {
@@ -269,6 +270,9 @@
 .profile-follows-modal__search-row {
   padding: 10px 16px 8px;
   border-bottom: 1px solid rgba(173, 214, 251, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .profile-follows-modal__search-input {
@@ -284,6 +288,11 @@
 
 .profile-follows-modal__search-input::placeholder {
   color: rgba(225, 239, 255, 0.6);
+}
+
+.profile-follows-modal__search-row .profile-follows-modal__tabs {
+  width: 100%;
+  justify-content: flex-start;
 }
 
 .profile-follows-item {

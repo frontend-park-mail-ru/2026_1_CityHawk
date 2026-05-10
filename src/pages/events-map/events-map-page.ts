@@ -1,7 +1,11 @@
 import './events-map-page.css';
 import '../../modules/events-map/events-map-canvas.css';
 import '../../modules/events-map/events-mood-sidebar.css';
-import { getEvents } from '../../api/events.api.js';
+import {
+  getMapCollectionSpots,
+  getMapCollections,
+  getMapFilters,
+} from '../../api/map.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
 import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
 import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
@@ -14,36 +18,27 @@ import {
   type EventsMapPin,
 } from '../../modules/events-map/events-map-canvas.js';
 import { renderEventsMapMoodSidebar } from '../../modules/events-map/events-mood-sidebar.js';
-import type { EventCard, Tag, User } from '../../types/api.js';
+import type {
+  MapCollection,
+  MapFiltersResponse,
+  MapSpot,
+  User,
+} from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
-type SortValue = 'popular' | 'name';
+type SortValue = 'popular' | 'name' | 'dateAsc' | 'dateDesc';
 type FilterSelectName = 'district' | 'style' | 'season' | 'sort';
+
+type DatePreset = 'today' | 'weekend' | '';
 
 interface FilterState {
   query: string;
-  district: string;
   style: string;
-  season: string;
+  season: DatePreset;
   sort: SortValue;
   active: string;
   cityId: string;
-}
-
-interface MapSpot {
-  id: string;
-  title: string;
-  imageUrl: string;
-  address: string;
-  district: string;
-  districtLabel: string;
-  style: string;
-  styleLabel: string;
-  season: string;
-  seasonLabel: string;
-  popularity: number;
-  latitude: number;
-  longitude: number;
+  collectionId: string;
 }
 
 interface MoodCard {
@@ -64,15 +59,16 @@ const FALLBACK_MOOD_IMAGES = [
 function getFilterStateFromLocation(): FilterState {
   const params = new URLSearchParams(window.location.search);
   const rawSort = String(params.get('sort') || '').trim();
+  const rawSeason = String(params.get('season') || '').trim();
 
   return {
     query: String(params.get('query') || '').trim(),
-    district: String(params.get('district') || '').trim(),
     style: String(params.get('style') || '').trim(),
-    season: String(params.get('season') || '').trim(),
-    sort: rawSort === 'name' ? 'name' : 'popular',
+    season: rawSeason === 'today' || rawSeason === 'weekend' ? rawSeason : '',
+    sort: rawSort === 'name' || rawSort === 'dateAsc' || rawSort === 'dateDesc' ? rawSort : 'popular',
     active: String(params.get('active') || '').trim(),
     cityId: String(params.get('cityId') || '').trim(),
+    collectionId: String(params.get('collectionId') || '').trim(),
   };
 }
 
@@ -92,205 +88,130 @@ function buildPagePath(updates: Record<string, string | null | undefined>): stri
   return `${ROUTE_PATH}${suffix}`;
 }
 
-function toNumber(value: unknown): number | null {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function resolveSeason(value: string): { value: string; label: string } {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return { value: 'all', label: 'Круглый год' };
-  }
-
-  const month = date.getMonth() + 1;
-  if (month === 12 || month <= 2) {
-    return { value: 'winter', label: 'Зима' };
-  }
-  if (month >= 3 && month <= 5) {
-    return { value: 'spring', label: 'Весна' };
-  }
-  if (month >= 6 && month <= 8) {
-    return { value: 'summer', label: 'Лето' };
-  }
-  return { value: 'autumn', label: 'Осень' };
-}
-
-function normalizeStyle(tag?: Tag | null): { value: string; label: string } {
-  const value = String(tag?.id || '').trim();
-  const label = String(tag?.name || '').trim();
-  return {
-    value: value || 'other',
-    label: label || 'Без тега',
-  };
-}
-
-function extractMapSpot(event: EventCard, index: number): MapSpot | null {
-  const source = event as unknown as Record<string, unknown>;
-  const sessions = Array.isArray(source.sessions) ? source.sessions : [];
-  const firstSession = sessions[0] as Record<string, unknown> | undefined;
-  const sessionPlace = firstSession?.place as Record<string, unknown> | undefined;
-  const nextSession = source.nextSession as Record<string, unknown> | undefined;
-  const nextSessionPlace = nextSession?.place as Record<string, unknown> | undefined;
-
-  const latitude = toNumber(sessionPlace?.latitude) ?? toNumber(nextSessionPlace?.latitude);
-  const longitude = toNumber(sessionPlace?.longitude) ?? toNumber(nextSessionPlace?.longitude);
-
-  if (latitude === null || longitude === null) {
-    console.debug('[events-map] skip event without coords', {
-      eventId: event.id,
-      title: event.title,
-      latitude: sessionPlace?.latitude,
-      longitude: sessionPlace?.longitude,
-    });
-    return null;
-  }
-
-  const citySource = sessionPlace?.city ?? nextSessionPlace?.city;
-  const cityName = String(citySource && typeof citySource === 'object'
-    ? ((citySource as Record<string, unknown>).name || '')
-    : '').trim();
-  const placeName = String(sessionPlace?.name || nextSessionPlace?.name || '').trim();
-  const address = String(sessionPlace?.addressLine || nextSessionPlace?.addressLine || '').trim();
-  const season = resolveSeason(String(firstSession?.startAt || event.nextSession?.startAt || ''));
-  const style = normalizeStyle(Array.isArray(event.tags) ? event.tags[0] : null);
-
-  return {
-    id: String(event.id || '').trim(),
-    title: String(event.title || '').trim() || 'Без названия',
-    imageUrl: String(event.coverImageUrl || '').trim() || '/public/static/img/photo.jpeg',
-    address: [placeName, address].filter(Boolean).join(', ') || 'Адрес не указан',
-    district: cityName.toLowerCase() || 'other',
-    districtLabel: cityName || 'Другой город',
-    style: style.value,
-    styleLabel: style.label,
-    season: season.value,
-    seasonLabel: season.label,
-    popularity: Math.max(1, 1000 - index),
-    latitude,
-    longitude,
-  };
-}
-
-function matchesFilters(spot: MapSpot, filters: FilterState): boolean {
-  if (filters.district && spot.district !== filters.district) {
-    return false;
-  }
-
-  if (filters.style && spot.style !== filters.style) {
-    return false;
-  }
-
-  if (filters.season && spot.season !== filters.season) {
-    return false;
-  }
-
-  if (!filters.query) {
-    return true;
-  }
-
-  const haystack = [
-    spot.title,
-    spot.address,
-    spot.districtLabel,
-    spot.styleLabel,
-    spot.seasonLabel,
-  ].join(' ').toLowerCase();
-
-  return haystack.includes(filters.query.toLowerCase());
-}
-
-function sortSpots(items: MapSpot[], sort: SortValue): MapSpot[] {
-  const normalized = [...items];
-
-  if (sort === 'name') {
-    return normalized.sort((a, b) => a.title.localeCompare(b.title, 'ru'));
-  }
-
-  return normalized.sort((a, b) => b.popularity - a.popularity);
-}
-
-function buildOptions(
-  spots: MapSpot[],
-  key: 'district' | 'style' | 'season',
-  selectedValue: string,
+function toMapFilterOptions(
+  items: Array<{ id?: string; name?: string; value?: string; label?: string }> = [],
+  selected: string,
 ): EventsMapFilterOption[] {
-  const source = new Map<string, string>();
-
-  spots.forEach((spot) => {
-    if (key === 'district') {
-      source.set(spot.district, spot.districtLabel);
-      return;
-    }
-
-    if (key === 'style') {
-      source.set(spot.style, spot.styleLabel);
-      return;
-    }
-
-    source.set(spot.season, spot.seasonLabel);
-  });
-
-  return Array.from(source.entries())
-    .map(([value, label]) => ({
-      value,
-      label,
-      selected: value === selectedValue,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label, 'ru'));
-}
-
-function resolveMoodHeading(filters: FilterState): string {
-  if (filters.style) {
-    return 'Подборка по тегу';
-  }
-
-  if (filters.season) {
-    return 'Подборка по сезону';
-  }
-
-  return 'Подборки';
-}
-
-function buildMoodCards(spots: MapSpot[]): MoodCard[] {
-  const stats = new Map<string, { title: string; count: number; imageUrl: string }>();
-
-  spots.forEach((spot) => {
-    const entry = stats.get(spot.style);
-    if (entry) {
-      entry.count += 1;
-      if (!entry.imageUrl && spot.imageUrl) {
-        entry.imageUrl = spot.imageUrl;
+  return items
+    .map((item) => {
+      const value = String(item.id || item.value || '').trim();
+      const label = String(item.name || item.label || '').trim();
+      if (!value || !label) {
+        return null;
       }
-      return;
-    }
 
-    stats.set(spot.style, {
-      title: spot.styleLabel,
-      count: 1,
-      imageUrl: spot.imageUrl,
-    });
-  });
+      return {
+        value,
+        label,
+        selected: value === selected,
+      };
+    })
+    .filter((item): item is EventsMapFilterOption => Boolean(item));
+}
 
-  const cards = Array.from(stats.entries())
-    .sort((a, b) => b[1].count - a[1].count || a[1].title.localeCompare(b[1].title, 'ru'))
+function getDateRangeByPreset(preset: DatePreset): { dateFrom?: string; dateTo?: string } {
+  if (!preset) {
+    return {};
+  }
+
+  const now = new Date();
+  if (preset === 'today') {
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    return {
+      dateFrom: start.toISOString().slice(0, 10),
+      dateTo: end.toISOString().slice(0, 10),
+    };
+  }
+
+  const day = now.getDay();
+  const shiftToSaturday = day === 0 ? 6 : 6 - day;
+  const saturday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + shiftToSaturday);
+  const sunday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + shiftToSaturday + 1);
+
+  return {
+    dateFrom: saturday.toISOString().slice(0, 10),
+    dateTo: sunday.toISOString().slice(0, 10),
+  };
+}
+
+function toPins(spots: MapSpot[], active: string): EventsMapPin[] {
+  return spots
+    .filter((spot) => Number.isFinite(Number(spot.latitude)) && Number.isFinite(Number(spot.longitude)))
+    .map((spot) => ({
+      id: String(spot.eventId || spot.id || '').trim(),
+      title: String(spot.title || '').trim() || 'Без названия',
+      address: String(spot.address || '').trim() || 'Адрес не указан',
+      imageUrl: String(spot.imageUrl || '').trim() || '/public/static/img/photo.jpeg',
+      latitude: Number(spot.latitude),
+      longitude: Number(spot.longitude),
+      active: String(spot.eventId || spot.id || '').trim() === active,
+    }))
+    .filter((pin) => Boolean(pin.id));
+}
+
+function buildMoodCards(collections: MapCollection[]): MoodCard[] {
+  return collections
     .slice(0, 5)
-    .map(([style, value], index) => ({
-      title: value.title,
-      imageUrl: value.imageUrl || FALLBACK_MOOD_IMAGES[index % FALLBACK_MOOD_IMAGES.length],
-      href: `${ROUTE_PATH}?style=${encodeURIComponent(style)}`,
+    .map((collection, index) => ({
+      title: String(collection.title || '').trim() || 'Подборка',
+      imageUrl: String(collection.imageUrl || '').trim() || FALLBACK_MOOD_IMAGES[index % FALLBACK_MOOD_IMAGES.length],
+      href: buildPagePath({
+        collectionId: collection.id,
+        active: null,
+      }),
     }));
+}
 
-  return cards;
+function resolveMoodHeading(collectionId: string): string {
+  return collectionId ? 'Выбранная подборка' : 'Выбери подборку';
+}
+
+function pickCollectionId(collections: MapCollection[], currentCollectionId: string): string {
+  if (!currentCollectionId) {
+    return '';
+  }
+  return collections.some((item) => item.id === currentCollectionId) ? currentCollectionId : '';
+}
+
+async function loadMapData(filters: FilterState): Promise<{
+  collections: MapCollection[];
+  mapFilters: MapFiltersResponse;
+  spots: MapSpot[];
+}> {
+  const [collectionsResponse, mapFilters] = await Promise.all([
+    getMapCollections({ cityId: filters.cityId || undefined, limit: 5 }).catch(() => ({ items: [] })),
+    getMapFilters(filters.cityId || undefined).catch(() => ({ tags: [], datePresets: [], sortOptions: [] })),
+  ]);
+
+  const collections = Array.isArray(collectionsResponse.items) ? collectionsResponse.items : [];
+  const collectionId = pickCollectionId(collections, filters.collectionId);
+
+  if (!collectionId) {
+    return { collections, mapFilters, spots: [] };
+  }
+
+  const dateRange = getDateRangeByPreset(filters.season);
+  const spotsResponse = await getMapCollectionSpots(collectionId, {
+    cityId: filters.cityId || undefined,
+    query: filters.query || undefined,
+    tagId: filters.style || undefined,
+    dateFrom: dateRange.dateFrom,
+    dateTo: dateRange.dateTo,
+    sort: filters.sort,
+    limit: 200,
+    offset: 0,
+  }).catch(() => ({ items: [] }));
+
+  return {
+    collections,
+    mapFilters,
+    spots: Array.isArray(spotsResponse.items) ? spotsResponse.items : [],
+  };
 }
 
 export async function eventsMapPage({ navigate }: RouteContext): Promise<RouteView> {
   const filters = getFilterStateFromLocation();
-  console.debug('[events-map] enter page', {
-    path: window.location.pathname,
-    search: window.location.search,
-    filters,
-  });
   const me = await getMeOrNull().catch(() => null);
   const user: (User & { displayName: string }) | null = me
     ? {
@@ -299,62 +220,29 @@ export async function eventsMapPage({ navigate }: RouteContext): Promise<RouteVi
     }
     : null;
 
-  const response = await getEvents({
-    query: filters.query || undefined,
-    cityId: filters.cityId || undefined,
-    limit: 200,
-    offset: 0,
-  }).catch((error) => {
-    console.debug('[events-map] getEvents failed', error);
-    return { items: [], total: 0, limit: 0, offset: 0 };
-  });
-  console.debug('[events-map] getEvents response', {
-    total: response.total,
-    limit: response.limit,
-    offset: response.offset,
-    itemsCount: Array.isArray(response.items) ? response.items.length : 0,
-  });
+  const { collections, mapFilters, spots } = await loadMapData(filters);
+  const selectedCollectionId = pickCollectionId(collections, filters.collectionId);
 
-  const allSpots = (Array.isArray(response.items) ? response.items : [])
-    .map((event, index) => extractMapSpot(event, index))
-    .filter((spot): spot is MapSpot => Boolean(spot));
-
-  const filtered = sortSpots(allSpots.filter((spot) => matchesFilters(spot, filters)), filters.sort);
-  console.debug('[events-map] mapped spots', {
-    allSpots: allSpots.length,
-    filteredSpots: filtered.length,
-    sort: filters.sort,
-  });
-  const activeId = filtered.some((spot) => spot.id === filters.active)
+  const activeId = spots.some((spot) => String(spot.eventId || spot.id || '').trim() === filters.active)
     ? filters.active
-    : (filtered[0]?.id || '');
+    : String(spots[0]?.eventId || spots[0]?.id || '').trim();
 
-  const pins: EventsMapPin[] = filtered.map((spot) => ({
-    id: spot.id,
-    title: spot.title,
-    address: spot.address,
-    imageUrl: spot.imageUrl,
-    latitude: spot.latitude,
-    longitude: spot.longitude,
-    active: spot.id === activeId,
-  }));
-
-  const moodCards = buildMoodCards(allSpots);
+  const pins = toPins(spots, activeId);
 
   const eventsMapCanvas = renderEventsMapCanvas({
-    districtOptions: buildOptions(allSpots, 'district', filters.district),
-    styleOptions: buildOptions(allSpots, 'style', filters.style),
-    seasonOptions: buildOptions(allSpots, 'season', filters.season),
-    sortOptions: [
-      { value: 'popular', label: 'Сначала популярные', selected: filters.sort === 'popular' },
-      { value: 'name', label: 'По названию А-Я', selected: filters.sort === 'name' },
-    ],
+    districtOptions: toMapFilterOptions(
+      collections.map((item) => ({ value: item.id, label: item.title })),
+      selectedCollectionId,
+    ),
+    styleOptions: toMapFilterOptions(mapFilters.tags, filters.style),
+    seasonOptions: toMapFilterOptions(mapFilters.datePresets, filters.season),
+    sortOptions: toMapFilterOptions(mapFilters.sortOptions, filters.sort),
     hasPins: pins.length > 0,
   });
 
   const eventsMapMoodSidebar = renderEventsMapMoodSidebar({
-    heading: resolveMoodHeading(filters),
-    cards: moodCards,
+    heading: resolveMoodHeading(selectedCollectionId),
+    cards: buildMoodCards(collections),
   });
 
   const html = renderTemplate('events-map-page', {
@@ -372,13 +260,21 @@ export async function eventsMapPage({ navigate }: RouteContext): Promise<RouteVi
       const detachEventsMapCanvas = attachEventsMapCanvas(root, {
         pins,
         onFilterChange(name, value) {
+          if (name === 'district') {
+            navigate(buildPagePath({
+              collectionId: value || null,
+              active: null,
+            }));
+            return;
+          }
+
           navigate(buildPagePath({
             [name as FilterSelectName]: value || null,
             active: null,
           }));
         },
-        onPinPick(pinId) {
-          navigate(`/events/${encodeURIComponent(pinId)}`);
+        onPinPick(eventId) {
+          navigate(`/events/${encodeURIComponent(eventId)}`);
         },
       });
 

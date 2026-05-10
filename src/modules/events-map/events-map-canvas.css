@@ -138,6 +138,34 @@
     position: relative;
 }
 
+.events-map-canvas__input {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 38px 0 14px;
+    border: 0.5px solid var(--ui-interactive-border, var(--home-color-border));
+    border-radius: 14px;
+    background: var(--ui-interactive-bg);
+    color: var(--home-color-text);
+    font-size: 15px;
+    line-height: 1.35;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--ui-dropdown-arrow-color) 50%),
+        linear-gradient(135deg, var(--ui-dropdown-arrow-color) 50%, transparent 50%);
+    background-position:
+        calc(100% - 18px) calc(50% - 2px),
+        calc(100% - 12px) calc(50% - 2px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+}
+
+.events-map-canvas__input option {
+    font-size: 15px;
+    line-height: 1.4;
+}
+
 .events-map-canvas__input--hidden {
     position: absolute;
     opacity: 0;
@@ -152,6 +180,8 @@
 }
 
 .events-map-canvas__custom-trigger {
+    display: flex;
+    align-items: center;
     width: 100%;
     min-height: 46px;
     padding: 0 48px 0 16px;
@@ -168,6 +198,7 @@
         box-shadow 0.2s ease,
         color 0.2s ease;
     text-align: left;
+    line-height: 1.35;
     cursor: pointer;
     appearance: none;
     background-image:
@@ -178,6 +209,9 @@
         calc(100% - 18px) calc(50% - 3px);
     background-size: 6px 6px, 6px 6px;
     background-repeat: no-repeat;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .events-map-canvas__custom-trigger--active {
@@ -222,19 +256,24 @@
 }
 
 .events-map-canvas__custom-option {
+    display: flex;
+    align-items: center;
     width: 100%;
     text-align: left;
     border: none;
     border-radius: 10px;
     background: transparent;
     color: var(--home-color-text);
-    padding: 8px 12px;
+    min-height: 38px;
+    padding: 9px 12px;
     font-size: var(--home-text-5);
+    line-height: 1.35;
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.2s ease;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: initial;
+    word-break: break-word;
 }
 
 .events-map-canvas__custom-option:hover,
