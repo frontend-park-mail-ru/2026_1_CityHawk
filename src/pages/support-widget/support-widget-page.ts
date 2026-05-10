@@ -278,6 +278,20 @@ export async function supportWidgetPage(context: RouteContext): Promise<RouteVie
   return {
     html: renderWidget(content, path, errorMessage),
     mount(root) {
+      const closeButton = root.querySelector('[data-role="support-widget-close"]');
+      const handleCloseClick = (): void => {
+        postParentMessage('support:close');
+        if (window.history.length > 1) {
+          window.history.back();
+          return;
+        }
+        navigate('/', { replace: true });
+      };
+
+      if (closeButton instanceof HTMLButtonElement) {
+        closeButton.addEventListener('click', handleCloseClick);
+      }
+
       if (path === '/support-widget/new') {
         attachTicketForm(root, async (payload, form) => {
           const messageNode = form.querySelector('[data-role="support-ticket-form-message"]');
@@ -313,6 +327,12 @@ export async function supportWidgetPage(context: RouteContext): Promise<RouteVie
         });
         attachMessageForm(root, params.id, navigate);
       }
+
+      return () => {
+        if (closeButton instanceof HTMLButtonElement) {
+          closeButton.removeEventListener('click', handleCloseClick);
+        }
+      };
     },
   };
 }

@@ -15,6 +15,7 @@ import { renderEventGallery } from '../../modules/events/details/event-gallery.j
 import { renderEventHero } from '../../modules/events/details/event-hero.js';
 import { attachEventLocation, renderEventLocation } from '../../modules/events/details/event-location.js';
 import { localizeCategoryName } from '../../modules/events/common/category-localization.js';
+import { formatEventDateOrPeriod } from '../../modules/events/common/event-date-label.js';
 import { renderEventRecommendations } from '../../modules/events/details/event-recommendations.js';
 import type {
   EventCard,
@@ -94,6 +95,51 @@ function formatEventDate(value?: string | null): string {
   }).format(date);
 }
 
+function formatEventPeriod(startAt?: string | null, endAt?: string | null): string | null {
+  if (!startAt || !endAt) {
+    return null;
+  }
+
+  const start = new Date(startAt);
+  const end = new Date(endAt);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return null;
+  }
+
+  const sameYear = start.getFullYear() === end.getFullYear();
+  const sameMonth = sameYear && start.getMonth() === end.getMonth();
+  const sameDay = sameMonth && start.getDate() === end.getDate();
+
+  if (sameDay) {
+    return null;
+  }
+
+  const monthGenitive = [
+    'января',
+    'февраля',
+    'марта',
+    'апреля',
+    'мая',
+    'июня',
+    'июля',
+    'августа',
+    'сентября',
+    'октября',
+    'ноября',
+    'декабря',
+  ];
+  const shortFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' });
+
+  if (sameMonth) {
+    return `${start.getDate()}-${end.getDate()} ${monthGenitive[start.getMonth()]}`;
+  }
+
+  const startLabel = shortFormatter.format(start);
+  const endLabel = shortFormatter.format(end);
+  return `${startLabel} - ${endLabel}`;
+}
+
 function mapEventImagesToGalleryViewModel(rawEvent: EventDetailsLike): GalleryImageViewModel[] {
   const images = Array.isArray(rawEvent.images) ? rawEvent.images : [];
   const title = rawEvent.title || 'Мероприятие';
@@ -158,10 +204,16 @@ function mapEventDetailsToPageViewModel(rawEvent: EventDetailsLike = {}): EventP
   const mapCoordinates = resolveEventMapCoordinates(rawEvent);
   const title = rawEvent.title || 'Futurione';
   const description = rawEvent.fullDescription || '';
-  const paragraphs = description
-    .split(/\n{2,}/)
+  const rawParagraphs = description
+    .split(/\n+/)
     .map((part) => part.trim())
     .filter(Boolean);
+  const paragraphs = rawParagraphs.length <= 1 && rawParagraphs[0] && rawParagraphs[0].length > 320
+    ? rawParagraphs[0]
+      .split(/(?<=[.!?])\s+/)
+      .map((part) => part.trim())
+      .filter(Boolean)
+    : rawParagraphs;
 
   const safeParagraphs = paragraphs.length > 0
     ? paragraphs
@@ -188,7 +240,8 @@ function mapEventDetailsToPageViewModel(rawEvent: EventDetailsLike = {}): EventP
     authorId: String(rawEvent.author?.id || '').trim(),
     category,
     title,
-    dateText: formatEventDate(firstSession?.startAt || rawEvent.dateText),
+    dateText: formatEventPeriod(firstSession?.startAt, firstSession?.endAt)
+      || formatEventDate(firstSession?.startAt || rawEvent.dateText),
     placeText: locationParts.join(', ') || 'Локация уточняется',
     posterUrl: rawEvent.coverImageUrl || galleryImages[0]?.imageUrl || '',
     leadText: rawEvent.shortDescription || 'Актуальная информация о событии, времени и формате посещения.',
@@ -248,7 +301,7 @@ function mapEventToRecommendationViewModel(item: Partial<EventCard> = {}): Recom
     item.nextSession?.place?.name,
     item.nextSession?.place?.addressLine,
   ].filter(Boolean);
-  const dateText = formatEventDate(item.nextSession?.startAt);
+  const dateText = formatEventDateOrPeriod(item);
   const placeText = placeParts.join(', ');
   const tags = Array.isArray(item.tags)
     ? item.tags.map((tag) => tag?.name || '').filter(Boolean)

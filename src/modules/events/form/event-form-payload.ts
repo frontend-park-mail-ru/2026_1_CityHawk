@@ -274,7 +274,10 @@ function mapSessionsToInitialSchedule(sessions?: EventSession[]): EventFormSched
 function buildSessions(formPayload: EventFormValues): EventSessionPayload[] {
   const placeValue = String(formPayload.placeId || '').trim();
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(placeValue);
-  const placePayload = isUuid ? { placeId: placeValue } : { placeName: placeValue };
+  if (!isUuid) {
+    throw new Error('Выбери место из подсказок перед публикацией');
+  }
+  const placePayload = { placeId: placeValue };
 
   if (formPayload.isAnytime) {
     return [];

@@ -27,6 +27,18 @@
   line-height: 1.15;
 }
 
+.support-widget__close {
+  border: 1px solid var(--home-color-border);
+  background: var(--home-color-surface);
+  color: var(--home-color-text);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .support-widget__nav {
   display: flex;
   gap: 8px;
@@ -298,7 +310,41 @@
 
 @media (max-width: 520px) {
   .support-widget {
-    padding: 14px;
+    min-height: 100dvh;
+    padding: 0;
+    padding-top: max(var(--site-header-offset, 0px), env(safe-area-inset-top));
+  }
+
+  .support-widget__header,
+  .support-widget__nav,
+  .support-alert {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .support-widget__header {
+    margin-bottom: 12px;
+    padding-top: 14px;
+  }
+
+  .support-widget__close {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    font-size: 26px;
+  }
+
+  .support-widget__nav {
+    margin-bottom: 12px;
+  }
+
+  .support-section {
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+    margin-bottom: 10px;
   }
 
   .support-ticket {

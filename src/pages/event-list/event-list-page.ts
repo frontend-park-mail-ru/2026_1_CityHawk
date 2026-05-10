@@ -10,6 +10,7 @@ import { localizeCategoryName } from '../../modules/events/common/category-local
 import { renderEventListCatalog } from '../../modules/events/list/event-list-catalog.js';
 import { attachEventListFilters, renderEventListFilters } from '../../modules/events/list/event-list-filters.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
+import { formatEventDateOrPeriod } from '../../modules/events/common/event-date-label.js';
 import type { Category, EventCard, Tag, User } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
@@ -42,25 +43,6 @@ function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
-function formatEventDate(value?: string | null): string {
-  if (!value) {
-    return '';
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return String(value);
-  }
-
-  return new Intl.DateTimeFormat('ru-RU', {
-    day: 'numeric',
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-}
-
 function mapEventToCatalogCardViewModel(event: Partial<EventCard> = {}): CatalogCardViewModel {
   const tags = Array.isArray(event.tags)
     ? event.tags.map((tag) => tag?.name || '').filter(Boolean)
@@ -75,7 +57,7 @@ function mapEventToCatalogCardViewModel(event: Partial<EventCard> = {}): Catalog
     imageUrl: event.coverImageUrl || '/public/static/img/concert.jpeg',
     title: event.title || '',
     tags,
-    dateText: formatEventDate(event.nextSession?.startAt),
+    dateText: formatEventDateOrPeriod(event),
     placeText,
     isFavorite: Boolean(event.isFavorite),
   };

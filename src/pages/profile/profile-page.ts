@@ -18,6 +18,7 @@ import { getHeaderUserDisplayName } from '../../components/header/header-user.js
 import { renderEventCard } from '../../components/event-card/event-card.js';
 import { showToast } from '../../app/ui/toast.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
+import { formatEventDateOrPeriod } from '../../modules/events/common/event-date-label.js';
 import type { EventCard, FollowUser } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
@@ -54,25 +55,6 @@ function formatBirthday(value?: string): string {
   }).format(date);
 }
 
-function formatEventDate(value?: string | null): string {
-  if (!value) {
-    return 'Дата уточняется';
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return String(value);
-  }
-
-  return new Intl.DateTimeFormat('ru-RU', {
-    day: '2-digit',
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-}
-
 function mapEventToProfileCard(item: Partial<EventCard> = {}): string {
   const tags = Array.isArray(item.tags)
     ? item.tags.map((tag) => String(tag?.name || '').trim()).filter(Boolean).slice(0, 3)
@@ -86,7 +68,7 @@ function mapEventToProfileCard(item: Partial<EventCard> = {}): string {
     id: item.id || '',
     imageUrl: item.coverImageUrl || '/public/static/img/concert.jpeg',
     title: item.title || 'Без названия',
-    textLines: [formatEventDate(item.nextSession?.startAt), placeText],
+    textLines: [formatEventDateOrPeriod(item), placeText],
     tags,
     isFavorite: Boolean(item.isFavorite),
     cardClass: 'profile-overview__event-card',
