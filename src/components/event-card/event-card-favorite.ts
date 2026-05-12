@@ -34,15 +34,13 @@ export function attachEventCardFavorites(root: HTMLElement): () => void {
       return;
     }
 
-    const eventId = String(button.dataset.eventId || '').trim();
-    if (!eventId || pendingByEventId.has(eventId)) {
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
-
     event.preventDefault();
     event.stopPropagation();
+
+    const eventId = String(button.dataset.eventId || '').trim();
+    if (!eventId || pendingByEventId.has(eventId)) {  
+      return;
+    }
 
     const isCurrentlyActive = button.classList.contains('event-card__favorite--active');
     pendingByEventId.add(eventId);
