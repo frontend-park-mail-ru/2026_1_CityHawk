@@ -9,6 +9,7 @@ const TEMPLATE_URLS = [
   '/src/components/form-controls/form-select.hbs',
   '/src/components/footer/footer.hbs',
   '/src/components/header/header.hbs',
+  '/src/components/support-launcher/support-launcher-panel.hbs',
   '/src/modules/events/details/event-description.hbs',
   '/src/modules/events/delete/event-delete-card.hbs',
   '/src/modules/events/delete/event-delete-screen.hbs',

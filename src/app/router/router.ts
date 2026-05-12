@@ -81,12 +81,15 @@ export class Router {
 
   private readonly notFound: RouteRenderer;
 
+  private readonly sharedBinders: Array<(root: HTMLElement) => RouteCleanup>;
+
   private cleanup: RouteCleanup | null;
 
   constructor({ root, routes, notFound }: RouterOptions) {
     this.root = root;
     this.routes = routes;
     this.notFound = notFound;
+    this.sharedBinders = [attachEventCardFavorites, attachHeaderMenu];
     this.cleanup = null;
     this.onPopState = this.onPopState.bind(this);
     this.onDocumentClick = this.onDocumentClick.bind(this);
@@ -187,15 +190,15 @@ export class Router {
 
     this.root.innerHTML = html;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    const detachEventCardFavorites = attachEventCardFavorites(this.root);
-    const detachHeaderMenu = attachHeaderMenu(this.root);
+    const sharedCleanup = this.sharedBinders
+      .map((binder) => binder(this.root))
+      .filter((cleanup): cleanup is RouteCleanup => typeof cleanup === 'function');
 
     if (view && typeof view !== 'string' && typeof view.mount === 'function') {
       const cleanup = view.mount(this.root);
       if (typeof cleanup === 'function') {
         this.cleanup = () => {
-          detachEventCardFavorites();
-          detachHeaderMenu();
+          sharedCleanup.forEach((detach) => detach());
           cleanup();
         };
         return;
@@ -203,8 +206,7 @@ export class Router {
     }
 
     this.cleanup = () => {
-      detachEventCardFavorites();
-      detachHeaderMenu();
+      sharedCleanup.forEach((detach) => detach());
     };
   }
 

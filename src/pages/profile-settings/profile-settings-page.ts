@@ -23,9 +23,7 @@ function animateLoginAside(root: HTMLElement): void {
   }
 
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      loginEl.classList.add('loaded');
-    });
+    loginEl.classList.add('loaded');
   });
 }
 

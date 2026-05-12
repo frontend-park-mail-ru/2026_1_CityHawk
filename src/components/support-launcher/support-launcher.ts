@@ -1,4 +1,5 @@
 import { showToast } from '../../app/ui/toast.js';
+import { renderTemplate } from '../../app/templates/renderer.js';
 
 type SupportIframeState = 'closed' | 'opening' | 'opened' | 'load_error';
 
@@ -23,17 +24,12 @@ const render = (): void => {
 
   const isOpen = state !== 'closed';
   root.innerHTML = isOpen
-    ? [
-      `<section class="support-launcher__panel support-launcher__panel--${state}" aria-label="Поддержка">`,
-      '<div class="support-launcher__bar">',
-      '<span>Поддержка</span>',
-      '<button class="support-launcher__close" type="button" data-action="support-close" aria-label="Закрыть поддержку">×</button>',
-      '</div>',
-      state === 'opening' ? '<p class="support-launcher__state">Загрузка...</p>' : '',
-      state === 'load_error' ? '<p class="support-launcher__state">Не удалось загрузить поддержку.</p>' : '',
-      `<iframe class="support-launcher__iframe" src="${getWidgetSrc()}" title="Поддержка CityHawk" data-role="support-iframe"></iframe>`,
-      '</section>',
-    ].join('')
+    ? renderTemplate('support-launcher-panel', {
+      state,
+      isOpening: state === 'opening',
+      isLoadError: state === 'load_error',
+      widgetSrc: getWidgetSrc(),
+    })
     : '';
 };
 

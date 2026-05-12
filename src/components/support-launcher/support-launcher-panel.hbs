@@ -1,0 +1,13 @@
+<section class="support-launcher__panel support-launcher__panel--{{state}}" aria-label="Поддержка">
+  <div class="support-launcher__bar">
+    <span>Поддержка</span>
+    <button class="support-launcher__close" type="button" data-action="support-close" aria-label="Закрыть поддержку">×</button>
+  </div>
+  {{#if isOpening}}
+    <p class="support-launcher__state">Загрузка...</p>
+  {{/if}}
+  {{#if isLoadError}}
+    <p class="support-launcher__state">Не удалось загрузить поддержку.</p>
+  {{/if}}
+  <iframe class="support-launcher__iframe" src="{{widgetSrc}}" title="Поддержка CityHawk" data-role="support-iframe"></iframe>
+</section>

@@ -18,6 +18,21 @@ function normalizeSuggestionType(value: unknown): string {
   return String(value || '').trim().toLowerCase();
 }
 
+const SUGGESTION_META_LABELS: Record<string, string> = {
+  category: 'Категория',
+  'категория': 'Категория',
+  tag: 'Тег',
+  'тег': 'Тег',
+  event: 'Событие',
+  'событие': 'Событие',
+  user: 'Пользователь',
+  'пользователь': 'Пользователь',
+};
+
+function isHeaderSearchSuggestion(item: HeaderSearchSuggestion | null): item is HeaderSearchSuggestion {
+  return item !== null;
+}
+
 function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
   if (!payload || typeof payload !== 'object') {
     return [];
@@ -66,27 +81,13 @@ function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
           label,
         } satisfies HeaderSearchSuggestion;
       })
-      .filter(Boolean)
-      .map((item) => item as HeaderSearchSuggestion)
+      .filter(isHeaderSearchSuggestion)
     : [];
 }
 
 function getSuggestionMetaLabel(type: string): string {
   const normalizedType = normalizeSuggestionType(type);
-
-  if (normalizedType === 'category' || normalizedType === 'категория') {
-    return 'Категория';
-  }
-
-  if (normalizedType === 'tag' || normalizedType === 'тег') {
-    return 'Тег';
-  }
-
-  if (normalizedType === 'event' || normalizedType === 'событие') {
-    return 'Событие';
-  }
-
-  return '';
+  return SUGGESTION_META_LABELS[normalizedType] || '';
 }
 
 export function attachHeaderSearchSuggestions(
