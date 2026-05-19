@@ -91,9 +91,15 @@ async function requestMultipart<TResponse>(
     let errorMessage = `HTTP ${response.status}`;
 
     try {
-      const errorData = await response.json() as { error?: string };
+      const errorData = await response.json() as { error?: string; details?: Record<string, string> };
       if (typeof errorData?.error === 'string' && errorData.error) {
         errorMessage = errorData.error;
+      }
+      if (errorData?.details && typeof errorData.details === 'object') {
+        const firstDetail = Object.values(errorData.details).find((value) => typeof value === 'string' && value);
+        if (firstDetail) {
+          errorMessage = `${errorMessage}: ${firstDetail}`;
+        }
       }
     } catch {
       errorMessage = `HTTP ${response.status}`;

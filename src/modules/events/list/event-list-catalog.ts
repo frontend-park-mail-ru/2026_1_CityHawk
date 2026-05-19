@@ -8,6 +8,7 @@ export interface EventListCatalogCard {
   tags?: string[];
   dateText?: string;
   placeText?: string;
+  isFavorite?: boolean;
 }
 
 export interface EventListCatalogState {

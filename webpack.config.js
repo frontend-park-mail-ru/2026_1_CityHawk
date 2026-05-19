@@ -90,8 +90,8 @@ module.exports = {
   },
   performance: {
     hints: 'warning',
-    maxAssetSize: 700 * 1024,
-    maxEntrypointSize: 700 * 1024,
+    maxAssetSize: 1024 * 1024,
+    maxEntrypointSize: 1024 * 1024,
     assetFilter: (assetFilename) => (
       !assetFilename.includes('public/static/img/')
       && !assetFilename.endsWith('.DS_Store')

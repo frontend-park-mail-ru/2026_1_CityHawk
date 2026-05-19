@@ -7,6 +7,7 @@ import { renderHomeEventsSection } from '../../modules/home/home-events-section.
 import { renderHomeMoodSection } from '../../modules/home/home-mood-section.js';
 import { attachHeroSearch, renderHeroSearch } from '../../modules/home/hero-search.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
+import { formatEventDateOrPeriod } from '../../modules/events/common/event-date-label.js';
 import type { EventCard, HomeResponse, User } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
@@ -17,6 +18,7 @@ interface HomeEventCardViewModel {
   tags: string[];
   dateText: string;
   placeText: string;
+  isFavorite: boolean;
 }
 
 interface MoodViewModel {
@@ -34,25 +36,6 @@ const FALLBACK_MOOD_IMAGES = [
   '/public/static/img/navka.jpeg',
 ];
 
-function formatEventDate(value?: string | null): string {
-  if (!value) {
-    return '';
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return String(value);
-  }
-
-  return new Intl.DateTimeFormat('ru-RU', {
-    day: 'numeric',
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-}
-
 function mapFeaturedEventToCardViewModel(event: Partial<EventCard> = {}): HomeEventCardViewModel {
   const tags = Array.isArray(event.tags)
     ? event.tags.map((tag) => tag?.name || '').filter(Boolean)
@@ -67,8 +50,9 @@ function mapFeaturedEventToCardViewModel(event: Partial<EventCard> = {}): HomeEv
     imageUrl: event.coverImageUrl || '',
     title: event.title || '',
     tags,
-    dateText: formatEventDate(event.nextSession?.startAt),
+    dateText: formatEventDateOrPeriod(event),
     placeText: placeParts.join(', '),
+    isFavorite: Boolean(event.isFavorite),
   };
 }
 

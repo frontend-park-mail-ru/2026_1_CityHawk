@@ -18,9 +18,6 @@
       <div class="profile-hero__content">
         <div class="profile-hero__head">
           <h1 class="profile-hero__name">{{user.name}}</h1>
-          <button class="profile__button profile__button--primary profile-hero__edit" type="button" data-role="profile-edit-button">
-            Редактировать
-          </button>
         </div>
         <div class="profile-hero__location">Город: {{user.cityName}}</div>
         <p class="profile-hero__bio">{{user.bio}}</p>
@@ -33,14 +30,22 @@
       </div>
 
       <div class="profile-hero__stats">
-        <div class="profile-stat">
-          <div class="profile-stat__value">{{stats.myEvents}}</div>
-          <div class="profile-stat__label">моих событий</div>
+        <div class="profile-hero__stats-row">
+          <button class="profile-stat profile-stat--button" type="button" data-role="profile-open-follows" data-tab="followers">
+            <div class="profile-stat__value">{{stats.myEvents}}</div>
+            <div class="profile-stat__label">подписчики</div>
+          </button>
+          <button class="profile-stat profile-stat--button" type="button" data-role="profile-open-follows" data-tab="following">
+            <div class="profile-stat__value">{{stats.favorites}}</div>
+            <div class="profile-stat__label">подписки</div>
+          </button>
         </div>
-        <div class="profile-stat">
-          <div class="profile-stat__value">{{stats.favorites}}</div>
-          <div class="profile-stat__label">в избранном</div>
-        </div>
+        <button class="profile__button profile__button--primary profile-hero__edit ui-button ui-button--primary ui-button--pill" type="button" data-role="profile-edit-button">
+          Редактировать
+        </button>
+        <button class="profile__button profile__button--secondary profile-hero__find ui-button ui-button--ghost ui-button--pill" type="button" data-role="profile-open-friends">
+          Найти друзей
+        </button>
       </div>
     </section>
 
@@ -64,7 +69,7 @@
     <section class="profile-section profile-section--home-like">
       <div class="home-events__head">
         <h2 class="home-events__title">Избранное</h2>
-        <a href="/events" class="home-events__link">показать ещё...</a>
+        <a href="{{favoriteMoreHref}}" class="home-events__link">{{favoriteMoreLabel}}</a>
       </div>
 
       {{#if favoriteEventCards.length}}
@@ -76,6 +81,38 @@
       {{else}}
       <p class="profile-section__empty">Добавляй мероприятия в избранное, чтобы они появились здесь.</p>
       {{/if}}
+    </section>
+  </div>
+
+  <div class="profile-follows-modal" data-role="profile-follows-modal" hidden>
+    <div class="profile-follows-modal__backdrop" data-role="profile-follows-close"></div>
+    <section class="profile-follows-modal__dialog" role="dialog" aria-modal="true" aria-label="Друзья и подписки">
+      <header class="profile-follows-modal__header">
+        <button type="button" class="profile-follows-modal__close" data-role="profile-follows-close" aria-label="Закрыть">
+          ×
+        </button>
+      </header>
+      <div class="profile-follows-modal__search-row">
+        <input
+          type="text"
+          class="profile-follows-modal__search-input"
+          data-role="profile-follows-search"
+          placeholder="Поиск друзей по имени или городу"
+          autocomplete="off"
+        />
+        <div class="profile-follows-modal__tabs">
+          <button type="button" class="profile-follows-modal__tab ui-button ui-button--ghost" data-role="profile-follows-tab" data-tab="discover">
+            Найти друзей
+          </button>
+          <button type="button" class="profile-follows-modal__tab ui-button ui-button--ghost" data-role="profile-follows-tab" data-tab="followers">
+            Подписчики
+          </button>
+          <button type="button" class="profile-follows-modal__tab ui-button ui-button--ghost" data-role="profile-follows-tab" data-tab="following">
+            Подписки
+          </button>
+        </div>
+      </div>
+      <div class="profile-follows-modal__list" data-role="profile-follows-list"></div>
     </section>
   </div>
 </section>

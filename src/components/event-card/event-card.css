@@ -1,4 +1,5 @@
 .event-card {
+    position: relative;
     min-width: 0;
     color: var(--home-color-text);
     padding: 12px;
@@ -12,6 +13,44 @@
         box-shadow 0.2s ease,
         border-color 0.2s ease,
         background-color 0.2s ease;
+}
+
+.event-card__favorite {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 10px;
+    background: rgba(13, 25, 62, 0.28);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    z-index: 1;
+}
+
+.event-card__favorite img {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+.event-card__favorite:hover {
+    transform: scale(1.06);
+}
+
+.event-card__favorite--active {
+    border-color: var(--form-control-border-active);
+    background: var(--form-control-border-active);
+}
+
+.event-card__favorite--loading {
+    opacity: 0.75;
+    pointer-events: none;
 }
 
 .event-card * {
@@ -64,6 +103,15 @@
     overflow: hidden;
 }
 
+.event-card__tags-full {
+    display: contents;
+}
+
+.event-card__tags-mobile {
+    display: none;
+    gap: var(--event-card-tag-row-gap);
+}
+
 .event-card__tag {
     display: inline-flex;
     align-items: center;
@@ -82,6 +130,10 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     user-select: none;
+}
+
+.event-card__tag--count {
+    opacity: 0.84;
 }
 
 .event-card:hover,
@@ -104,5 +156,37 @@
 
     .event-card__tag {
         background: rgba(118, 128, 144, 0.22);
+    }
+}
+
+@media (max-width: 768px) {
+    .event-card__tags-full {
+        display: none;
+    }
+
+    .event-card__tags-mobile {
+        display: inline-flex;
+        align-items: center;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .event-card__tags-mobile .event-card__tag {
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .event-card__tags-mobile .event-card__tag:not(.event-card__tag--count) {
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .event-card__tags-mobile--with-count .event-card__tag:not(.event-card__tag--count) {
+        max-width: calc(100% - 56px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }

@@ -4,14 +4,18 @@ import './styles/toast.css';
 import './pages/home/home.css';
 import './pages/event-list/event-list.css';
 import './components/form-controls/form-controls.css';
+import './components/button/button.css';
 import './components/event-card/event-card.css';
 import './components/header/header.css';
 import './components/footer/footer.css';
+import './components/support-launcher/support-launcher.css';
 import './modules/home/hero-search.css';
 import './modules/home/home-events-section.css';
 import './modules/home/home-mood-section.css';
 import './modules/events/list/event-list-filters.css';
 import './modules/events/list/event-list-catalog.css';
+import './modules/events-map/events-mood-sidebar.css';
+import './modules/events-map/events-map-canvas.css';
 
 import './app/bootstrap.js';
 import { registerServiceWorker } from './app/register-service-worker.js';

@@ -4,6 +4,11 @@
 
 API приложения CityHawk построено по REST-подходу.
 
+Статус документа:
+
+- обновлено под текущий frontend (ветка с картой и профилем)
+- последняя актуализация: апрель 2026
+
 Основные принципы:
 
 - backend API использует префикс `/api`
@@ -98,6 +103,24 @@ ok
 ### GET /swagger/
 
 UI для просмотра OpenAPI.
+
+### GET /runtime-config.js
+
+Runtime-конфиг для frontend-клиента.
+
+Успешный ответ:
+
+```javascript
+window.__APP_CONFIG__ = {
+  API_BASE_URL: "http://localhost:8080",
+  YANDEX_MAPS_API_KEY: "<key-or-empty-string>"
+};
+```
+
+Примечания:
+
+- endpoint отдается frontend-server'ом
+- используется для конфигурации базового API URL и ключа Yandex Maps
 
 ## Статические файлы
 
@@ -236,6 +259,246 @@ UI для просмотра OpenAPI.
 }
 ```
 
+## Social API (Followers & Friends)
+
+Раздел для подписок пользователей друг на друга и поиска друзей.
+
+### GET /api/me/followers
+
+Список пользователей, которые подписаны на текущего пользователя.
+
+Query-параметры:
+
+- `limit` (number, optional, default: `100`)
+- `offset` (number, optional, default: `0`)
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "username": "Мария",
+      "userSurname": "Соколова",
+      "avatarUrl": "https://.../avatar.jpg",
+      "city": {
+        "id": "uuid",
+        "name": "Москва",
+        "countryName": "Россия",
+        "timezone": "Europe/Moscow"
+      },
+      "isFollowing": true
+    }
+  ],
+  "total": 1,
+  "limit": 100,
+  "offset": 0
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+
+### GET /api/me/following
+
+Список пользователей, на которых подписан текущий пользователь.
+
+Query-параметры:
+
+- `limit` (number, optional, default: `100`)
+- `offset` (number, optional, default: `0`)
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [],
+  "total": 0,
+  "limit": 100,
+  "offset": 0
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+
+### POST /api/users/{userId}/follow
+
+Подписаться на пользователя.
+
+Path-параметры:
+
+- `userId` (uuid|string, required)
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "ok": true
+}
+```
+
+Возможные ошибки:
+
+- `400 Invalid userId`
+- `401 Unauthorized`
+- `404 User not found`
+- `409 Already following`
+
+### DELETE /api/users/{userId}/follow
+
+Отписаться от пользователя.
+
+Path-параметры:
+
+- `userId` (uuid|string, required)
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "ok": true
+}
+```
+
+Возможные ошибки:
+
+- `400 Invalid userId`
+- `401 Unauthorized`
+- `404 User not found`
+
+## Search API
+
+### GET /api/search
+
+Поиск по пользователям и событиям для строки поиска (используется в хедере и для поиска друзей).
+
+Query-параметры:
+
+- `query` (string, required)
+- `limit` (number, optional, default: `5`)
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "type": "user",
+      "title": "Мария Соколова",
+      "label": "@maria"
+    },
+    {
+      "id": "uuid",
+      "type": "event",
+      "title": "Futurione",
+      "label": "Выставка"
+    }
+  ]
+}
+```
+
+Примечания для backend:
+
+- `items` может содержать как объекты, так и строки (для совместимости со старым клиентом).
+- Для `type=user` желательно возвращать `id`, чтобы frontend мог переходить на профиль.
+- Для `type=event` желательно возвращать `id`, чтобы frontend мог переходить на страницу события.
+
+## Organizer Applications API (draft)
+
+Раздел для страницы `/organizer/apply`.
+
+### POST /api/organizer/applications
+
+Создать заявку на роль организатора.
+
+Тело запроса:
+
+```json
+{
+  "name": "Иван Петров",
+  "email": "ivan@example.com",
+  "phone": "+79000000000",
+  "city": "Москва",
+  "projectName": "North Art Lab",
+  "categories": "Концерты, Выставки",
+  "links": "https://example.com",
+  "about": "Организуем события 2 года...",
+  "consent": true
+}
+```
+
+Успешный ответ `201 Created`:
+
+```json
+{
+  "id": "uuid",
+  "status": "pending",
+  "createdAt": "2026-05-09T10:00:00Z"
+}
+```
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+- `409 Active application already exists`
+
+Frontend integration (текущее поведение клиента):
+
+- страница `/organizer/apply` отправляет `POST /api/organizer/applications`
+- валидация обязательных полей делается нативно в браузере (`required`)
+- при `201` форма скрывается и показывается блок "Заявка отправлена"
+- при ошибке backend текст из поля `error` показывается пользователю через toast
+
+### GET /api/organizer/applications/me
+
+Получить текущую заявку авторизованного пользователя.
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "id": "uuid",
+  "status": "pending",
+  "name": "Иван Петров",
+  "email": "ivan@example.com",
+  "phone": "+79000000000",
+  "city": "Москва",
+  "projectName": "North Art Lab",
+  "categories": "Концерты, Выставки",
+  "links": "https://example.com",
+  "about": "Организуем события 2 года...",
+  "reviewComment": "",
+  "createdAt": "2026-05-09T10:00:00Z",
+  "updatedAt": "2026-05-09T10:00:00Z"
+}
+```
+
+### PATCH /api/admin/organizer/applications/{applicationId}
+
+Админ меняет статус заявки.
+
+Тело запроса:
+
+```json
+{
+  "status": "approved",
+  "reviewComment": "Проверено, можно открывать доступ."
+}
+```
+
+Поддерживаемые `status`:
+
+- `pending`
+- `needs_info`
+- `approved`
+- `rejected`
+
 Побочные эффекты:
 
 - сервер очищает `access_token`, `refresh_token`, `csrf_token`
@@ -260,9 +523,28 @@ UI для просмотра OpenAPI.
 Успешный callback:
 
 - выставляет `access_token`, `refresh_token`, `csrf_token`
-- возвращает JSON с сообщением об успешном логине
+- перенаправляет пользователя на главную страницу фронтенда из `FRONTEND_ORIGIN`
 
 ## Profile API
+
+Контракт страниц:
+
+- `/profile`:
+  - обязательно: `GET /api/me`
+  - мои события: `GET /api/events?authorId=<me.id>&limit=4&offset=0`
+  - избранное (целевая схема): `GET /api/me/favorites?limit=4&offset=0`
+- `/profile/settings`:
+  - загрузка формы: `GET /api/me` + `GET /api/cities`
+  - сохранение: `PATCH /api/me` (json или multipart с `avatar`)
+  - выход: `POST /api/auth/logout`
+- модалка подписок/подписчиков на `/profile`:
+  - список подписчиков: `GET /api/me/followers?limit=100&offset=0`
+  - список подписок: `GET /api/me/following?limit=100&offset=0`
+  - подписаться: `POST /api/users/{userId}/follow`
+  - отписаться: `DELETE /api/users/{userId}/follow`
+- карточки событий на `/`, `/events`, `/events/{id}`, `/profile`:
+  - поставить в избранное: `POST /api/me/favorites/{eventId}`
+  - убрать из избранного: `DELETE /api/me/favorites/{eventId}`
 
 ### GET /api/me
 
@@ -280,7 +562,13 @@ UI для просмотра OpenAPI.
   "email": "user@mail.com",
   "username": "Alice",
   "userSurname": "Ivanova",
+  "role": "user",
   "birthday": "2004-01-12",
+  "bio": "Люблю джаз, выставки и прогулки по городу",
+  "interestTagIds": [
+    "22222222-2222-2222-2222-222222222222",
+    "33333333-3333-3333-3333-333333333333"
+  ],
   "avatarUrl": "http://example.com/uploads/avatars/file.png",
   "city": {
     "id": "uuid",
@@ -295,6 +583,55 @@ UI для просмотра OpenAPI.
 Возможные ошибки:
 
 - `401 Unauthorized`
+
+### POST /api/me/favorites/{eventId}
+
+Добавляет событие в избранное текущего пользователя.
+
+Требования:
+
+- cookie `access_token`
+- cookie `csrf_token`
+- header `X-CSRF-Token`
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "ok": true
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+- `403 CSRF token mismatch`
+- `404 Event not found`
+- `409 Already in favorites`
+
+### DELETE /api/me/favorites/{eventId}
+
+Удаляет событие из избранного текущего пользователя.
+
+Требования:
+
+- cookie `access_token`
+- cookie `csrf_token`
+- header `X-CSRF-Token`
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "ok": true
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+- `403 CSRF token mismatch`
+- `404 Event not found`
 
 ### PATCH /api/me
 
@@ -317,6 +654,10 @@ UI для просмотра OpenAPI.
   "userSurname": "Ivanova",
   "birthday": "2004-01-12",
   "cityId": "11111111-1111-1111-1111-111111111111",
+  "bio": "Люблю джаз, выставки и прогулки по городу",
+  "interestTagIds": [
+    "22222222-2222-2222-2222-222222222222"
+  ],
   "avatarUrl": "https://example.com/avatar.jpg"
 }
 ```
@@ -331,12 +672,17 @@ email=new-user@mail.com
 userSurname=Ivanova
 birthday=2004-01-12
 cityId=11111111-1111-1111-1111-111111111111
+bio=Люблю джаз, выставки и прогулки по городу
+interestTagIds=22222222-2222-2222-2222-222222222222
+interestTagIds=33333333-3333-3333-3333-333333333333
 avatar=<binary file>
 ```
 
 Правила:
 
 - все поля опциональны
+- `role` в ответе: `user`, `organizer`, `admin`
+- `interestTagIds` передается как массив UUID в JSON или как повторяющееся поле в multipart
 - если загружен файл `avatar`, сервер сохраняет его локально
 - допустимые форматы файла: `PNG`, `JPEG`, `GIF`, `WebP`
 - максимальный размер файла: `5 MB`
@@ -349,7 +695,12 @@ avatar=<binary file>
   "email": "user@mail.com",
   "username": "Alice",
   "userSurname": "Ivanova",
+  "role": "organizer",
   "birthday": "2004-01-12",
+  "bio": "Люблю джаз, выставки и прогулки по городу",
+  "interestTagIds": [
+    "22222222-2222-2222-2222-222222222222"
+  ],
   "avatarUrl": "http://example.com/uploads/avatars/file.png",
   "updatedAt": "2026-03-23T12:00:00Z"
 }
@@ -361,6 +712,223 @@ avatar=<binary file>
 - `401 Unauthorized`
 - `403 CSRF token mismatch`
 - `403 Invalid origin`
+
+### GET /api/me/favorites
+
+Избранные события текущего пользователя для страницы профиля.
+
+Требование:
+
+- cookie `access_token`
+
+Query параметры:
+
+- `limit` — положительное число, по умолчанию `12`
+- `offset` — неотрицательное число, по умолчанию `0`
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Rock concert",
+      "shortDescription": "Best rock night",
+      "coverImageUrl": "https://example.com/event.jpg",
+      "isFavorite": true,
+      "tags": [],
+      "nextSession": {
+        "startAt": "2026-03-30T19:00:00Z",
+        "place": {
+          "name": "Arena",
+          "addressLine": "Lenina 1"
+        }
+      }
+    }
+  ],
+  "total": 1,
+  "limit": 12,
+  "offset": 0
+}
+```
+
+Примечания:
+
+- для текущего пользователя в этом списке `isFavorite` всегда `true`.
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+
+### GET /api/me/followers
+
+Возвращает список подписчиков текущего пользователя.
+
+Требование:
+
+- cookie `access_token`
+
+Query параметры:
+
+- `limit` — положительное число, по умолчанию `20`, максимум `100`
+- `offset` — неотрицательное число, по умолчанию `0`
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "username": "Maria",
+      "userSurname": "Sokolova",
+      "avatarUrl": "http://example.com/uploads/avatars/file.png",
+      "city": {
+        "id": "uuid",
+        "name": "Moscow",
+        "countryName": "Russia",
+        "timezone": "Europe/Moscow"
+      },
+      "isFollowing": true
+    }
+  ],
+  "total": 1,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+
+### GET /api/me/following
+
+Возвращает список пользователей, на которых подписан текущий пользователь.
+
+Требование:
+
+- cookie `access_token`
+
+Query параметры:
+
+- `limit` — положительное число, по умолчанию `20`, максимум `100`
+- `offset` — неотрицательное число, по умолчанию `0`
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "username": "Elena",
+      "userSurname": "Pavlova",
+      "avatarUrl": "http://example.com/uploads/avatars/file.png",
+      "city": {
+        "id": "uuid",
+        "name": "Kazan",
+        "countryName": "Russia",
+        "timezone": "Europe/Moscow"
+      },
+      "isFollowing": true
+    }
+  ],
+  "total": 1,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+
+### POST /api/users/{userId}/follow
+
+Подписывает текущего пользователя на пользователя `{userId}`.
+
+Требования:
+
+- cookie `access_token`
+- cookie `csrf_token`
+- header `X-CSRF-Token`
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "ok": true
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+- `403 CSRF token mismatch`
+- `404 User not found`
+- `409 Already following`
+
+### DELETE /api/users/{userId}/follow
+
+Отписывает текущего пользователя от пользователя `{userId}`.
+
+Требования:
+
+- cookie `access_token`
+- cookie `csrf_token`
+- header `X-CSRF-Token`
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "ok": true
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+- `403 CSRF token mismatch`
+- `404 User not found`
+
+### GET /api/me/collections
+
+Подборки текущего пользователя для профиля.
+
+Требование:
+
+- cookie `access_token`
+
+Query параметры:
+
+- `limit` — положительное число, по умолчанию `12`
+- `offset` — неотрицательное число, по умолчанию `0`
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Weekend Picks",
+      "description": "Best events for weekend",
+      "imageUrl": "https://example.com/collection.jpg",
+      "isPublic": true
+    }
+  ],
+  "total": 1,
+  "limit": 12,
+  "offset": 0
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
 
 ## Home API
 
@@ -444,6 +1012,7 @@ Query параметры:
       "title": "Rock concert",
       "shortDescription": "Best rock night",
       "coverImageUrl": "https://example.com/event.jpg",
+      "isFavorite": false,
       "tags": [],
       "nextSession": {
         "startAt": "2026-03-30T19:00:00Z",
@@ -459,6 +1028,11 @@ Query параметры:
   "offset": 0
 }
 ```
+
+Примечания:
+
+- `isFavorite` вычисляется относительно текущего авторизованного пользователя;
+- для гостя поле может отсутствовать или быть `false`.
 
 Возможные ошибки:
 
@@ -713,11 +1287,33 @@ Query параметры:
 - `query` — минимум 2 символа
 - `limit` — от `5` до `10`, по умолчанию `5`
 
+Элемент подсказки может относиться к:
+
+- событию (`type: event`)
+- категории (`type: category`)
+- тегу (`type: tag`)
+
 Успешный ответ:
 
 ```json
 {
-  "items": ["Rock concert", "rock", "retro"]
+  "items": [
+    {
+      "id": "uuid-event",
+      "type": "event",
+      "label": "Rock concert"
+    },
+    {
+      "id": "uuid-category",
+      "type": "category",
+      "label": "Концерты"
+    },
+    {
+      "id": "uuid-tag",
+      "type": "tag",
+      "label": "Rock"
+    }
+  ]
 }
 ```
 
@@ -766,6 +1362,136 @@ Query параметры:
 
 Возможные ошибки:
 
+- `404 Collection not found`
+
+## Map API
+
+Правило страницы карты:
+
+- если подборка не выбрана, пины на карте не отображаются
+- выбор подборки обязателен для загрузки точек
+- фильтры общие и не зависят от конкретной подборки
+
+### GET /api/map/collections
+
+Подборки для боковой панели карты.
+
+Query параметры:
+
+- `cityId` — опционально, фильтр по городу
+- `limit` — опционально, ограничение количества
+
+Успешный ответ:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Городской вайб",
+      "description": "Лучшие городские локации",
+      "imageUrl": "https://example.com/collection.jpg",
+      "eventsCount": 18,
+      "isPublic": true
+    }
+  ]
+}
+```
+
+### GET /api/map/filters
+
+Глобальные фильтры карты (не зависят от выбранной подборки).
+
+Query параметры:
+
+- `cityId` — опционально
+
+Успешный ответ:
+
+```json
+{
+  "tags": [
+    {
+      "id": "uuid",
+      "name": "Urban",
+      "slug": "urban"
+    }
+  ],
+  "datePresets": [
+    {
+      "value": "today",
+      "label": "Сегодня"
+    },
+    {
+      "value": "weekend",
+      "label": "Выходные"
+    }
+  ],
+  "sortOptions": [
+    {
+      "value": "popular",
+      "label": "Сначала популярные"
+    },
+    {
+      "value": "name",
+      "label": "По названию А-Я"
+    }
+  ]
+}
+```
+
+### GET /api/map/collections/{collectionId}/spots
+
+Пины карты для выбранной подборки.
+
+Query параметры:
+
+- `cityId` — опционально
+- `query` — опционально, текстовый поиск
+- `tagId` — опционально
+- `dateFrom` — опционально
+- `dateTo` — опционально
+- `sort` — `popular | name | dateAsc | dateDesc`
+- `limit` — положительное число, по умолчанию `50`
+- `offset` — неотрицательное число, по умолчанию `0`
+
+Успешный ответ:
+
+```json
+{
+  "collection": {
+    "id": "uuid",
+    "title": "Городской вайб"
+  },
+  "items": [
+    {
+      "id": "uuid",
+      "eventId": "uuid",
+      "title": "Патриаршие пруды",
+      "address": "Малая Бронная улица",
+      "latitude": 55.76361,
+      "longitude": 37.595164,
+      "imageUrl": "https://example.com/photo.jpg",
+      "startAt": "2026-05-06T18:00:00Z",
+      "popularity": 98,
+      "tags": [
+        {
+          "id": "uuid",
+          "name": "Urban",
+          "slug": "urban"
+        }
+      ]
+    }
+  ],
+  "total": 18,
+  "limit": 50,
+  "offset": 0
+}
+```
+
+Возможные ошибки:
+
+- `400 Validation failed`
 - `404 Collection not found`
 
 ## Place Lookup API
@@ -848,16 +1574,287 @@ Query параметры:
 - `400 invalid place suggestion`
 - `401 Unauthorized`
 
-## Минимальный frontend-набор
+## Support API
 
-Endpoint'ы, которые чаще всего нужны фронтенду:
+API техподдержки используется iframe-фронтендом и обычными страницами сервиса. Все endpoint'ы требуют авторизации через cookie `access_token`. Изменяющие запросы дополнительно требуют CSRF:
+
+- cookie `csrf_token`
+- header `X-CSRF-Token`
+
+Права доступа:
+
+- `user` создает обращения, видит только свои обращения, редактирует только свои незакрытые обращения и пишет сообщения только в свои обращения;
+- `admin` видит все обращения, меняет статус любого обращения, пишет в любую переписку и получает статистику;
+- роль хранится в таблице `user_role`, временно меняется вручную через `psql`.
+
+Временно выдать роль администратора можно так:
+
+```sql
+INSERT INTO user_role (user_id, role, created_at)
+SELECT id, 'admin', now()
+FROM user_account
+WHERE email = 'admin@mail.com'
+ON CONFLICT (user_id, role) DO NOTHING;
+```
+
+Вернуть обычную роль:
+
+```sql
+DELETE FROM user_role ur
+USING user_account ua
+WHERE ur.user_id = ua.id
+  AND ua.email = 'admin@mail.com'
+  AND ur.role = 'admin';
+```
+
+Категории обращений:
+
+- `bug` — баг;
+- `suggestion` — предложение;
+- `product_complaint` — продуктовая жалоба;
+- `other` — другое.
+
+Статусы обращений:
+
+- `open` — открыто;
+- `in_progress` — в работе;
+- `closed` — закрыто.
+
+### POST /api/support/tickets
+
+Создает обращение текущего пользователя.
+
+Тело запроса:
+
+```json
+{
+  "category": "bug",
+  "title": "Не открывается карточка события",
+  "message": "При клике на событие появляется пустой экран."
+}
+```
+
+Успешный ответ `201 Created`:
+
+```json
+{
+  "id": "uuid",
+  "category": "bug",
+  "status": "open",
+  "title": "Не открывается карточка события",
+  "message": "При клике на событие появляется пустой экран.",
+  "createdAt": "2026-04-25T10:00:00Z",
+  "updatedAt": "2026-04-25T10:00:00Z",
+  "closedAt": null
+}
+```
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+- `403 CSRF token mismatch`
+
+### GET /api/support/tickets
+
+Возвращает обращения текущего пользователя. Для `admin` возвращает все обращения.
+
+Query параметры:
+
+- `status` — опционально, один из `open`, `in_progress`, `closed`
+- `category` — опционально, один из `bug`, `suggestion`, `product_complaint`, `other`
+- `limit` — по умолчанию `20`, максимум `100`
+- `offset` — по умолчанию `0`
+
+Успешный ответ:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "category": "bug",
+      "status": "open",
+      "title": "Не открывается карточка события",
+      "message": "При клике на событие появляется пустой экран.",
+      "createdAt": "2026-04-25T10:00:00Z",
+      "updatedAt": "2026-04-25T10:00:00Z",
+      "closedAt": null
+    }
+  ],
+  "limit": 20,
+  "offset": 0
+}
+```
+
+### GET /api/support/tickets/{ticketId}
+
+Возвращает одно обращение текущего пользователя. Для `admin` может вернуть любое обращение.
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+- `404 Support ticket not found`
+
+### PATCH /api/support/tickets/{ticketId}
+
+Редактирует обращение текущего пользователя. Закрытые обращения редактировать нельзя.
+
+Тело запроса:
+
+```json
+{
+  "category": "product_complaint",
+  "title": "Некорректная информация о событии",
+  "message": "В карточке указано неправильное время начала."
+}
+```
+
+Все поля опциональны, но должен быть передан хотя бы один параметр.
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+- `403 CSRF token mismatch`
+- `404 Support ticket not found`
+- `409 Support ticket is closed`
+
+### PATCH /api/support/tickets/{ticketId}/status
+
+Меняет статус обращения. Доступно только пользователю с ролью `admin`.
+
+Тело запроса:
+
+```json
+{
+  "status": "in_progress"
+}
+```
+
+Правила:
+
+- при статусе `closed` backend выставляет `closedAt`;
+- при переходе из `closed` обратно в `open` или `in_progress` backend сбрасывает `closedAt`.
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+- `403 CSRF token mismatch`
+- `403 Forbidden`
+- `404 Support ticket not found`
+
+### GET /api/support/tickets/{ticketId}/messages
+
+Возвращает переписку по обращению текущего пользователя. Для `admin` доступна переписка любого обращения.
+
+Успешный ответ:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "ticketId": "uuid",
+      "authorUserId": "uuid",
+      "authorRole": "user",
+      "body": "Проблема повторяется после перезагрузки страницы.",
+      "createdAt": "2026-04-25T10:05:00Z"
+    }
+  ]
+}
+```
+
+Возможные ошибки:
+
+- `401 Unauthorized`
+- `404 Support ticket not found`
+
+### POST /api/support/tickets/{ticketId}/messages
+
+Добавляет сообщение в переписку по обращению. Для `admin` можно добавить сообщение в любое обращение, в ответе `authorRole` будет `admin`.
+
+Тело запроса:
+
+```json
+{
+  "body": "Проблема повторяется после перезагрузки страницы."
+}
+```
+
+Успешный ответ `201 Created`:
+
+```json
+{
+  "id": "uuid",
+  "ticketId": "uuid",
+  "authorUserId": "uuid",
+  "authorRole": "user",
+  "body": "Проблема повторяется после перезагрузки страницы.",
+  "createdAt": "2026-04-25T10:05:00Z"
+}
+```
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+- `403 CSRF token mismatch`
+- `404 Support ticket not found`
+
+### GET /api/support/stats
+
+Возвращает статистику обращений. Endpoint доступен только пользователю с ролью `admin`.
+
+Query параметры:
+
+- `from` — опционально, RFC3339 timestamp
+- `to` — опционально, RFC3339 timestamp
+
+Успешный ответ:
+
+```json
+{
+  "total": 42,
+  "byStatus": {
+    "open": 10,
+    "in_progress": 12,
+    "closed": 20
+  },
+  "byCategory": {
+    "bug": 18,
+    "suggestion": 8,
+    "product_complaint": 12,
+    "other": 4
+  },
+  "openTotal": 10,
+  "inProgressTotal": 12,
+  "closedTotal": 20
+}
+```
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+
+## Актуальный frontend-набор
+
+Endpoint'ы, которые реально используются текущим frontend:
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `POST /api/auth/refresh`
 - `POST /api/auth/logout`
 - `GET /api/me`
-- `PATCH /api/me`
+- `PATCH /api/me` (`application/json` и `multipart/form-data`)
+- `POST /api/me/favorites/{eventId}`
+- `DELETE /api/me/favorites/{eventId}`
+- `GET /api/me/followers`
+- `GET /api/me/following`
+- `POST /api/users/{userId}/follow`
+- `DELETE /api/users/{userId}/follow`
 - `GET /api/home`
 - `GET /api/events`
 - `GET /api/events/{eventId}`
@@ -868,5 +1865,37 @@ Endpoint'ы, которые чаще всего нужны фронтенду:
 - `GET /api/tags`
 - `GET /api/cities`
 - `GET /api/search`
-- `GET /api/collections`
-- `GET /api/collections/{collectionId}`
+- `GET /api/place-suggestions`
+- `POST /api/places/resolve`
+- `POST /api/support/tickets`
+- `GET /api/support/tickets`
+- `GET /api/support/tickets/{ticketId}`
+- `PATCH /api/support/tickets/{ticketId}`
+- `PATCH /api/support/tickets/{ticketId}/status`
+- `GET /api/support/tickets/{ticketId}/messages`
+- `POST /api/support/tickets/{ticketId}/messages`
+- `GET /api/support/stats`
+
+Профиль:
+
+- текущая реализация блока "избранное" на `/profile` временно использует `GET /api/events`
+- целевой API для профиля: `GET /api/me/favorites` и `GET /api/me/collections`
+- кнопка сердца на карточках уже использует `POST/DELETE /api/me/favorites/{eventId}` без перезагрузки страницы
+
+Примечание по карте:
+
+- страница `/events-map` использует Yandex Maps API v3 через `YANDEX_MAPS_API_KEY`
+- целевая backend-схема для карты описана в разделе `Map API`
+
+## Планируемый API-бэклог
+
+Endpoint'ы для следующих итераций (когда избранное/подборки/друзья будут расширяться в профиле):
+
+- `GET /api/me/favorites`
+- `GET /api/me/collections`
+- `POST /api/me/collections`
+- `PATCH /api/me/collections/{collectionId}`
+- `DELETE /api/me/collections/{collectionId}`
+- `POST /api/me/collections/{collectionId}/events/{eventId}`
+- `DELETE /api/me/collections/{collectionId}/events/{eventId}`
+- `GET /api/users?query=...` (поиск пользователей)

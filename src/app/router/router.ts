@@ -6,6 +6,8 @@ import type {
   RouteView,
 } from '../../types/router.js';
 import { getMeOrNull } from '../../api/profile.api.js';
+import { attachEventCardFavorites } from '../../components/event-card/event-card-favorite.js';
+import { attachHeaderMenu } from '../../components/header/header-menu.js';
 import {
   buildAuthPath,
   getCurrentPathWithSearch,
@@ -79,12 +81,15 @@ export class Router {
 
   private readonly notFound: RouteRenderer;
 
+  private readonly sharedBinders: Array<(root: HTMLElement) => RouteCleanup>;
+
   private cleanup: RouteCleanup | null;
 
   constructor({ root, routes, notFound }: RouterOptions) {
     this.root = root;
     this.routes = routes;
     this.notFound = notFound;
+    this.sharedBinders = [attachEventCardFavorites, attachHeaderMenu];
     this.cleanup = null;
     this.onPopState = this.onPopState.bind(this);
     this.onDocumentClick = this.onDocumentClick.bind(this);
@@ -185,13 +190,24 @@ export class Router {
 
     this.root.innerHTML = html;
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    const sharedCleanup = this.sharedBinders
+      .map((binder) => binder(this.root))
+      .filter((cleanup): cleanup is RouteCleanup => typeof cleanup === 'function');
 
     if (view && typeof view !== 'string' && typeof view.mount === 'function') {
       const cleanup = view.mount(this.root);
       if (typeof cleanup === 'function') {
-        this.cleanup = cleanup;
+        this.cleanup = () => {
+          sharedCleanup.forEach((detach) => detach());
+          cleanup();
+        };
+        return;
       }
     }
+
+    this.cleanup = () => {
+      sharedCleanup.forEach((detach) => detach());
+    };
   }
 
   matchRoute(path: string): RouteMatch | null {

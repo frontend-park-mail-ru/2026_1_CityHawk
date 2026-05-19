@@ -9,6 +9,7 @@ const TEMPLATE_URLS = [
   '/src/components/form-controls/form-select.hbs',
   '/src/components/footer/footer.hbs',
   '/src/components/header/header.hbs',
+  '/src/components/support-launcher/support-launcher-panel.hbs',
   '/src/modules/events/details/event-description.hbs',
   '/src/modules/events/delete/event-delete-card.hbs',
   '/src/modules/events/delete/event-delete-screen.hbs',
@@ -34,6 +35,12 @@ const TEMPLATE_URLS = [
   '/src/modules/profile/profile-aside.hbs',
   '/src/modules/profile/profile-form.hbs',
   '/src/modules/profile/profile-overview.hbs',
+  '/src/modules/support/support-message-form.hbs',
+  '/src/modules/support/support-messages.hbs',
+  '/src/modules/support/support-status-badge.hbs',
+  '/src/modules/support/support-ticket-form.hbs',
+  '/src/modules/support/support-ticket-list.hbs',
+  '/src/modules/profile/profile-overview.hbs',
   '/src/app/app-error.hbs',
   '/src/pages/event/event.hbs',
   '/src/pages/event-list/event-list.hbs',
@@ -44,6 +51,8 @@ const TEMPLATE_URLS = [
   '/src/pages/profile/profile.hbs',
   '/src/pages/profile-settings/profile-settings.hbs',
   '/src/pages/register/register.hbs',
+  '/src/pages/support-statistics/support-statistics.hbs',
+  '/src/pages/support-widget/support-widget.hbs',
 ];
 
 export const APP_SHELL_URLS = [

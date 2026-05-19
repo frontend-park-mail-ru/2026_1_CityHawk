@@ -276,15 +276,15 @@ main.login {
 
 .login__submit {
     width: var(--width-button);
-    height: var(--height-button);
-    background: var(--color-background-tone-1);
-    color: var(--color-blank);
+    --ui-button-height: var(--height-button);
+    --ui-button-radius: var(--radius-button);
+    --ui-button-border: var(--color-background-tone-1);
+    --ui-button-bg: var(--color-background-tone-1);
+    --ui-button-bg-hover: var(--ui-interactive-bg-hover, var(--color-accent-3));
+    --ui-button-text: var(--color-blank);
     font-family: var(--font-primary, sans-serif);
     font-size: var(--text-button);
     font-weight: 400;
-    border: none;
-    border-radius: var(--radius-button);
-    cursor: pointer;
 }
 
 .login__oauth {
@@ -375,25 +375,11 @@ main.login {
 .login__next,
 .login__prev {
     width: var(--width-button-half);
-    height: var(--height-button);
-    background: var(--color-background-tone-1);
-    color: var(--color-blank);
+    --ui-button-height: var(--height-button);
+    --ui-button-radius: var(--radius-button);
     font-family: var(--font-primary, sans-serif);
     font-size: var(--text-button);
     font-weight: 400;
-    border: none;
-    border-radius: var(--radius-button);
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.login__next:hover,
-.login__next:focus-visible,
-.login__prev:hover,
-.login__prev:focus-visible {
-    background: var(--ui-interactive-bg-hover, var(--color-accent-3));
-    transform: var(--ui-interactive-lift, translateY(-1px));
-    box-shadow: var(--ui-interactive-focus-ring, 0 0 0 3px rgba(139, 188, 233, 0.14));
 }
 
 /* ========================================
@@ -411,14 +397,10 @@ main.login {
 }
 
 .login__submit {
-    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.login__submit:hover,
-.login__submit:focus-visible {
-    background: var(--ui-interactive-bg-hover, var(--color-accent-3));
-    transform: var(--ui-interactive-lift, translateY(-1px));
-    box-shadow: var(--ui-interactive-focus-ring, 0 0 0 3px rgba(139, 188, 233, 0.14));
+    --ui-button-border: var(--color-background-tone-1);
+    --ui-button-bg: var(--color-background-tone-1);
+    --ui-button-bg-hover: var(--ui-interactive-bg-hover, var(--color-accent-3));
+    --ui-button-text: var(--color-blank);
 }
 
 .login__submit:active {

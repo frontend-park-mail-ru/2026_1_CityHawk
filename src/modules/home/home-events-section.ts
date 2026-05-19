@@ -8,6 +8,7 @@ export interface HomeEventCard {
   tags?: string[];
   dateText?: string;
   placeText?: string;
+  isFavorite?: boolean;
 }
 
 export interface HomeEventsSectionState {

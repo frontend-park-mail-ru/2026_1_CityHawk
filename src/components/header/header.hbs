@@ -2,17 +2,19 @@
   <div class="site-header__container">
     <div class="site-header__row">
       <div class="site-header__left">
-        <div class="site-header__menu">
+        <div class="site-header__menu" data-role="header-menu">
           <button
             type="button"
             class="site-header__menu-trigger"
             aria-label="Открыть меню"
             aria-haspopup="menu"
+            aria-expanded="false"
+            data-role="header-menu-trigger"
           >
             <img src="/public/static/icons/menu.svg" alt="" class="site-header__menu-icon" aria-hidden="true" />
           </button>
 
-          <aside class="site-header__sidebar" aria-label="Навигационное меню">
+          <aside class="site-header__sidebar" aria-label="Навигационное меню" data-role="header-menu-sidebar">
             <nav class="site-header__sidebar-nav">
               <div class="site-header__sidebar-group">
                 <h3 class="site-header__sidebar-group-title">Навигация</h3>
@@ -22,24 +24,15 @@
               </div>
 
               <div class="site-header__sidebar-group">
-                <h3 class="site-header__sidebar-group-title">Личное</h3>
-                <a href="/profile" class="site-header__sidebar-link">Найти друзей</a>
-                <a href="/profile" class="site-header__sidebar-link">Профиль</a>
-                <a href="/profile" class="site-header__sidebar-link">Избранное</a>
-                <a href="/profile" class="site-header__sidebar-link">Мои подборки</a>
-                <a href="/profile/settings" class="site-header__sidebar-link">Настройки</a>
-              </div>
-
-              <div class="site-header__sidebar-group">
                 <h3 class="site-header__sidebar-group-title">Система</h3>
-                <a href="/support" class="site-header__sidebar-link">Поддержка</a>
+                <a
+                  href="/support-widget"
+                  class="site-header__sidebar-link"
+                  data-action="open-support-launcher"
+                >Поддержка</a>
                 <a href="/organizer/apply" class="site-header__sidebar-link">Стать организатором</a>
               </div>
             </nav>
-
-            <div class="site-header__sidebar-footer">
-              <a href="/login" class="site-header__sidebar-link site-header__sidebar-link--exit">Выход</a>
-            </div>
           </aside>
         </div>
 
@@ -63,13 +56,6 @@
             <span data-role="header-city-label">Москва</span>
           </button>
           <div class="site-header__city-menu" data-role="header-city-menu" hidden>
-            <button
-              type="button"
-              class="site-header__city-option"
-              data-role="header-city-option"
-              data-city-id=""
-              data-city-name=""
-            >Все города</button>
             <div data-role="header-city-options"></div>
           </div>
         </div>
@@ -100,12 +86,20 @@
 
       <div class="site-header__actions">
         {{#if user}}
-          <a href="/profile" class="site-header__link site-header__link--with-icon site-header__user">
-            <img src="/public/static/icons/person.svg" alt="" class="site-header__link-icon" aria-hidden="true" />
-            <span>{{user.displayName}}</span>
-          </a>
+          <div class="site-header__user-menu">
+            <a href="/profile" class="site-header__link site-header__link--with-icon site-header__user">
+              <img src="/public/static/icons/person.svg" alt="" class="site-header__link-icon" aria-hidden="true" />
+              <span>{{user.displayName}}</span>
+            </a>
+            <div class="site-header__user-dropdown" aria-label="Меню пользователя">
+              <a href="/profile" class="site-header__user-dropdown-link">Профиль</a>
+              <a href="/profile/settings" class="site-header__user-dropdown-link">Настройки</a>
+              <a href="/profile" class="site-header__user-dropdown-link">Найти друзей</a>
+              <a href="/login" class="site-header__user-dropdown-link site-header__user-dropdown-link--exit">Выход</a>
+            </div>
+          </div>
         {{else}}
-          <a href="/login" class="site-header__signin">Войти</a>
+          <a href="/login" class="site-header__signin ui-button ui-button--secondary ui-button--pill">Войти</a>
         {{/if}}
       </div>
     </div>

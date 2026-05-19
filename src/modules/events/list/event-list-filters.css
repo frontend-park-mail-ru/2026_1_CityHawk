@@ -1,4 +1,6 @@
 .event-list-filters {
+    position: relative;
+    z-index: 31;
     padding: 14px 16px;
     border: 1px solid var(--ui-filter-shell-border);
     border-radius: 999px;
@@ -63,6 +65,7 @@
     background-size: 6px 6px, 6px 6px;
     background-repeat: no-repeat;
     text-align: left;
+    font-size: 16px;
 }
 
 .event-list-filters__custom-trigger--active {
@@ -103,7 +106,7 @@
     border: 1px solid var(--home-color-border);
     background: var(--ui-dropdown-surface);
     box-shadow: var(--ui-dropdown-shadow);
-    z-index: 20;
+    z-index: 1300;
 }
 
 .event-list-filters__custom-option {
@@ -114,7 +117,7 @@
     background: transparent;
     color: var(--home-color-text);
     padding: 8px 12px;
-    font-size: var(--home-text-5);
+    font-size: 16px;
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.2s ease;
 }
@@ -138,14 +141,14 @@
     align-items: center;
     justify-content: flex-end;
     gap: 12px;
-    min-height: 46px;
+    min-height: 40px;
     padding-left: 4px;
 }
 
 .event-list-filters__reset {
     color: var(--home-color-text);
     opacity: 0.72;
-    font-size: var(--home-text-5);
+    font-size: 16px;
     font-weight: 500;
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -158,8 +161,20 @@
 }
 
 @media (max-width: 1100px) {
+    .event-list-filters {
+        overflow-x: auto;
+        overflow-y: visible;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .event-list-filters::-webkit-scrollbar {
+        display: none;
+    }
+
     .event-list-filters__grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(180px, 1fr)) auto;
+        min-width: max-content;
     }
 }
 
@@ -170,12 +185,14 @@
     }
 
     .event-list-filters__grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(4, minmax(170px, 1fr)) auto;
+        gap: 8px;
+        min-width: max-content;
     }
 
     .event-list-filters__actions {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row;
+        align-items: center;
         padding-left: 0;
     }
 }

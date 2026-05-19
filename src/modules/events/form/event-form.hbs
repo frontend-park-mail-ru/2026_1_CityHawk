@@ -149,7 +149,7 @@
 
             <button
               type="button"
-              class="event-create-form__dates-add"
+              class="event-create-form__dates-add ui-button ui-button--ghost ui-button--pill"
               data-action="event-create-add-date"
             >
               Добавить дату
@@ -355,8 +355,8 @@
   </section>
 
   <div class="event-create-form__actions">
-    <button type="submit" class="event-create-form__submit">{{submitLabel}}</button>
-    <button type="button" class="event-create-form__cancel" data-action="event-create-cancel">Отмена</button>
+    <button type="submit" class="event-create-form__submit ui-button ui-button--primary ui-button--pill">{{submitLabel}}</button>
+    <button type="button" class="event-create-form__cancel ui-button ui-button--ghost ui-button--pill" data-action="event-create-cancel">Отмена</button>
     {{#if deleteHref}}
       <a class="event-create-form__danger-link" href="{{deleteHref}}">Удалить событие</a>
     {{/if}}

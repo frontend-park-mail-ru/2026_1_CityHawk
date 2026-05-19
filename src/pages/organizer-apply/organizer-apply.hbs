@@ -1,0 +1,62 @@
+<section class="organizer-apply-page__intro">
+  <p class="organizer-apply-page__lead">
+    Расскажите о своем проекте. Мы проверим заявку и откроем вам кабинет для публикации событий.
+  </p>
+</section>
+
+<section class="organizer-apply-page__content">
+  <form class="organizer-apply-form" data-role="organizer-apply-form" novalidate>
+    <div class="organizer-apply-form__grid">
+      <label class="organizer-apply-form__field">
+        <span>Ваше имя</span>
+        <input type="text" name="name" required placeholder="Имя и фамилия" />
+      </label>
+      <label class="organizer-apply-form__field">
+        <span>Контактный email</span>
+        <input type="email" name="email" required placeholder="you@example.com" />
+      </label>
+      <label class="organizer-apply-form__field">
+        <span>Телефон</span>
+        <input type="tel" name="phone" required placeholder="+7 (900) 000-00-00" />
+      </label>
+      <label class="organizer-apply-form__field">
+        <span>Город</span>
+        <input type="text" name="city" required placeholder="Москва" />
+      </label>
+      <label class="organizer-apply-form__field organizer-apply-form__field--full">
+        <span>Название проекта или компании</span>
+        <input type="text" name="projectName" required placeholder="Например: Арт-студия Север" />
+      </label>
+      <label class="organizer-apply-form__field organizer-apply-form__field--full">
+        <span>Категории мероприятий</span>
+        <input type="text" name="categories" required placeholder="Концерты, выставки, стендап" />
+      </label>
+      <label class="organizer-apply-form__field organizer-apply-form__field--full">
+        <span>Сайт или соцсети</span>
+        <input type="url" name="links" placeholder="https://..." />
+      </label>
+      <label class="organizer-apply-form__field organizer-apply-form__field--full">
+        <span>Коротко об опыте и формате мероприятий</span>
+        <textarea name="about" rows="5" required placeholder="Что организуете, как часто, для какой аудитории"></textarea>
+      </label>
+    </div>
+
+    <label class="organizer-apply-form__agree">
+      <input type="checkbox" name="consent" required />
+      <span>Подтверждаю, что данные корректны и согласен на обработку заявки.</span>
+    </label>
+
+    <div class="organizer-apply-form__actions">
+      <button type="submit" class="ui-button ui-button--primary ui-button--pill">
+        Отправить заявку
+      </button>
+    </div>
+  </form>
+
+  <div class="organizer-apply-success" data-role="organizer-apply-success" hidden>
+    <h2>Заявка отправлена</h2>
+    <p>
+      Спасибо! Мы получили вашу заявку и свяжемся с вами в течение 1-2 рабочих дней.
+    </p>
+  </div>
+</section>

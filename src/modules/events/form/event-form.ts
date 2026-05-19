@@ -15,6 +15,7 @@ import type { EventFormSelectOption } from './event-form-reference-data.js';
 import { createEventFormScheduleController } from './event-form-schedule-controller.js';
 import { getEventFormElements } from './event-form-selectors.js';
 import { createEventFormValidator } from './event-form-validation.js';
+import { clearFieldError, showFieldError } from './event-form-validation.js';
 
 const GALLERY_PREVIEW_SLOTS = 4;
 const PLACE_SUGGESTIONS_LIMIT = 5;
@@ -822,7 +823,23 @@ export function attachEventForm(root: ParentNode, options: EventFormOptions = {}
     }
 
     const values = collectFormValues(form);
-    values.placeId = await placeLookup.resolvePlaceValue(values.placeId);
+    try {
+      values.placeId = await placeLookup.resolvePlaceValue(values.placeId);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Не удалось подтвердить выбранное место';
+      showFieldError(elements.placeInput, elements.placeError, message);
+      return;
+    }
+
+    if (!isUuid(values.placeId)) {
+      showFieldError(
+        elements.placeInput,
+        elements.placeError,
+        'Выбери место из подсказок, чтобы добавить событие',
+      );
+      return;
+    }
+    clearFieldError(elements.placeInput, elements.placeError);
 
     if (!validator.validate(values)) {
       return;

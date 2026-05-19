@@ -1,0 +1,27 @@
+<main class="support-widget">
+  <header class="support-widget__header">
+    <div>
+      <p class="support-widget__eyebrow">CityHawk</p>
+      <h1 class="support-widget__title">Обращения</h1>
+    </div>
+    <button
+      type="button"
+      class="support-widget__close"
+      data-role="support-widget-close"
+      aria-label="Закрыть поддержку"
+    >
+      ×
+    </button>
+  </header>
+
+  <nav class="support-widget__nav" aria-label="Разделы">
+    <a class="support-widget__nav-link {{#if isNew}}support-widget__nav-link--active{{/if}}" href="/support-widget/new">Новое</a>
+    <a class="support-widget__nav-link {{#if isTickets}}support-widget__nav-link--active{{/if}}" href="/support-widget/tickets">Мои обращения</a>
+  </nav>
+
+  {{#if errorMessage}}
+    <p class="support-alert support-alert--error">{{errorMessage}}</p>
+  {{/if}}
+
+  {{{content}}}
+</main>

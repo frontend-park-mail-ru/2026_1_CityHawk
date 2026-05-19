@@ -65,8 +65,17 @@ async function startApp(): Promise<void> {
       () => import('../pages/profile-settings/profile-settings-page.js'),
       'profileSettingsPage',
     ),
+    '/organizer/apply': lazyRoute(
+      () => import('../pages/organizer-apply/organizer-apply-page.js'),
+      'organizerApplyPage',
+    ),
     '/password_reset': lazyRoute(() => import('../pages/password_reset/password_reset-page.js'), 'passwordResetPage'),
     '/register': lazyRoute(() => import('../pages/register/register-page.js'), 'registerPage'),
+    '/support-widget': lazyRoute(() => import('../pages/support-widget/support-widget-page.js'), 'supportWidgetPage'),
+    '/support-widget/new': lazyRoute(() => import('../pages/support-widget/support-widget-page.js'), 'supportWidgetPage'),
+    '/support-widget/tickets': lazyRoute(() => import('../pages/support-widget/support-widget-page.js'), 'supportWidgetPage'),
+    '/support-widget/tickets/:id': lazyRoute(() => import('../pages/support-widget/support-widget-page.js'), 'supportWidgetPage'),
+    '/support/statistics': lazyRoute(() => import('../pages/support-statistics/support-statistics-page.js'), 'supportStatisticsPage'),
   };
 
   const router = new Router({

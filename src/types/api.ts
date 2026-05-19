@@ -41,6 +41,7 @@ export interface EventCard {
   coverImageUrl?: string;
   tags: Tag[];
   nextSession?: EventNextSession | null;
+  isFavorite?: boolean;
 }
 
 export interface EventAuthor {
@@ -161,10 +162,27 @@ export interface User {
   name?: string;
   username?: string;
   userSurname?: string;
+  role?: 'user' | 'organizer' | 'admin';
   birthday?: string;
   avatarUrl?: string;
   city?: City | null;
   createdAt?: string;
+}
+
+export interface FollowUser {
+  id: string;
+  username: string;
+  userSurname?: string;
+  avatarUrl?: string | null;
+  city?: City | null;
+  isFollowing?: boolean;
+}
+
+export interface FollowListResponse {
+  items: FollowUser[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface LoginPayload {
@@ -206,4 +224,125 @@ export interface AuthUser {
 
 export interface AuthOkResponse {
   ok: true;
+}
+
+export type SupportCategory = 'bug' | 'suggestion' | 'product_complaint' | 'other';
+
+export type SupportStatus = 'open' | 'in_progress' | 'closed';
+
+export interface SupportTicket {
+  id: string;
+  category: SupportCategory;
+  status: SupportStatus;
+  title: string;
+  message: string;
+  createdAt: string;
+  updatedAt: string;
+  closedAt: string | null;
+}
+
+export interface SupportTicketListResponse {
+  items: SupportTicket[];
+  limit: number;
+  offset: number;
+}
+
+export interface SupportTicketQueryParams {
+  status?: SupportStatus;
+  category?: SupportCategory;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateSupportTicketPayload {
+  category: SupportCategory;
+  title: string;
+  message: string;
+}
+
+export type UpdateSupportTicketPayload = Partial<CreateSupportTicketPayload>;
+
+export interface UpdateSupportTicketStatusPayload {
+  status: SupportStatus;
+}
+
+export interface SupportMessage {
+  id: string;
+  ticketId: string;
+  authorUserId: string;
+  authorRole: 'user' | 'admin';
+  body: string;
+  createdAt: string;
+}
+
+export interface SupportMessageListResponse {
+  items: SupportMessage[];
+}
+
+export interface CreateSupportMessagePayload {
+  body: string;
+}
+
+export interface SupportStats {
+  total: number;
+  byStatus: Record<SupportStatus, number>;
+  byCategory: Record<SupportCategory, number>;
+  openTotal: number;
+  inProgressTotal: number;
+  closedTotal: number;
+}
+
+export interface SupportStatsQueryParams {
+  from?: string;
+  to?: string;
+}
+
+export interface MapCollection {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  eventsCount: number;
+  isPublic: boolean;
+}
+
+export interface MapCollectionsResponse {
+  items: MapCollection[];
+}
+
+export interface MapOption {
+  value: string;
+  label: string;
+}
+
+export interface MapFiltersResponse {
+  tags: Tag[];
+  datePresets: MapOption[];
+  sortOptions: MapOption[];
+}
+
+export interface MapSpot {
+  id: string;
+  eventId: string;
+  title: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  imageUrl?: string;
+  startAt: string;
+  popularity: number;
+  tags: Tag[];
+}
+
+export interface MapCollectionMeta {
+  id: string;
+  title: string;
+}
+
+export interface MapCollectionSpotsResponse {
+  collection: MapCollectionMeta;
+  items: MapSpot[];
+  total: number;
+  limit: number;
+  offset: number;
 }
