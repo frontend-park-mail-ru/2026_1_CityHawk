@@ -85,6 +85,45 @@
       </div>
 
       <div class="site-header__actions">
+        <div class="site-header__notifications" data-role="header-notifications">
+            <button
+              type="button"
+              class="site-header__notifications-trigger"
+              aria-label="Открыть уведомления"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+              data-role="header-notifications-trigger"
+            >
+              <svg class="site-header__notifications-bell" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.4 17.4a3.5 3.5 0 0 1-6.8 0" />
+                <path d="M5.4 16.2h13.2l-1.2-2.1v-3.6a5.4 5.4 0 0 0-10.8 0v3.6l-1.2 2.1Z" />
+              </svg>
+              <span class="site-header__notifications-count" data-role="header-notifications-count" aria-hidden="true" hidden>0</span>
+            </button>
+
+            <section
+              class="site-header__notifications-panel"
+              aria-label="Уведомления"
+              data-role="header-notifications-panel"
+            >
+              <header class="site-header__notifications-header">
+                <svg class="site-header__notifications-title-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M15.4 17.4a3.5 3.5 0 0 1-6.8 0" />
+                  <path d="M5.4 16.2h13.2l-1.2-2.1v-3.6a5.4 5.4 0 0 0-10.8 0v3.6l-1.2 2.1Z" />
+                </svg>
+                <h2 class="site-header__notifications-title">Уведомления</h2>
+              </header>
+
+              <div class="site-header__notifications-tabs" role="tablist" aria-label="Фильтр уведомлений">
+                <button type="button" class="site-header__notifications-tab site-header__notifications-tab--active" data-role="header-notifications-tab" data-notification-type="all">Все</button>
+                <button type="button" class="site-header__notifications-tab" data-role="header-notifications-tab" data-notification-type="invitations">Приглашения</button>
+                <button type="button" class="site-header__notifications-tab" data-role="header-notifications-tab" data-notification-type="system">Системные</button>
+              </div>
+
+              <div class="site-header__notifications-list" data-role="header-notifications-list"></div>
+            </section>
+        </div>
+
         {{#if user}}
           <div class="site-header__user-menu">
             <a href="/profile" class="site-header__link site-header__link--with-icon site-header__user">

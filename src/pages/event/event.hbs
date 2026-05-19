@@ -10,4 +10,221 @@
     {{{eventLocation}}}
     {{{eventRecommendations}}}
   </main>
+
+  <div class="event-invite-modal" data-role="event-invite-modal" hidden>
+    <button
+      type="button"
+      class="event-invite-modal__backdrop"
+      data-role="event-invite-close"
+      aria-label="Закрыть окно приглашения"
+    ></button>
+
+    <section
+      class="event-invite-modal__dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="event-invite-title"
+    >
+      <button
+        type="button"
+        class="event-invite-modal__close"
+        data-role="event-invite-close"
+        aria-label="Закрыть"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </svg>
+      </button>
+
+      <header class="event-invite-modal__header">
+        <svg class="event-invite-modal__header-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 20a6 6 0 0 0-12 0" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M19 8v6" />
+          <path d="M16 11h6" />
+        </svg>
+        <div>
+          <h2 class="event-invite-modal__title" id="event-invite-title">Пригласить на событие</h2>
+          <p class="event-invite-modal__subtitle">Выберите людей и отправьте им приглашение на «{{eventShare.title}}»</p>
+        </div>
+      </header>
+
+      <label class="event-invite-modal__search">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m16 16 4 4" />
+        </svg>
+        <input
+          type="text"
+          class="event-invite-modal__search-input"
+          data-role="event-invite-search"
+          placeholder="Найти человека"
+          autocomplete="off"
+        />
+      </label>
+
+      <div class="event-invite-modal__list" data-role="event-invite-list">
+        {{#if hasInviteUsers}}
+          {{#each inviteUsers}}
+            <label
+              class="event-invite-modal__person"
+              data-role="event-invite-user"
+              data-user-id="{{id}}"
+              data-user-name="{{displayName}}"
+              data-user-city="{{cityText}}"
+            >
+              <input
+                type="checkbox"
+                class="event-invite-modal__checkbox"
+                data-role="event-invite-checkbox"
+                value="{{id}}"
+              />
+              <span class="event-invite-modal__avatar">
+                {{#if avatarUrl}}
+                  <img src="{{avatarUrl}}" alt="" />
+                {{else}}
+                  {{initials}}
+                {{/if}}
+              </span>
+              <span class="event-invite-modal__person-info">
+                <span class="event-invite-modal__person-name">{{displayName}}</span>
+                <span class="event-invite-modal__person-city">{{cityText}}</span>
+              </span>
+              <span class="event-invite-modal__checkmark" aria-hidden="true">✓</span>
+            </label>
+          {{/each}}
+        {{/if}}
+      </div>
+
+      <label class="event-invite-modal__message">
+        <span>Сообщение</span>
+        <textarea
+          data-role="event-invite-message"
+          rows="3"
+          placeholder="Привет! Хочу пригласить тебя на это событие."
+        ></textarea>
+      </label>
+
+      <div class="event-invite-modal__footer">
+        <p class="event-invite-modal__selected">
+          Выбрано: <span data-role="event-invite-selected-count">0</span>
+        </p>
+        <button type="button" class="event-invite-modal__send" data-action="event-invite-send" disabled>
+          Отправить приглашение
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <div class="event-share-modal" data-role="event-share-modal" hidden>
+    <button
+      type="button"
+      class="event-share-modal__backdrop"
+      data-role="event-share-close"
+      aria-label="Закрыть окно поделиться"
+    ></button>
+
+    <section
+      class="event-share-modal__dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="event-share-title"
+    >
+      <button
+        type="button"
+        class="event-share-modal__close"
+        data-role="event-share-close"
+        aria-label="Закрыть"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </svg>
+      </button>
+
+      <header class="event-share-modal__header">
+        <svg class="event-share-modal__header-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="18" cy="5" r="3" />
+          <circle cx="6" cy="12" r="3" />
+          <circle cx="18" cy="19" r="3" />
+          <path d="M8.6 10.6 15.4 6.4" />
+          <path d="M8.6 13.4 15.4 17.6" />
+        </svg>
+        <div>
+          <h2 class="event-share-modal__title" id="event-share-title">Поделиться событием</h2>
+          <p class="event-share-modal__subtitle">Поделитесь событием любым удобным способом</p>
+        </div>
+      </header>
+
+      <article class="event-share-modal__preview">
+        <img class="event-share-modal__image" src="{{eventShare.posterUrl}}" alt="{{eventShare.title}}" />
+        <div class="event-share-modal__details">
+          <h3 class="event-share-modal__event-title">{{eventShare.title}}</h3>
+          <p class="event-share-modal__meta">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 2v4" />
+              <path d="M17 2v4" />
+              <path d="M3.5 9h17" />
+              <rect x="3.5" y="4" width="17" height="17" rx="2.5" />
+            </svg>
+            {{eventShare.dateText}}
+          </p>
+          <p class="event-share-modal__meta">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z" />
+              <circle cx="12" cy="10" r="2.5" />
+            </svg>
+            {{eventShare.placeText}}
+          </p>
+        </div>
+      </article>
+
+      <div class="event-share-modal__actions">
+        <button
+          type="button"
+          class="event-share-modal__action"
+          data-action="event-share-copy"
+          data-share-url="{{eventShare.url}}"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" />
+            <path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1" />
+          </svg>
+          Скопировать ссылку
+        </button>
+
+        <button
+          type="button"
+          class="event-share-modal__action"
+          data-action="event-share-native"
+          data-share-title="{{eventShare.title}}"
+          data-share-text="{{eventShare.text}}"
+          data-share-url="{{eventShare.url}}"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <path d="M8.6 10.6 15.4 6.4" />
+            <path d="M8.6 13.4 15.4 17.6" />
+          </svg>
+          Поделиться
+        </button>
+
+        <button
+          type="button"
+          class="event-share-modal__action"
+          data-action="event-share-chat"
+          data-share-url="{{eventShare.url}}"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m22 2-7 20-4-9-9-4 20-7Z" />
+            <path d="M22 2 11 13" />
+          </svg>
+          Отправить в чат
+        </button>
+      </div>
+    </section>
+  </div>
 </div>

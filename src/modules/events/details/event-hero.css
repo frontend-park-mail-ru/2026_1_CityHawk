@@ -93,13 +93,17 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 10px;
     min-height: 48px;
     padding: 0 20px;
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 999px;
+    background: transparent;
     color: var(--home-color-text);
+    font-size: var(--home-text-5);
     font-weight: 600;
     text-decoration: none;
+    cursor: pointer;
     transition:
         background 0.2s ease,
         border-color 0.2s ease,
@@ -116,6 +120,22 @@
 .event-hero__action--primary {
     background: rgba(122, 173, 247, 0.16);
     border-color: rgba(139, 188, 233, 0.26);
+}
+
+.event-hero__action--icon {
+    width: 58px;
+    padding: 0;
+}
+
+.event-hero__action-icon {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
 }
 
 .event-hero__poster {

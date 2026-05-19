@@ -8,6 +8,7 @@ import type {
 import { getMeOrNull } from '../../api/profile.api.js';
 import { attachEventCardFavorites } from '../../components/event-card/event-card-favorite.js';
 import { attachHeaderMenu } from '../../components/header/header-menu.js';
+import { attachHeaderNotifications } from '../../components/header/header-notifications.js';
 import {
   buildAuthPath,
   getCurrentPathWithSearch,
@@ -89,7 +90,7 @@ export class Router {
     this.root = root;
     this.routes = routes;
     this.notFound = notFound;
-    this.sharedBinders = [attachEventCardFavorites, attachHeaderMenu];
+    this.sharedBinders = [attachEventCardFavorites, attachHeaderMenu, attachHeaderNotifications];
     this.cleanup = null;
     this.onPopState = this.onPopState.bind(this);
     this.onDocumentClick = this.onDocumentClick.bind(this);

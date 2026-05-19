@@ -17,16 +17,39 @@
           {{/if}}
         </div>
 
-        {{#if canManage}}
-          <div class="event-hero__actions">
-            <a class="event-hero__action event-hero__action--primary" href="/events/{{eventId}}/edit">
-              Редактировать
-            </a>
-            <a class="event-hero__action" href="/events/{{eventId}}/delete">
-              Удалить
-            </a>
-          </div>
-        {{/if}}
+        <div class="event-hero__actions">
+          <button type="button" class="event-hero__action" data-action="event-invite-open">
+            <svg class="event-hero__action-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15 20a6 6 0 0 0-12 0" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M19 8v6" />
+              <path d="M16 11h6" />
+            </svg>
+            Пригласить
+          </button>
+
+          <button
+            type="button"
+            class="event-hero__action event-hero__action--primary"
+            data-action="event-share-open"
+            data-share-url="{{shareUrl}}"
+          >
+            <svg class="event-hero__action-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <path d="M8.6 10.6 15.4 6.4" />
+              <path d="M8.6 13.4 15.4 17.6" />
+            </svg>
+            Поделиться
+          </button>
+
+          <button type="button" class="event-hero__action event-hero__action--icon" aria-label="Добавить в избранное">
+            <svg class="event-hero__action-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="event-hero__poster">

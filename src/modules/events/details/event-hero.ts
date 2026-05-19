@@ -7,7 +7,7 @@ export interface EventHeroState {
   dateText?: string;
   placeText?: string;
   posterUrl?: string;
-  canManage?: boolean;
+  shareUrl?: string;
 }
 
 export function renderEventHero(state: EventHeroState = {}): string {

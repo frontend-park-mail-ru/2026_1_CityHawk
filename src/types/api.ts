@@ -185,6 +185,95 @@ export interface FollowListResponse {
   offset: number;
 }
 
+export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'cancelled';
+
+export interface EventInvitee extends FollowUser {
+  invitationStatus?: InvitationStatus | null;
+}
+
+export interface EventInviteeSearchResponse {
+  items: EventInvitee[];
+}
+
+export interface CreateEventInvitationsPayload {
+  recipientIds: string[];
+  message?: string;
+  eventSessionId?: string;
+}
+
+export interface EventInvitation {
+  id: string;
+  eventId: string;
+  eventSessionId?: string | null;
+  senderId: string;
+  recipientId: string;
+  status: InvitationStatus;
+  message?: string;
+  respondedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface EventInvitationsResponse {
+  items: EventInvitation[];
+}
+
+export interface ShareLinkResponse {
+  id: string;
+  url: string;
+  token: string;
+  eventId?: string;
+  collectionId?: string;
+  createdAt: string;
+}
+
+export type NotificationType =
+  | 'event_invitation'
+  | 'invitation_accepted'
+  | 'event_reminder'
+  | 'collection_shared'
+  | 'system';
+
+export interface NotificationActor {
+  id: string;
+  displayName: string;
+  avatarUrl?: string | null;
+}
+
+export interface NotificationEventSummary {
+  id: string;
+  title: string;
+  coverImageUrl?: string;
+  dateText?: string;
+  placeText?: string;
+}
+
+export interface NotificationInvitationSummary {
+  id: string;
+  status: InvitationStatus;
+}
+
+export interface NotificationItem {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message?: string;
+  isRead: boolean;
+  readAt?: string | null;
+  createdAt: string;
+  actor?: NotificationActor | null;
+  event?: NotificationEventSummary | null;
+  invitation?: NotificationInvitationSummary | null;
+}
+
+export interface NotificationsResponse {
+  items: NotificationItem[];
+  unreadCount: number;
+  total: number;
+  limit: number;
+  offset: number;
+}
+
 export interface LoginPayload {
   email: string;
   password: string;
