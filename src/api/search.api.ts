@@ -7,6 +7,7 @@ export interface SearchSuggestionItem {
   label?: string;
   title?: string;
   name?: string;
+  email?: string;
 }
 
 export interface SearchResultsResponse {
@@ -45,7 +46,10 @@ export async function searchUsers(query: string, limit = 10): Promise<FollowUser
         return null;
       }
 
-      const title = String(source.title || source.name || source.label || '').trim();
+      const label = String(source.label || '').trim();
+      const explicitEmail = String(source.email || '').trim();
+      const email = explicitEmail || (label.includes('@') && !label.startsWith('@') ? label : '');
+      const title = String(source.title || source.name || email || label || '').trim();
       const [first = '', second = ''] = title.split(/\s+/, 2);
 
       return {

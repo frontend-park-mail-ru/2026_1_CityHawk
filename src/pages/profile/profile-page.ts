@@ -401,7 +401,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           return;
         }
         followsSearchInput.placeholder = activeFollowTab === 'discover'
-          ? 'Найти друзей по имени'
+          ? 'Найти друзей по имени или email'
           : 'Поиск по имени или городу';
       };
 

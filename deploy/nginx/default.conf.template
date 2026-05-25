@@ -30,7 +30,7 @@ server {
         proxy_set_header Connection "";
     }
 
-    location /uploads/ {
+    location ^~ /uploads/ {
         proxy_pass http://cityhawk_backend;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
