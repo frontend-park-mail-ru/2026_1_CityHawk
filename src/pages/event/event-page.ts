@@ -14,8 +14,8 @@ import { attachHeaderCityPicker } from '../../components/header/header-city-pick
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { showToast } from '../../app/ui/toast.js';
 import { attachEventDescription, renderEventDescription } from '../../modules/events/details/event-description.js';
-import { renderEventGallery } from '../../modules/events/details/event-gallery.js';
-import { renderEventHero } from '../../modules/events/details/event-hero.js';
+import { attachEventGallery, renderEventGallery } from '../../modules/events/details/event-gallery.js';
+import { attachEventHeroFavorite, renderEventHero } from '../../modules/events/details/event-hero.js';
 import { attachEventLocation, renderEventLocation } from '../../modules/events/details/event-location.js';
 import { localizeCategoryName } from '../../modules/events/common/category-localization.js';
 import { formatEventDateOrPeriod } from '../../modules/events/common/event-date-label.js';
@@ -133,7 +133,7 @@ type EventDetailsLike = Omit<Partial<EventDetails>, 'images' | 'sessions'> & {
 
 function formatEventDate(value?: string | null): string {
   if (!value) {
-    return 'Дата уточняется';
+    return '';
   }
 
   const date = new Date(value);
@@ -219,32 +219,37 @@ function toFiniteCoordinate(value: unknown): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
+function getPlaceCoordinates(place?: LoosePlace | null): { latitude?: number; longitude?: number } {
+  return {
+    latitude: toFiniteCoordinate(place?.latitude),
+    longitude: toFiniteCoordinate(place?.longitude),
+  };
+}
+
 function resolveEventMapCoordinates(rawEvent: EventDetailsLike): { latitude?: number; longitude?: number } {
   const sessions = Array.isArray(rawEvent.sessions) ? rawEvent.sessions : [];
   const firstSessionPlace = sessions[0]?.place as LoosePlace | null | undefined;
   const nextSessionPlace = (rawEvent as unknown as { nextSession?: { place?: LoosePlace | null } })
     .nextSession?.place;
 
-  const fromFirstSession = {
-    latitude: toFiniteCoordinate(firstSessionPlace?.latitude),
-    longitude: toFiniteCoordinate(firstSessionPlace?.longitude),
-  };
+  const fromFirstSession = getPlaceCoordinates(firstSessionPlace);
   if (fromFirstSession.latitude !== undefined && fromFirstSession.longitude !== undefined) {
     return fromFirstSession;
   }
 
-  const fromNextSession = {
-    latitude: toFiniteCoordinate(nextSessionPlace?.latitude),
-    longitude: toFiniteCoordinate(nextSessionPlace?.longitude),
-  };
+  const fromNextSession = getPlaceCoordinates(nextSessionPlace);
   if (fromNextSession.latitude !== undefined && fromNextSession.longitude !== undefined) {
     return fromNextSession;
   }
 
+  const fromEventPlace = getPlaceCoordinates(rawEvent.place);
+  if (fromEventPlace.latitude !== undefined && fromEventPlace.longitude !== undefined) {
+    return fromEventPlace;
+  }
+
   for (const session of sessions) {
     const sessionPlace = session?.place as LoosePlace | null | undefined;
-    const latitude = toFiniteCoordinate(sessionPlace?.latitude);
-    const longitude = toFiniteCoordinate(sessionPlace?.longitude);
+    const { latitude, longitude } = getPlaceCoordinates(sessionPlace);
     if (latitude !== undefined && longitude !== undefined) {
       return { latitude, longitude };
     }
@@ -255,7 +260,9 @@ function resolveEventMapCoordinates(rawEvent: EventDetailsLike): { latitude?: nu
 
 function mapEventDetailsToPageViewModel(rawEvent: EventDetailsLike = {}): EventPageViewModel {
   const firstSession = Array.isArray(rawEvent.sessions) ? rawEvent.sessions[0] : null;
-  const place: LoosePlace | null = firstSession?.place || rawEvent.place || null;
+  const nextSessionPlace = (rawEvent as unknown as { nextSession?: { place?: LoosePlace | null } })
+    .nextSession?.place;
+  const place: LoosePlace | null = firstSession?.place || nextSessionPlace || rawEvent.place || null;
   const mapCoordinates = resolveEventMapCoordinates(rawEvent);
   const title = rawEvent.title || 'Futurione';
   const description = rawEvent.fullDescription || '';
@@ -280,7 +287,7 @@ function mapEventDetailsToPageViewModel(rawEvent: EventDetailsLike = {}): EventP
 
   const locationParts = [
     place?.addressLine,
-    place?.name,
+    firstSession?.placeName || place?.name || rawEvent.placeName,
     place?.city?.name || rawEvent.city?.name,
   ].filter(Boolean);
   const categories = Array.isArray(rawEvent.categories) ? rawEvent.categories : [];
@@ -296,20 +303,19 @@ function mapEventDetailsToPageViewModel(rawEvent: EventDetailsLike = {}): EventP
     title,
     dateText: formatEventPeriod(firstSession?.startAt, firstSession?.endAt)
       || formatEventDate(firstSession?.startAt || rawEvent.dateText),
-    placeText: locationParts.join(', ') || 'Локация уточняется',
+    placeText: locationParts.join(', '),
     posterUrl: rawEvent.coverImageUrl || galleryImages[0]?.imageUrl || '',
     leadText: rawEvent.shortDescription || 'Актуальная информация о событии, времени и формате посещения.',
     paragraphs: safeParagraphs,
     locationParagraphs: [
       locationParts.join(', ') || 'Адрес будет добавлен позже.',
-    place?.description || 'Подробная навигация и ориентиры для посетителей появятся после интеграции с backend.',
     ],
     galleryImages,
     mapImageUrl: '/public/static/img/map.jpeg',
     mapAlt: `Карта для ${title}`,
     mapLatitude: mapCoordinates.latitude,
     mapLongitude: mapCoordinates.longitude,
-    mapTitle: place?.name || title,
+    mapTitle: firstSession?.placeName || place?.name || rawEvent.placeName || title,
   };
 }
 
@@ -352,7 +358,7 @@ function getFallbackEvent(eventId: string): EventDetailsLike {
 
 function mapEventToRecommendationViewModel(item: Partial<EventCard> = {}): RecommendationViewModel {
   const placeParts = [
-    item.nextSession?.place?.name,
+    item.nextSession?.placeName || item.nextSession?.place?.name,
     item.nextSession?.place?.addressLine,
   ].filter(Boolean);
   const dateText = formatEventDateOrPeriod(item);
@@ -828,6 +834,7 @@ export async function eventPage({ navigate, params = {} }: RouteContext): Promis
       placeText: event.placeText,
       posterUrl: event.posterUrl,
       shareUrl: eventShare.url,
+      isFavorite: Boolean(rawEvent.isFavorite),
     }),
     eventDescription: renderEventDescription({
       leadText: event.leadText,
@@ -848,6 +855,12 @@ export async function eventPage({ navigate, params = {} }: RouteContext): Promis
     eventRecommendations: renderEventRecommendations({
       items: recommendations,
     }),
+    ownerActions: rawEvent.isOwner
+      ? {
+        editHref: `/events/${encodeURIComponent(String(eventId))}/edit`,
+        deleteHref: `/events/${encodeURIComponent(String(eventId))}/delete`,
+      }
+      : null,
     eventShare,
     inviteUsers,
     hasInviteUsers: inviteUsers.length > 0,
@@ -864,6 +877,8 @@ export async function eventPage({ navigate, params = {} }: RouteContext): Promis
       });
 
       attachEventDescription(root);
+      const detachEventGallery = attachEventGallery(root);
+      const detachEventHeroFavorite = attachEventHeroFavorite(root);
       const detachEventLocation = attachEventLocation(root);
       const detachEventShareModal = attachEventShareModal(root, eventId);
       const detachEventInviteModal = attachEventInviteModal(root, eventId);
@@ -903,6 +918,8 @@ export async function eventPage({ navigate, params = {} }: RouteContext): Promis
 
       return () => {
         detachCityPicker();
+        detachEventGallery();
+        detachEventHeroFavorite();
         detachEventLocation();
         detachEventShareModal();
         detachEventInviteModal();

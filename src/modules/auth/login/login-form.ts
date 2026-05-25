@@ -49,7 +49,7 @@ export function attachLoginForm(root: ParentNode, options: LoginFormOptions = {}
     const val = this.value.trim();
 
     if (!val) {
-      showFieldError(wrapper, 'Пароль не должен быть пустым!');
+      showFieldError(wrapper, 'Введите пароль');
     } else {
       hideFieldError(wrapper);
       passError = false;
@@ -76,7 +76,7 @@ export function attachLoginForm(root: ParentNode, options: LoginFormOptions = {}
     }
 
     if (!passVal) {
-      showFieldError(passWrapper, 'Пароль не должен быть пустым!');
+      showFieldError(passWrapper, 'Введите пароль');
       passError = true;
     } else {
       hideFieldError(passWrapper);
@@ -95,7 +95,7 @@ export function attachLoginForm(root: ParentNode, options: LoginFormOptions = {}
 
       const emailErrorMsg = getErrorMessageElement(emailWrapper);
       if (emailErrorMsg) {
-        emailErrorMsg.textContent = 'Пользователь не найден';
+        emailErrorMsg.textContent = 'Проверьте email или пароль';
       }
 
       const passErrorMsg = getErrorMessageElement(passWrapper);

@@ -15,6 +15,16 @@ export interface EventListCatalogState {
   cards?: EventListCatalogCard[];
   hasCards?: boolean;
   canCreateEvent?: boolean;
+  currentPage?: number;
+  totalPages?: number;
+  prevHref?: string;
+  nextHref?: string;
+  pages?: Array<{
+    href?: string;
+    label: string;
+    active?: boolean;
+    isGap?: boolean;
+  }>;
 }
 
 export function renderEventListCatalog(state: EventListCatalogState = {}): string {
@@ -28,5 +38,11 @@ export function renderEventListCatalog(state: EventListCatalogState = {}): strin
     })),
     hasCards: typeof state.hasCards === 'boolean' ? state.hasCards : cards.length > 0,
     canCreateEvent: Boolean(state.canCreateEvent),
+    hasPagination: Number(state.totalPages || 0) > 1,
+    currentPage: Number(state.currentPage || 1),
+    totalPages: Number(state.totalPages || 1),
+    prevHref: state.prevHref || '',
+    nextHref: state.nextHref || '',
+    pages: Array.isArray(state.pages) ? state.pages : [],
   });
 }

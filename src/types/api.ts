@@ -31,7 +31,8 @@ export interface Category {
 
 export interface EventNextSession {
   startAt: string;
-  place: PlacePreview;
+  place?: PlacePreview | null;
+  placeName?: string;
 }
 
 export interface EventCard {
@@ -61,6 +62,7 @@ export interface EventSession {
   endAt: string;
   price: number;
   placeId?: string;
+  placeName?: string;
   place?: Place | null;
 }
 
@@ -80,6 +82,8 @@ export interface EventDetails {
   updatedAt: string;
   isFavorite: boolean;
   isOwner: boolean;
+  placeName?: string;
+  place?: Place | null;
   coverImageUrl?: string;
 }
 
@@ -280,12 +284,8 @@ export interface LoginPayload {
 }
 
 export interface RegisterPayload {
-  username: string;
   email: string;
-  userSurname: string;
   password: string;
-  birthday?: string;
-  cityId?: string;
 }
 
 export interface UpdateProfilePayload {
@@ -415,10 +415,11 @@ export interface MapSpot {
   eventId: string;
   title: string;
   address: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
+  place?: Place | null;
   imageUrl?: string;
-  startAt: string;
+  startAt?: string;
   popularity: number;
   tags: Tag[];
 }

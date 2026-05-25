@@ -1,6 +1,6 @@
-export const SHELL_CACHE = 'cityhawk-shell-v1';
-export const DATA_CACHE = 'cityhawk-data-v1';
-export const STATIC_CACHE = 'cityhawk-static-v1';
+export const SHELL_CACHE = 'cityhawk-shell-v2';
+export const DATA_CACHE = 'cityhawk-data-v2';
+export const STATIC_CACHE = 'cityhawk-static-v2';
 export const HANDLEBARS_CDN_URL = 'https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.8/handlebars.min.js';
 
 const TEMPLATE_URLS = [
@@ -58,7 +58,13 @@ const TEMPLATE_URLS = [
 export const APP_SHELL_URLS = [
   '/',
   '/index.html',
+  '/offline.html',
   '/runtime-config.js',
   '/public/static/favicons/site.webmanifest',
+  '/public/static/favicons/apple-touch-icon.png',
+  '/public/static/favicons/favicon-32x32.png',
+  '/public/static/favicons/favicon-16x16.png',
+  '/public/static/favicons/android-chrome-192x192.png',
+  '/public/static/favicons/android-chrome-512x512.png',
   ...TEMPLATE_URLS,
 ];

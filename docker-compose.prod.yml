@@ -11,7 +11,8 @@ services:
     environment:
       BACKEND_UPSTREAM: ${BACKEND_UPSTREAM:-host.docker.internal:8080}
       SERVER_NAME: ${SERVER_NAME:-_}
-      PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-/api}
+      HTTPS_REDIRECT_HOST: ${HTTPS_REDIRECT_HOST:-${SERVER_NAME:-localhost}}
+      PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-}
       YANDEX_MAPS_API_KEY: ${YANDEX_MAPS_API_KEY:-}
       SSL_CERTIFICATE: ${SSL_CERTIFICATE:-/etc/letsencrypt/live/cityhawk.example/fullchain.pem}
       SSL_CERTIFICATE_KEY: ${SSL_CERTIFICATE_KEY:-/etc/letsencrypt/live/cityhawk.example/privkey.pem}

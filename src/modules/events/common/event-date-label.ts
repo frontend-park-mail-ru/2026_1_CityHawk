@@ -59,7 +59,7 @@ function formatPeriodDate(startAt?: string | null, endAt?: string | null): strin
 
 export function formatEventDateOrPeriod(source: unknown): string {
   if (!source || typeof source !== 'object') {
-    return 'Дата уточняется';
+    return '';
   }
 
   const item = source as Record<string, unknown>;
@@ -86,5 +86,5 @@ export function formatEventDateOrPeriod(source: unknown): string {
   }
 
   const point = formatPointDate(startAt);
-  return point || 'Дата уточняется';
+  return point;
 }

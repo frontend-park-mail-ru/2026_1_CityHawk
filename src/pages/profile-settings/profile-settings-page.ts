@@ -8,12 +8,33 @@ import '../../modules/profile/profile-form.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { showToast } from '../../app/ui/toast.js';
+import { getUserErrorMessage } from '../../api/errors.js';
 import {
   getEmailValidationError,
   validatePersonName,
 } from '../../modules/auth/shared/validators.js';
 import type { ApiError, UpdateProfilePayload } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
+
+const AVATAR_MAX_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_AVATAR_TYPES = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
+
+function getAvatarUploadErrorMessage(error: unknown): string {
+  const apiError = error as ApiError | undefined;
+  const detail = String(apiError?.details?.avatar || '').trim();
+  const message = error instanceof Error ? error.message : '';
+  const source = detail || message;
+
+  if (/too large|file is too large/i.test(source)) {
+    return 'Загрузите изображение до 5 МБ';
+  }
+
+  if (/image/i.test(source)) {
+    return 'Загрузите PNG, JPEG, GIF или WebP';
+  }
+
+  return message || 'Не удалось обновить аватар';
+}
 
 function animateLoginAside(root: HTMLElement): void {
   const loginEl = root.classList.contains('login') ? root : root.querySelector('.login');
@@ -318,19 +339,19 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
           const details = apiError?.details || {};
 
           if (details.username) {
-            setFirstNameError('Имя должно быть от 3 до 32 символов');
+            setFirstNameError('Имя: от 3 до 32 символов');
           }
           if (details.userSurname) {
-            setLastNameError('Фамилия должна быть от 3 до 32 символов');
+            setLastNameError('Фамилия: от 3 до 32 символов');
           }
           if (details.email) {
-            setEmailError(getEmailValidationError(email) || 'Введите корректный email');
+            setEmailError(getEmailValidationError(email) || 'Проверьте email');
           }
           if (details.username || details.userSurname || details.email) {
             return;
           }
 
-          const message = error instanceof Error ? error.message : 'Не удалось обновить профиль';
+          const message = getUserErrorMessage(error, 'Не удалось обновить профиль');
           if (String(message).toLowerCase().includes('email')) {
             setEmailError(message);
             return;
@@ -427,12 +448,23 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
           return;
         }
 
+        if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
+          showToast('Загрузите PNG, JPEG, GIF или WebP', { type: 'error' });
+          avatarInput.value = '';
+          return;
+        }
+
+        if (file.size > AVATAR_MAX_SIZE_BYTES) {
+          showToast('Загрузите изображение до 5 МБ', { type: 'error' });
+          avatarInput.value = '';
+          return;
+        }
+
         try {
           await updateProfileMultipart({}, file);
           navigate('/profile/settings', { replace: true });
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Не удалось обновить аватар';
-          showToast(message, { type: 'error' });
+          showToast(getAvatarUploadErrorMessage(error), { type: 'error' });
         } finally {
           avatarInput.value = '';
         }

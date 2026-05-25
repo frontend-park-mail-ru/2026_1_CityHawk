@@ -8,17 +8,21 @@
       aria-label="{{#if isFavorite}}Убрать из избранного{{else}}Добавить в избранное{{/if}}"
       aria-pressed="{{#if isFavorite}}true{{else}}false{{/if}}"
     >
-      <img src="/public/static/icons/favorite.svg" alt="" />
+      <svg class="event-card__favorite-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z" />
+      </svg>
     </button>
-    <img
-      src="{{imageUrl}}"
-      alt="{{title}}"
-      class="event-card__image"
-      loading="lazy"
-      decoding="async"
-      referrerpolicy="no-referrer"
-      onerror="this.onerror=null;this.src='/public/static/img/concert.jpeg';"
-    />
+    <span class="event-card__image-frame" style="--event-card-image-bg: url('{{imageUrl}}');">
+      <img
+        src="{{imageUrl}}"
+        alt="{{title}}"
+        class="event-card__image"
+        loading="lazy"
+        decoding="async"
+        referrerpolicy="no-referrer"
+        onerror="this.onerror=null;this.src='/public/static/img/concert.jpeg';"
+      />
+    </span>
     <h3 class="event-card__title">{{title}}</h3>
 
     {{#each textLines}}
@@ -51,17 +55,21 @@
       aria-label="{{#if isFavorite}}Убрать из избранного{{else}}Добавить в избранное{{/if}}"
       aria-pressed="{{#if isFavorite}}true{{else}}false{{/if}}"
     >
-      <img src="/public/static/icons/favorite.svg" alt="" />
+      <svg class="event-card__favorite-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z" />
+      </svg>
     </button>
-    <img
-      src="{{imageUrl}}"
-      alt="{{title}}"
-      class="event-card__image"
-      loading="lazy"
-      decoding="async"
-      referrerpolicy="no-referrer"
-      onerror="this.onerror=null;this.src='/public/static/img/concert.jpeg';"
-    />
+    <span class="event-card__image-frame" style="--event-card-image-bg: url('{{imageUrl}}');">
+      <img
+        src="{{imageUrl}}"
+        alt="{{title}}"
+        class="event-card__image"
+        loading="lazy"
+        decoding="async"
+        referrerpolicy="no-referrer"
+        onerror="this.onerror=null;this.src='/public/static/img/concert.jpeg';"
+      />
+    </span>
     <h3 class="event-card__title">{{title}}</h3>
 
     {{#each textLines}}

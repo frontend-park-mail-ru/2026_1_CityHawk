@@ -30,6 +30,7 @@
       </div>
 
       <div class="profile-hero__stats">
+        {{#if isOwnProfile}}
         <div class="profile-hero__stats-row">
           <button class="profile-stat profile-stat--button" type="button" data-role="profile-open-follows" data-tab="followers">
             <div class="profile-stat__value">{{stats.myEvents}}</div>
@@ -46,12 +47,13 @@
         <button class="profile__button profile__button--secondary profile-hero__find ui-button ui-button--ghost ui-button--pill" type="button" data-role="profile-open-friends">
           Найти друзей
         </button>
+        {{/if}}
       </div>
     </section>
 
     <section class="profile-section profile-section--home-like">
       <div class="home-events__head">
-        <h2 class="home-events__title">Мои события</h2>
+        <h2 class="home-events__title">{{#if isOwnProfile}}Мои события{{else}}События пользователя{{/if}}</h2>
         <a href="/events" class="home-events__link">показать ещё...</a>
       </div>
 
@@ -66,6 +68,7 @@
       {{/if}}
     </section>
 
+    {{#if isOwnProfile}}
     <section class="profile-section profile-section--home-like">
       <div class="home-events__head">
         <h2 class="home-events__title">Избранное</h2>
@@ -82,8 +85,10 @@
       <p class="profile-section__empty">Добавляй мероприятия в избранное, чтобы они появились здесь.</p>
       {{/if}}
     </section>
+    {{/if}}
   </div>
 
+  {{#if isOwnProfile}}
   <div class="profile-follows-modal" data-role="profile-follows-modal" hidden>
     <div class="profile-follows-modal__backdrop" data-role="profile-follows-close"></div>
     <section class="profile-follows-modal__dialog" role="dialog" aria-modal="true" aria-label="Друзья и подписки">
@@ -115,4 +120,5 @@
       <div class="profile-follows-modal__list" data-role="profile-follows-list"></div>
     </section>
   </div>
+  {{/if}}
 </section>

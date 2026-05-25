@@ -23,6 +23,7 @@ export interface EventFormInitialValues {
   periodEnd?: string;
   isAnytime?: boolean;
   placeId?: string;
+  placeQuery?: string;
   category?: string;
   tags?: string[] | string;
   description?: string;
@@ -46,6 +47,7 @@ export interface EventFormValues {
   periodEnd: string;
   isAnytime: boolean;
   placeId: string;
+  placeName: string;
   category: string;
   tags: string[];
   description: string;
@@ -65,6 +67,8 @@ interface EventDetailsLike {
   categoryIds?: string[];
   categories?: Category[];
   tags?: Array<Tag | string>;
+  placeName?: string;
+  place?: EventSession['place'] | null;
   sessions?: EventSession[];
   imageUrl?: string;
   images?: EventImageLike[];
@@ -92,6 +96,15 @@ function formatDateForInput(value?: string | Date): string {
     return '';
   }
 
+  if (typeof value === 'string') {
+    const normalized = value.trim();
+    const isoMatch = normalized.match(/^(\d{4}-\d{2}-\d{2})(?:[T\s].*)?$/);
+
+    if (isoMatch) {
+      return isoMatch[1];
+    }
+  }
+
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return '';
@@ -103,6 +116,15 @@ function formatDateForInput(value?: string | Date): string {
 function formatTimeForInput(value?: string | Date): string {
   if (!value) {
     return '';
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim();
+    const isoMatch = normalized.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}[T\s]([0-9]{2}:[0-9]{2})/);
+
+    if (isoMatch) {
+      return isoMatch[1];
+    }
   }
 
   const date = new Date(value);
@@ -272,16 +294,19 @@ function mapSessionsToInitialSchedule(sessions?: EventSession[]): EventFormSched
 }
 
 function buildSessions(formPayload: EventFormValues): EventSessionPayload[] {
+  if (formPayload.isAnytime) {
+    return [];
+  }
+
   const placeValue = String(formPayload.placeId || '').trim();
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(placeValue);
   if (!isUuid) {
     throw new Error('Выбери место из подсказок перед публикацией');
   }
-  const placePayload = { placeId: placeValue };
-
-  if (formPayload.isAnytime) {
-    return [];
-  }
+  const placePayload = {
+    placeId: placeValue,
+    placeName: String(formPayload.placeName || '').trim(),
+  };
 
   if (formPayload.scheduleMode === 'multiple') {
     return formPayload.multipleDates.map((date, index) => {
@@ -373,10 +398,15 @@ export function mapEventDetailsToInitialValues(rawEvent: EventDetailsLike = {}):
   const tags = Array.isArray(rawEvent?.tags) ? rawEvent.tags : [];
   const schedule = mapSessionsToInitialSchedule(sessions);
   const galleryPreviewUrls = mapImageUrls(rawEvent);
+  const placeQuery = [
+    String(firstSession?.placeName || firstSession?.place?.name || rawEvent?.placeName || rawEvent?.place?.name || '').trim(),
+    String(firstSession?.place?.addressLine || '').trim(),
+  ].filter(Boolean).join(', ');
 
   return {
     title: String(rawEvent?.title || '').trim(),
     placeId: String(firstSession?.placeId || firstSession?.place?.id || '').trim(),
+    placeQuery,
     category: String(categories[0]?.id || categoryIds[0] || '').trim(),
     tags: tags
       .map((tag) => (typeof tag === 'string' ? tag : tag?.id || tag?.name || ''))

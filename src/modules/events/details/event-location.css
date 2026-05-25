@@ -10,10 +10,19 @@
 }
 
 .event-location__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.1fr) 420px;
-    gap: 34px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
     align-items: start;
+}
+
+.event-location__info {
+    width: 100%;
+    max-width: 720px;
+}
+
+.event-location__text {
+    width: 100%;
 }
 
 .event-location__title {
@@ -36,8 +45,8 @@
 .event-location__map {
     position: relative;
     overflow: hidden;
-    min-height: 200px;
     width: 100%;
+    height: 360px;
     padding: 0;
     cursor: pointer;
     text-align: left;
@@ -52,9 +61,21 @@
 }
 
 .event-location__map-canvas {
+    display: block;
     width: 100%;
     height: 100%;
-    min-height: 200px;
+}
+
+.event-location__map-fallback,
+.event-location__modal-fallback {
+    position: absolute;
+    inset: 0;
+}
+
+.event-location__map-fallback {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
 }
 
 .event-location__map:focus-visible {
@@ -63,9 +84,9 @@
 }
 
 .event-location__map-image {
+    display: block;
     width: 100%;
     height: 100%;
-    max-height: 200px;
     object-fit: cover;
     filter: brightness(0.55) saturate(0.9);
 }
@@ -74,6 +95,7 @@
     position: absolute;
     top: 47%;
     left: 54%;
+    z-index: 1;
     width: 18px;
     height: 18px;
     border-radius: 50%;
@@ -82,6 +104,18 @@
         0 0 0 8px rgba(47, 124, 255, 0.18),
         0 0 22px rgba(47, 124, 255, 0.6);
     transform: translate(-50%, -50%);
+}
+
+.event-location__map-fallback-text {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 18px 18px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(16, 25, 40, 0.82);
+    color: #f2f6fd;
+    font-size: 13px;
+    font-weight: 700;
 }
 
 .event-location__map:hover {
@@ -151,19 +185,14 @@
 }
 
 .event-location__modal-canvas,
-.event-location__modal-image {
+.event-location__modal-image,
+.event-location__modal-fallback {
     width: 100%;
     height: 100%;
 }
 
 .event-location__modal-image {
     object-fit: cover;
-}
-
-@media (max-width: 1100px) {
-    .event-location__grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 @media (max-width: 768px) {
@@ -177,6 +206,12 @@
 
     .event-location__paragraph {
         font-size: 15px;
+    }
+
+    .event-location__map,
+    .event-location__map-canvas,
+    .event-location__map-image {
+        height: 280px;
     }
 
     .event-location__modal {

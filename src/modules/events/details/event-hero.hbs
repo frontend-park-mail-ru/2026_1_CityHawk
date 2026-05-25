@@ -44,7 +44,14 @@
             Поделиться
           </button>
 
-          <button type="button" class="event-hero__action event-hero__action--icon" aria-label="Добавить в избранное">
+          <button
+            type="button"
+            class="event-hero__action event-hero__action--icon{{#if isFavorite}} event-hero__action--favorite-active{{/if}}"
+            data-role="event-hero-favorite"
+            data-event-id="{{eventId}}"
+            aria-label="{{#if isFavorite}}Убрать из избранного{{else}}Добавить в избранное{{/if}}"
+            aria-pressed="{{#if isFavorite}}true{{else}}false{{/if}}"
+          >
             <svg class="event-hero__action-icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z" />
             </svg>
@@ -52,7 +59,7 @@
         </div>
       </div>
 
-      <div class="event-hero__poster">
+      <div class="event-hero__poster {{posterClass}}">
         <img src="{{posterUrl}}" alt="{{title}}" class="event-hero__poster-image" />
       </div>
     </div>

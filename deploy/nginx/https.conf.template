@@ -13,7 +13,7 @@ server {
     }
 
     location / {
-        return 301 https://$host$request_uri;
+        return 301 https://${HTTPS_REDIRECT_HOST}$request_uri;
     }
 }
 

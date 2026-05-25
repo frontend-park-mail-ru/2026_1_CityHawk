@@ -9,6 +9,19 @@
     {{{eventGallery}}}
     {{{eventLocation}}}
     {{{eventRecommendations}}}
+
+    {{#if ownerActions}}
+      <section class="event-page__owner-actions" aria-label="Управление событием">
+        <div class="event-page__owner-actions-container">
+          <a class="event-page__owner-action event-page__owner-action--primary" href="{{ownerActions.editHref}}">
+            Редактировать событие
+          </a>
+          <a class="event-page__owner-action event-page__owner-action--danger" href="{{ownerActions.deleteHref}}">
+            Удалить событие
+          </a>
+        </div>
+      </section>
+    {{/if}}
   </main>
 
   <div class="event-invite-modal" data-role="event-invite-modal" hidden>

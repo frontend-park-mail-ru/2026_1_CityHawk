@@ -14,16 +14,34 @@ export interface EventFormScheduleController {
   validate: (values: EventFormValues) => boolean;
 }
 
-function buildMultipleDateRowHtml(): string {
-  return renderTemplate('event-form-multiple-date-row');
-}
-
 export function createEventFormScheduleController(elements: EventFormElements): EventFormScheduleController {
+  const isCreateMode = elements.form?.dataset.isCreateMode === 'true';
+  const minDate = String(elements.form?.dataset.minDate || '').trim();
   const handleDateChange = createInputClearHandler(elements.dateInput, elements.dateError);
   const handleStartTimeChange = createInputClearHandler(elements.startTimeInput, elements.dateError);
   const handleEndTimeChange = createInputClearHandler(elements.endTimeInput, elements.dateError);
   const handlePeriodStartChange = createInputClearHandler(elements.periodStartInput, elements.dateError);
   const handlePeriodEndChange = createInputClearHandler(elements.periodEndInput, elements.dateError);
+
+  const getAllDateInputs = (): HTMLInputElement[] => Array.from((elements.form || document).querySelectorAll<HTMLInputElement>(
+    '[data-role="event-create-date"], [data-role="event-create-multiple-date-input"], [data-role="event-create-period-start"], [data-role="event-create-period-end"]',
+  ));
+
+  const applyDateConstraints = (): void => {
+    if (!isCreateMode || !minDate) {
+      return;
+    }
+
+    getAllDateInputs().forEach((input) => {
+      input.min = minDate;
+    });
+  };
+
+  const isPastDate = (value: string): boolean => Boolean(value && minDate && value < minDate);
+
+  const isInvalidTimeRange = (startTime: string, endTime: string): boolean => (
+    Boolean(startTime && endTime) && endTime <= startTime
+  );
 
   const syncAnytimeState = (): void => {
     if (!(elements.anytimeInput instanceof HTMLInputElement)) {
@@ -73,6 +91,13 @@ export function createEventFormScheduleController(elements: EventFormElements): 
       elements.addDateButton.disabled = shouldDisableSchedule;
     }
 
+    if (elements.placeInput instanceof HTMLInputElement) {
+      elements.placeInput.disabled = shouldDisableSchedule;
+      if (shouldDisableSchedule) {
+        clearFieldError(elements.placeInput, elements.placeError);
+      }
+    }
+
     if (elements.anytimeInput.checked) {
       if (elements.dateInput instanceof HTMLInputElement) {
         elements.dateInput.value = '';
@@ -114,7 +139,11 @@ export function createEventFormScheduleController(elements: EventFormElements): 
       return;
     }
 
-    elements.multipleDatesList.insertAdjacentHTML('beforeend', buildMultipleDateRowHtml());
+    elements.multipleDatesList.insertAdjacentHTML('beforeend', renderTemplate('event-form-multiple-date-row', {
+      isCreateMode,
+      minDate,
+    }));
+    applyDateConstraints();
   };
 
   const handleMultipleDatesClick = (event: Event): void => {
@@ -172,13 +201,49 @@ export function createEventFormScheduleController(elements: EventFormElements): 
     }
 
     if (values.scheduleMode === 'single') {
-      return validateRequiredField(values.singleDate, elements.dateInput, elements.dateError, 'Укажи дату события');
+      if (isCreateMode && isPastDate(values.singleDate)) {
+        showFieldError(elements.dateInput, elements.dateError, 'Выберите дату не раньше сегодняшней');
+        elements.dateInput?.focus();
+        return false;
+      }
+
+      if (!validateRequiredField(values.singleDate, elements.dateInput, elements.dateError, 'Укажи дату события')) {
+        return false;
+      }
+
+      if (isInvalidTimeRange(values.singleStartTime, values.singleEndTime)) {
+        showFieldError(elements.endTimeInput, elements.dateError, 'Время окончания должно быть позже времени начала');
+        elements.endTimeInput?.focus();
+        return false;
+      }
+
+      clearFieldError(elements.endTimeInput, elements.dateError);
+      return true;
     }
 
     if (values.scheduleMode === 'multiple') {
       if (!values.multipleDates.length) {
         showFieldError(elements.dateInput, elements.dateError, 'Добавь хотя бы одну дату');
         elements.dateInput?.focus();
+        return false;
+      }
+
+      if (isCreateMode && values.multipleDates.some(isPastDate)) {
+        showFieldError(elements.dateInput, elements.dateError, 'Выберите даты не раньше сегодняшней');
+        elements.dateInput?.focus();
+        return false;
+      }
+
+      const invalidTimeIndex = values.multipleDates.findIndex((_, index) => isInvalidTimeRange(
+        values.multipleStartTimes[index] || '',
+        values.multipleEndTimes[index] || '',
+      ));
+
+      if (invalidTimeIndex >= 0) {
+        const invalidRow = elements.multipleDatesList?.querySelectorAll<HTMLElement>('.event-create-form__dates-item')[invalidTimeIndex];
+        const invalidInput = invalidRow?.querySelector<HTMLInputElement>('input[name="multipleEndTimes"]') || null;
+        showFieldError(invalidInput, elements.dateError, 'Время окончания должно быть позже времени начала');
+        invalidInput?.focus();
         return false;
       }
 
@@ -190,7 +255,19 @@ export function createEventFormScheduleController(elements: EventFormElements): 
       return false;
     }
 
+    if (isCreateMode && isPastDate(values.periodStart)) {
+      showFieldError(elements.periodStartInput, elements.dateError, 'Выберите дату не раньше сегодняшней');
+      elements.periodStartInput?.focus();
+      return false;
+    }
+
     if (!validateRequiredField(values.periodEnd, elements.periodEndInput, elements.dateError, 'Укажи дату окончания')) {
+      return false;
+    }
+
+    if (isCreateMode && isPastDate(values.periodEnd)) {
+      showFieldError(elements.periodEndInput, elements.dateError, 'Выберите дату не раньше сегодняшней');
+      elements.periodEndInput?.focus();
       return false;
     }
 
@@ -206,6 +283,7 @@ export function createEventFormScheduleController(elements: EventFormElements): 
 
   return {
     bind: () => {
+      applyDateConstraints();
       syncScheduleMode();
       syncAnytimeState();
       elements.dateInput?.addEventListener('input', handleDateChange);

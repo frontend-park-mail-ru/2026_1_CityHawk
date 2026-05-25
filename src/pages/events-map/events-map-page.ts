@@ -137,17 +137,27 @@ function getDateRangeByPreset(preset: DatePreset): { dateFrom?: string; dateTo?:
 
 function toPins(spots: MapSpot[], active: string): EventsMapPin[] {
   return spots
-    .filter((spot) => Number.isFinite(Number(spot.latitude)) && Number.isFinite(Number(spot.longitude)))
-    .map((spot) => ({
-      id: String(spot.eventId || spot.id || '').trim(),
-      title: String(spot.title || '').trim() || 'Без названия',
-      address: String(spot.address || '').trim() || 'Адрес не указан',
-      imageUrl: String(spot.imageUrl || '').trim() || '/public/static/img/photo.jpeg',
-      latitude: Number(spot.latitude),
-      longitude: Number(spot.longitude),
-      active: String(spot.eventId || spot.id || '').trim() === active,
-    }))
-    .filter((pin) => Boolean(pin.id));
+    .map((spot) => {
+      const place = spot.place || null;
+      const latitude = Number(spot.latitude ?? place?.latitude);
+      const longitude = Number(spot.longitude ?? place?.longitude);
+      const id = String(spot.eventId || spot.id || '').trim();
+      const placeAddress = [
+        place?.name,
+        place?.addressLine,
+      ].filter(Boolean).join(', ');
+
+      return {
+        id,
+        title: String(spot.title || '').trim() || 'Без названия',
+        address: String(spot.address || '').trim() || placeAddress || 'Адрес не указан',
+        imageUrl: String(spot.imageUrl || '').trim() || '/public/static/img/photo.jpeg',
+        latitude,
+        longitude,
+        active: id === active,
+      };
+    })
+    .filter((pin) => Boolean(pin.id) && Number.isFinite(pin.latitude) && Number.isFinite(pin.longitude));
 }
 
 function buildMoodCards(collections: MapCollection[]): MoodCard[] {
@@ -163,14 +173,15 @@ function buildMoodCards(collections: MapCollection[]): MoodCard[] {
     }));
 }
 
-function resolveMoodHeading(collectionId: string): string {
-  return collectionId ? 'Выбранная подборка' : 'Выбери подборку';
-}
-
 function pickCollectionId(collections: MapCollection[], currentCollectionId: string): string {
-  if (!currentCollectionId) {
+  if (!collections.length) {
     return '';
   }
+
+  if (!currentCollectionId) {
+    return String(collections[0]?.id || '').trim();
+  }
+
   return collections.some((item) => item.id === currentCollectionId) ? currentCollectionId : '';
 }
 
@@ -241,7 +252,6 @@ export async function eventsMapPage({ navigate }: RouteContext): Promise<RouteVi
   });
 
   const eventsMapMoodSidebar = renderEventsMapMoodSidebar({
-    heading: resolveMoodHeading(selectedCollectionId),
     cards: buildMoodCards(collections),
   });
 

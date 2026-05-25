@@ -6,6 +6,7 @@ import { getHeaderUserDisplayName } from '../../components/header/header-user.js
 import { getMeOrNull } from '../../api/profile.api.js';
 import { createOrganizerApplication } from '../../api/organizer.api.js';
 import { showToast } from '../../app/ui/toast.js';
+import { getUserErrorMessage } from '../../api/errors.js';
 import { renderEventEditorScreen } from '../../modules/events/form/event-editor-screen.js';
 import '../../modules/events/form/event-editor-screen.css';
 import type { User } from '../../types/api.js';
@@ -92,7 +93,7 @@ export async function organizerApplyPage({ navigate }: RouteContext): Promise<Ro
         try {
           await createOrganizerApplication(payload);
         } catch (error) {
-          showToast(error instanceof Error ? error.message : 'Не удалось отправить заявку', 'error');
+          showToast(getUserErrorMessage(error, 'Не удалось отправить заявку'), { type: 'error' });
           if (submitButton instanceof HTMLButtonElement) {
             submitButton.disabled = false;
             submitButton.textContent = initialSubmitText;

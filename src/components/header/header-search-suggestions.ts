@@ -33,17 +33,30 @@ function isHeaderSearchSuggestion(item: HeaderSearchSuggestion | null): item is 
   return item !== null;
 }
 
-function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
+function getSuggestionItemsSource(payload: unknown): unknown[] {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
   if (!payload || typeof payload !== 'object') {
     return [];
   }
 
-  const source = payload as {
-    items?: unknown;
-  };
+  const source = payload as Record<string, unknown>;
+  const directList = source.items || source.results || source.suggestions || source.data;
 
-  return Array.isArray(source.items)
-    ? source.items
+  if (Array.isArray(directList)) {
+    return directList;
+  }
+
+  return Object.values(source).flatMap((value) => (Array.isArray(value) ? value : []));
+}
+
+function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
+  const items = getSuggestionItemsSource(payload);
+
+  return items.length
+    ? items
       .map((item, index) => {
         if (typeof item === 'string') {
           const label = item.trim();
@@ -68,6 +81,12 @@ function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
           || typedItem.title
           || typedItem.name
           || typedItem.query
+          || (item as Record<string, unknown>).text
+          || (item as Record<string, unknown>).displayName
+          || [
+            (item as Record<string, unknown>).username,
+            (item as Record<string, unknown>).userSurname,
+          ].filter(Boolean).join(' ')
           || '',
         ).trim();
 
@@ -76,7 +95,13 @@ function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
         }
 
         return {
-          id: String(typedItem.id || '').trim(),
+          id: String(
+            typedItem.id
+            || (item as Record<string, unknown>).tagId
+            || (item as Record<string, unknown>).categoryId
+            || (item as Record<string, unknown>).eventId
+            || '',
+          ).trim(),
           type: normalizeSuggestionType(typedItem.type || 'query') || 'query',
           label,
         } satisfies HeaderSearchSuggestion;

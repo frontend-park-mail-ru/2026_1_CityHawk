@@ -14,6 +14,11 @@ export function renderEventCard(state: EventCardRenderState = {}): string {
   const tags = Array.isArray(state.tags) ? state.tags : [];
   const primaryTag = tags[0] || '';
   const extraTagsCount = Math.max(0, tags.length - 1);
+  const isMovieCard = tags.some((tag) => tag.trim().toLowerCase() === 'кино');
+  const cardClass = [
+    state.cardClass || '',
+    isMovieCard ? 'event-card--poster' : '',
+  ].filter(Boolean).join(' ');
 
   return renderTemplate('event-card', {
     id: state.id ?? '',
@@ -23,7 +28,7 @@ export function renderEventCard(state: EventCardRenderState = {}): string {
     tags,
     primaryTag,
     extraTagsCount,
-    cardClass: state.cardClass || '',
+    cardClass,
     isFavorite: Boolean(state.isFavorite),
   });
 }

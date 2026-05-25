@@ -346,10 +346,6 @@ main.login {
     background-image: url('/public/static/assets/yandex.svg');
 }
 
-.login__oauth-btn--google {
-    background-image: url('/public/static/assets/google.svg');
-}
-
 .login__oauth-btn--vk {
     background-image: url('/public/static/assets/vk.svg');
 }

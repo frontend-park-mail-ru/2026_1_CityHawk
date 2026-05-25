@@ -59,6 +59,21 @@
     z-index: 260;
 }
 
+.site-header__menu::after,
+.site-header__notifications::after,
+.site-header__user-menu::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 16px;
+}
+
+.site-header__notifications::after {
+    height: 24px;
+}
+
 .site-header__menu-trigger {
     width: 42px;
     height: 42px;
@@ -107,9 +122,9 @@
     pointer-events: none;
     transform: translateY(-6px);
     transition:
-        opacity 0.2s ease,
-        transform 0.2s ease,
-        visibility 0.2s ease;
+        opacity 0.2s ease 0.12s,
+        transform 0.2s ease 0.12s,
+        visibility 0s linear 0.32s;
 }
 
 .site-header__menu:hover .site-header__sidebar,
@@ -119,6 +134,7 @@
     visibility: visible;
     pointer-events: auto;
     transform: translateY(0);
+    transition-delay: 0s;
 }
 
 .site-header__sidebar-nav {
@@ -335,9 +351,9 @@
     pointer-events: none;
     transform: translateY(-6px);
     transition:
-        opacity 0.2s ease,
-        transform 0.2s ease,
-        visibility 0.2s ease;
+        opacity 0.2s ease 0.24s,
+        transform 0.2s ease 0.24s,
+        visibility 0s linear 0.44s;
 }
 
 .site-header__notifications:hover .site-header__notifications-panel,
@@ -346,6 +362,7 @@
     visibility: visible;
     pointer-events: auto;
     transform: translateY(0);
+    transition-delay: 0s;
 }
 
 .site-header__notifications-header {
@@ -641,7 +658,10 @@
     visibility: hidden;
     pointer-events: none;
     transform: translateY(-4px);
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    transition:
+        opacity 0.2s ease 0.12s,
+        transform 0.2s ease 0.12s,
+        visibility 0s linear 0.32s;
 }
 
 .site-header__user-menu:hover .site-header__user-dropdown,
@@ -650,6 +670,7 @@
     visibility: visible;
     pointer-events: auto;
     transform: translateY(0);
+    transition-delay: 0s;
 }
 
 .site-header__user-dropdown-link {

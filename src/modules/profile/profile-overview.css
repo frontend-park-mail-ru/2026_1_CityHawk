@@ -240,17 +240,24 @@
 }
 
 .profile-follows-modal__tab {
-  --ui-button-height: 36px;
-  --ui-button-padding-x: 12px;
-  --ui-button-radius: 10px;
-  --ui-button-border: var(--form-control-border-active);
-  --ui-button-bg: transparent;
-  --ui-button-bg-hover: var(--ui-interactive-bg-hover);
+  --ui-button-height: 44px;
+  --ui-button-padding-x: 18px;
+  --ui-button-radius: 999px;
+  --ui-button-border: rgba(173, 214, 251, 0.32);
+  --ui-button-bg: rgba(255, 255, 255, 0.06);
+  --ui-button-bg-hover: var(--ui-interactive-bg-hover, var(--color-accent-3));
   --ui-button-text: var(--color-blank);
+  font-weight: 600;
 }
 
 .profile-follows-modal__tab--active {
-  --ui-button-bg: var(--form-control-bg-active);
+  --ui-button-bg: var(--color-background-tone-1);
+  --ui-button-border: rgba(205, 232, 255, 0.75);
+}
+
+.profile-follows-modal__tab:hover,
+.profile-follows-modal__tab:focus-visible {
+  transform: translateY(-1px);
 }
 
 .profile-follows-modal__close {
@@ -333,11 +340,24 @@
   font-size: 13px;
 }
 
+.profile-follows-item__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .profile-follows-item__button {
-  min-width: 118px;
+  min-width: 112px;
   --ui-button-height: 34px;
   --ui-button-padding-x: 10px;
   --ui-button-radius: 10px;
+}
+
+.profile-follows-item__button--profile {
+  --ui-button-bg: rgba(255, 255, 255, 0.06);
+  --ui-button-border: rgba(173, 214, 251, 0.32);
+  --ui-button-text: var(--color-blank);
 }
 
 .profile-follows-item__button--ghost {
@@ -457,5 +477,16 @@
   .profile-event-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
+  }
+
+  .profile-follows-item {
+    grid-template-columns: 44px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .profile-follows-item__actions {
+    grid-column: 2;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 }

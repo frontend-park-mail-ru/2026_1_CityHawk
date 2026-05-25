@@ -5,22 +5,17 @@ import type { ApiError } from '../../../types/api.js';
 import { attachPasswordToggles } from '../shared/password-toggle.js';
 import {
   getErrorMessageElement,
-  hideFieldError,
   hideFieldMessage,
-  showFieldError,
   showFieldMessage,
 } from '../shared/field-messages.js';
 import {
   checkPasswordStrength,
   getEmailValidationError,
-  validatePersonName,
 } from '../shared/validators.js';
 import { attachOAuthButtons } from '../oauth.js';
 
 interface RegisterState {
   step?: number;
-  name?: string;
-  surname?: string;
   email?: string;
   password?: string;
 }
@@ -45,11 +40,7 @@ export function attachRegisterForm(root: ParentNode, options: RegisterFormOption
   let detachStep: (() => void) | null = null;
 
   if (state.step === 1) {
-    detachStep = setupStep1(root, state, options.rerender);
-  }
-
-  if (state.step === 2) {
-    detachStep = setupStep2(root, state, options.rerender, options.onFinish);
+    detachStep = setupRegisterCredentials(root, state, options.onFinish);
   }
 
   return () => {
@@ -62,7 +53,6 @@ export function attachRegisterForm(root: ParentNode, options: RegisterFormOption
 function getStepTemplate(step: number): string {
   switch (step) {
     case 1: return 'register-step1';
-    case 2: return 'register-step2';
     default: return 'register-step1';
   }
 }
@@ -90,121 +80,27 @@ function animateLoginTickets(root: ParentNode, state: RegisterState): void {
   loginEl.classList.add('loaded');
 }
 
-function setupStep1(root: ParentNode, state: RegisterState, rerender?: () => void): () => void {
-  const nameInput = root.querySelector('#name');
-  const surnameInput = root.querySelector('#surname');
-  const submitBtn = root.querySelector('.login__submit');
-
-  if (!(nameInput instanceof HTMLInputElement)
-    || !(surnameInput instanceof HTMLInputElement)
-    || !(submitBtn instanceof HTMLButtonElement)) {
-    return () => {};
-  }
-
-  let nameError = false;
-  let surnameError = false;
-  let submitAttempted = false;
-
-  nameInput.value = state.name || '';
-  surnameInput.value = state.surname || '';
-
-  const validateName = (): void => {
-    if (!submitAttempted && !nameError) {
-      return;
-    }
-
-    const wrapper = nameInput.closest('.login__field-error-wrapper');
-    const message = validatePersonName(nameInput.value, 'Имя');
-
-    if (message) {
-      showFieldError(wrapper, message);
-      nameError = true;
-      return;
-    }
-
-    hideFieldError(wrapper);
-    nameError = false;
-  };
-
-  const validateSurname = (): void => {
-    if (!submitAttempted && !surnameError) {
-      return;
-    }
-
-    const wrapper = surnameInput.closest('.login__field-error-wrapper');
-    const message = validatePersonName(surnameInput.value, 'Фамилия');
-
-    if (message) {
-      showFieldError(wrapper, message);
-      surnameError = true;
-      return;
-    }
-
-    hideFieldError(wrapper);
-    surnameError = false;
-  };
-
-  const handleNameInput = (): void => {
-    validateName();
-  };
-
-  const handleSurnameInput = (): void => {
-    validateSurname();
-  };
-
-  const handleSubmitClick = (event: Event): void => {
-    event.preventDefault();
-
-    submitAttempted = true;
-    validateName();
-    validateSurname();
-
-    if (nameError || surnameError) {
-      return;
-    }
-
-    state.name = nameInput.value.trim();
-    state.surname = surnameInput.value.trim();
-    state.step = 2;
-    rerender?.();
-  };
-
-  nameInput.addEventListener('input', handleNameInput);
-  surnameInput.addEventListener('input', handleSurnameInput);
-  submitBtn.addEventListener('click', handleSubmitClick);
-
-  return () => {
-    nameInput.removeEventListener('input', handleNameInput);
-    surnameInput.removeEventListener('input', handleSurnameInput);
-    submitBtn.removeEventListener('click', handleSubmitClick);
-  };
-}
-
-function setupStep2(
+function setupRegisterCredentials(
   root: ParentNode,
   state: RegisterState,
-  rerender?: () => void,
   onFinish?: () => void,
 ): () => void {
   const emailInput = root.querySelector('#email');
   const passwordInput = root.querySelector('#password');
   const confirmInput = root.querySelector('#password-confirm');
-  const nextBtn = root.querySelector('[data-role="register-finish"]') || root.querySelector('.login__next');
-  const prevBtn = root.querySelector('.login__prev');
+  const submitBtn = root.querySelector('[data-role="register-finish"]') || root.querySelector('.login__submit');
 
   if (!(emailInput instanceof HTMLInputElement)
     || !(passwordInput instanceof HTMLInputElement)
     || !(confirmInput instanceof HTMLInputElement)
-    || !(nextBtn instanceof HTMLButtonElement)
-    || !(prevBtn instanceof HTMLButtonElement)) {
+    || !(submitBtn instanceof HTMLButtonElement)) {
     return () => {};
   }
 
   const safeEmailInput: HTMLInputElement = emailInput;
   const safePasswordInput: HTMLInputElement = passwordInput;
   const safeConfirmInput: HTMLInputElement = confirmInput;
-  const safeNextBtn: HTMLButtonElement = nextBtn;
-  const safePrevBtn: HTMLButtonElement = prevBtn;
+  const safeSubmitBtn: HTMLButtonElement = submitBtn;
 
   let emailError = false;
   let passError = false;
@@ -267,11 +163,11 @@ function setupStep2(
     let color = '';
 
     if (!confirm) {
-      msg = 'Пароль не должен быть пустым!';
+      msg = 'Повторите пароль';
       color = 'var(--color-mid)';
       isError = true;
     } else if (confirm !== pass) {
-      msg = 'Пароли должны совпадать!';
+      msg = 'Пароли не совпадают';
       color = 'var(--color-mid)';
       isError = true;
     }
@@ -304,14 +200,7 @@ function setupStep2(
     }
   };
 
-  const handlePrevClick = (event: Event): void => {
-    event.preventDefault();
-    state.email = safeEmailInput.value;
-    state.step = 1;
-    rerender?.();
-  };
-
-  const handleNextClick = async (event: Event): Promise<void> => {
+  const handleSubmitClick = async (event: Event): Promise<void> => {
     event.preventDefault();
 
     submitAttempted = true;
@@ -328,9 +217,7 @@ function setupStep2(
 
     try {
       await register({
-        username: state.name || '',
         email: state.email,
-        userSurname: state.surname || '',
         password: state.password,
       });
     } catch (error) {
@@ -338,7 +225,7 @@ function setupStep2(
       const apiError = error as ApiError | undefined;
 
       if (apiError?.status === 409) {
-        showFieldMessage(wrapper, 'Пользователь с таким email уже существует', 'var(--color-mid)', true);
+        showFieldMessage(wrapper, 'Такой email уже зарегистрирован', 'var(--color-mid)', true);
         return;
       }
 
@@ -346,13 +233,13 @@ function setupStep2(
         if (apiError?.details?.email) {
           showFieldMessage(
             wrapper,
-            getEmailValidationError(safeEmailInput.value) || 'Укажите корректный email',
+            getEmailValidationError(safeEmailInput.value) || 'Проверьте email',
             'var(--color-mid)',
             true,
           );
           return;
         }
-        showFieldMessage(wrapper, apiError.message || 'Проверьте корректность введенных данных', 'var(--color-mid)', true);
+        showFieldMessage(wrapper, apiError.message || 'Проверьте данные', 'var(--color-mid)', true);
         return;
       }
 
@@ -375,8 +262,7 @@ function setupStep2(
   safeConfirmInput.addEventListener('input', updateConfirmField);
   safeConfirmInput.addEventListener('focus', updateConfirmField);
   safeConfirmInput.addEventListener('blur', handleConfirmBlur);
-  safePrevBtn.addEventListener('click', handlePrevClick);
-  safeNextBtn.addEventListener('click', handleNextClick);
+  safeSubmitBtn.addEventListener('click', handleSubmitClick);
 
   return () => {
     safeEmailInput.removeEventListener('input', validateEmail);
@@ -386,7 +272,6 @@ function setupStep2(
     safeConfirmInput.removeEventListener('input', updateConfirmField);
     safeConfirmInput.removeEventListener('focus', updateConfirmField);
     safeConfirmInput.removeEventListener('blur', handleConfirmBlur);
-    safePrevBtn.removeEventListener('click', handlePrevClick);
-    safeNextBtn.removeEventListener('click', handleNextClick);
+    safeSubmitBtn.removeEventListener('click', handleSubmitClick);
   };
 }

@@ -3,6 +3,7 @@ import { renderTemplate } from '../../../app/templates/renderer.js';
 
 interface YMapEntityLike {
   addChild?: (entity: unknown) => YMapEntityLike;
+  update?: (props: Record<string, unknown>) => void;
 }
 
 interface YMapLike extends YMapEntityLike {
@@ -84,8 +85,11 @@ export function renderEventLocation(state: EventLocationState = {}): string {
 
 export function attachEventLocation(root: ParentNode): () => void {
   const mapBlock = root.querySelector('[data-role="event-location-map"]');
+  const mapCanvas = root.querySelector<HTMLElement>('[data-role="event-location-map-canvas"]');
+  const mapFallback = root.querySelector<HTMLElement>('[data-role="event-location-map-fallback"]');
   const modal = root.querySelector<HTMLElement>('[data-role="event-location-modal"]');
   const modalCanvas = root.querySelector<HTMLElement>('[data-role="event-location-modal-canvas"]');
+  const modalFallback = root.querySelector<HTMLElement>('[data-role="event-location-modal-fallback"]');
   const modalCloseButtons = Array.from(
     root.querySelectorAll<HTMLElement>('[data-role="event-location-modal-close"]'),
   );
@@ -98,9 +102,65 @@ export function attachEventLocation(root: ParentNode): () => void {
   };
 
   let modalMap: YMapLike | null = null;
+  let previewMap: YMapLike | null = null;
   let disposed = false;
   let latitude: number | null = null;
   let longitude: number | null = null;
+  let previewResizeObserver: ResizeObserver | null = null;
+
+  const showPreviewFallback = () => {
+    if (mapCanvas instanceof HTMLElement) {
+      mapCanvas.hidden = true;
+    }
+    if (mapFallback instanceof HTMLElement) {
+      mapFallback.hidden = false;
+    }
+  };
+
+  const showModalFallback = () => {
+    if (modalCanvas instanceof HTMLElement) {
+      modalCanvas.hidden = true;
+    }
+    if (modalFallback instanceof HTMLElement) {
+      modalFallback.hidden = false;
+    }
+  };
+
+  const getMapLocation = () => {
+    if (latitude === null || longitude === null) {
+      return null;
+    }
+
+    return {
+      center: [longitude, latitude],
+      zoom: 14,
+    };
+  };
+
+  const refreshMap = (map: YMapLike | null) => {
+    const location = getMapLocation();
+    if (!map || !location) {
+      return;
+    }
+
+    map.update?.({ location });
+  };
+
+  const refreshMapAfterFrame = (map: YMapLike | null) => {
+    window.requestAnimationFrame(() => {
+      if (disposed) {
+        return;
+      }
+
+      refreshMap(map);
+
+      window.requestAnimationFrame(() => {
+        if (!disposed) {
+          refreshMap(map);
+        }
+      });
+    });
+  };
 
   const lockBodyScroll = () => {
     document.body.style.overflow = 'hidden';
@@ -139,11 +199,13 @@ export function attachEventLocation(root: ParentNode): () => void {
       return;
     }
 
+    const location = getMapLocation();
+    if (!location) {
+      return;
+    }
+
     modalMap = new ymaps3.YMap(modalCanvas, {
-      location: {
-        center: [longitude, latitude],
-        zoom: 14,
-      },
+      location,
       behaviors: ['drag', 'pinchZoom', 'scrollZoom'],
       controls: [],
       mode: 'vector',
@@ -165,6 +227,58 @@ export function attachEventLocation(root: ParentNode): () => void {
     );
 
     modalMap.addChild?.(marker);
+    refreshMapAfterFrame(modalMap);
+  };
+
+  const ensurePreviewMap = async () => {
+    if (!(mapCanvas instanceof HTMLElement) || latitude === null || longitude === null || previewMap) {
+      return;
+    }
+
+    const ymaps3 = await loadYandexMapsApiV3(YANDEX_MAPS_API_KEY);
+    if (disposed || latitude === null || longitude === null || previewMap) {
+      return;
+    }
+
+    await ymaps3.ready;
+    if (disposed || latitude === null || longitude === null || previewMap) {
+      return;
+    }
+
+    const location = getMapLocation();
+    if (!location) {
+      return;
+    }
+
+    previewMap = new ymaps3.YMap(mapCanvas, {
+      location,
+      behaviors: ['drag', 'pinchZoom', 'scrollZoom'],
+      controls: [],
+      mode: 'vector',
+      theme: 'dark',
+    });
+
+    previewMap
+      .addChild?.(new ymaps3.YMapDefaultSchemeLayer({ theme: 'dark' }))
+      .addChild?.(new ymaps3.YMapDefaultFeaturesLayer({}));
+
+    const markerElement = document.createElement('div');
+    markerElement.className = 'event-location__marker';
+    const marker = new ymaps3.YMapMarker(
+      {
+        coordinates: [longitude, latitude],
+        zIndex: 120,
+      },
+      markerElement,
+    );
+
+    previewMap.addChild?.(marker);
+    refreshMapAfterFrame(previewMap);
+
+    if ('ResizeObserver' in window) {
+      previewResizeObserver = new ResizeObserver(() => refreshMap(previewMap));
+      previewResizeObserver.observe(mapCanvas);
+    }
   };
 
   const openModal = () => {
@@ -173,8 +287,10 @@ export function attachEventLocation(root: ParentNode): () => void {
     }
     modal.hidden = false;
     lockBodyScroll();
-    ensureModalMap().catch(() => {
-      // Silent fallback: keep static map preview when API failed to load.
+    window.requestAnimationFrame(() => {
+      ensureModalMap().catch(() => {
+        showModalFallback();
+      });
     });
   };
 
@@ -183,6 +299,11 @@ export function attachEventLocation(root: ParentNode): () => void {
     longitude = Number(mapBlock.dataset.longitude);
 
     if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+      window.requestAnimationFrame(() => {
+        ensurePreviewMap().catch(() => {
+          showPreviewFallback();
+        });
+      });
       mapBlock.addEventListener('click', openModal);
     }
   } else if (mapBlock instanceof HTMLElement) {
@@ -201,6 +322,14 @@ export function attachEventLocation(root: ParentNode): () => void {
       modalMap.destroy();
       modalMap = null;
     }
+
+    if (previewMap) {
+      previewMap.destroy();
+      previewMap = null;
+    }
+
+    previewResizeObserver?.disconnect();
+    previewResizeObserver = null;
 
     if (mapBlock instanceof HTMLElement) {
       mapBlock.removeEventListener('click', handleMapClick);

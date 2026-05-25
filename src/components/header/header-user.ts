@@ -19,7 +19,9 @@ export function getHeaderUserDisplayName(user: HeaderUserLike | null | undefined
   }
 
   if (user?.email) {
-    return String(user.email).split('@')[0];
+    const email = String(user.email).trim();
+    const [localPart] = email.split('@');
+    return localPart || email;
   }
 
   return '';

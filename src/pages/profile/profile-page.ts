@@ -17,10 +17,14 @@ import { attachHeaderSearchSuggestions } from '../../components/header/header-se
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { renderEventCard } from '../../components/event-card/event-card.js';
 import { showToast } from '../../app/ui/toast.js';
+import { getUserErrorMessage } from '../../api/errors.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { formatEventDateOrPeriod } from '../../modules/events/common/event-date-label.js';
+import { isVisibleEvent } from '../../modules/events/common/event-visibility.js';
 import type { EventCard, FollowUser } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
+
+const PROFILE_PREVIEW_STORAGE_PREFIX = 'cityhawk.profile-preview.';
 
 function getUserInitials(name?: string): string {
   const parts = String(name || '')
@@ -60,7 +64,7 @@ function mapEventToProfileCard(item: Partial<EventCard> = {}): string {
     ? item.tags.map((tag) => String(tag?.name || '').trim()).filter(Boolean).slice(0, 3)
     : [];
   const placeText = [
-    String(item.nextSession?.place?.name || '').trim(),
+    String(item.nextSession?.placeName || item.nextSession?.place?.name || '').trim(),
     String(item.nextSession?.place?.addressLine || '').trim(),
   ].filter(Boolean).join(', ') || 'Место уточняется';
 
@@ -124,6 +128,46 @@ function getFollowDisplayName(user: Partial<FollowUser>): string {
   const first = String(user.username || '').trim();
   const last = String(user.userSurname || '').trim();
   return [first, last].filter(Boolean).join(' ') || 'Пользователь';
+}
+
+function saveProfilePreview(user: Partial<FollowUser>): void {
+  const userId = String(user.id || '').trim();
+  if (!userId) {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(
+      `${PROFILE_PREVIEW_STORAGE_PREFIX}${userId}`,
+      JSON.stringify({
+        id: userId,
+        username: String(user.username || '').trim(),
+        userSurname: String(user.userSurname || '').trim(),
+        avatarUrl: String(user.avatarUrl || '').trim(),
+        city: user.city || null,
+        isFollowing: Boolean(user.isFollowing),
+      }),
+    );
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function loadProfilePreview(userId: string): FollowUser | null {
+  if (!userId) {
+    return null;
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(`${PROFILE_PREVIEW_STORAGE_PREFIX}${userId}`);
+    if (!raw) {
+      return null;
+    }
+
+    return JSON.parse(raw) as FollowUser;
+  } catch {
+    return null;
+  }
 }
 
 function normalizeInterestValues(raw: unknown): string[] {
@@ -202,29 +246,33 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
   const searchParams = new URLSearchParams(window.location.search);
   const showAllFavorites = String(searchParams.get('favorites') || '').trim() === 'all';
   const favoriteLimit = showAllFavorites ? 24 : 4;
+  const viewedUserId = String(searchParams.get('userId') || '').trim();
 
   const me = await getMeOrNull().catch(() => null);
-  const displayName = getHeaderUserDisplayName(me) || 'Пользователь';
+  const isOwnProfile = !viewedUserId || String(me?.id || '').trim() === viewedUserId;
+  const previewUser = !isOwnProfile ? loadProfilePreview(viewedUserId) : null;
+  const profileSource = isOwnProfile ? me : previewUser;
+  const displayName = getHeaderUserDisplayName(profileSource) || 'Пользователь';
   const fallbackEvents = getFallbackEvents();
   const fallbackFollowers = getFallbackFollowers();
   const fallbackFollowing = getFallbackFollowing();
 
   const [myEventsResult, favoriteEventsResult, followersResult, followingResult, tagsResult] = await Promise.allSettled([
-    me?.id
-      ? getEvents({ authorId: String(me.id), limit: 4, offset: 0 })
+    (isOwnProfile ? me?.id : viewedUserId)
+      ? getEvents({ authorId: String(isOwnProfile ? me?.id : viewedUserId), limit: 4, offset: 0 })
       : Promise.resolve({ items: fallbackEvents }),
-    getMyFavorites(favoriteLimit, 0),
-    getMyFollowers(100, 0),
-    getMyFollowing(100, 0),
+    isOwnProfile ? getMyFavorites(favoriteLimit, 0) : Promise.resolve({ items: [] }),
+    isOwnProfile ? getMyFollowers(100, 0) : Promise.resolve({ items: [] }),
+    isOwnProfile ? getMyFollowing(100, 0) : Promise.resolve({ items: [] }),
     getTags(),
   ]);
 
   const myEvents = myEventsResult.status === 'fulfilled' && Array.isArray(myEventsResult.value?.items)
-    ? myEventsResult.value.items
+    ? myEventsResult.value.items.filter(isVisibleEvent)
     : fallbackEvents;
   const favoriteEvents = favoriteEventsResult.status === 'fulfilled'
     && Array.isArray(favoriteEventsResult.value?.items)
-    ? favoriteEventsResult.value.items
+    ? favoriteEventsResult.value.items.filter(isVisibleEvent)
     : [];
   const followers = followersResult.status === 'fulfilled'
     && Array.isArray(followersResult.value?.items)
@@ -243,26 +291,26 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       .map((tag) => [String(tag?.id || '').trim(), String(tag?.name || '').trim()] as const)
       .filter(([id, name]) => Boolean(id && name)),
   );
-  const rawInterestValues = normalizeInterestValues((me as { interestTagIds?: unknown; interests?: unknown } | null)?.interestTagIds)
-    .concat(normalizeInterestValues((me as { interestTagIds?: unknown; interests?: unknown } | null)?.interests));
+  const rawInterestValues = normalizeInterestValues((profileSource as { interestTagIds?: unknown; interests?: unknown } | null)?.interestTagIds)
+    .concat(normalizeInterestValues((profileSource as { interestTagIds?: unknown; interests?: unknown } | null)?.interests));
   const interestLabels = Array.from(new Set(
     rawInterestValues
       .map((value) => interestIdToLabel.get(value) || value)
       .map((value) => String(value || '').trim())
       .filter(Boolean),
   ));
-  const bio = String((me as { bio?: string } | null)?.bio || '').trim();
+  const bio = String((profileSource as { bio?: string } | null)?.bio || '').trim();
 
   const user = {
     displayName,
     name: displayName,
-    firstName: me?.username || 'Не указано',
-    lastName: me?.userSurname || '',
-    email: me?.email || 'Не указан',
-    birthdateLabel: formatBirthday(me?.birthday || ''),
-    cityName: me?.city?.name || 'Не указан',
+    firstName: profileSource?.username || 'Не указано',
+    lastName: profileSource?.userSurname || '',
+    email: isOwnProfile ? me?.email || 'Не указан' : 'Скрыт',
+    birthdateLabel: isOwnProfile ? formatBirthday(me?.birthday || '') : 'Скрыта',
+    cityName: profileSource?.city?.name || 'Не указан',
     initials: getUserInitials(displayName),
-    avatarUrl: me?.avatarUrl || '',
+    avatarUrl: profileSource?.avatarUrl || '',
     bio: bio || 'Описание пока не добавлено',
     tags: interestLabels,
   };
@@ -278,6 +326,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       myEvents: followers.length,
       favorites: following.length,
     },
+    isOwnProfile,
     isProfilePage: true,
     isSettingsPage: false,
     enableAvatarUpload: false,
@@ -383,6 +432,13 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         }
       };
 
+      const findUserById = (userId: string): FollowUser | null => (
+        followersState.find((item) => String(item.id || '').trim() === userId)
+        || followingState.find((item) => String(item.id || '').trim() === userId)
+        || searchResults.find((item) => String(item.id || '').trim() === userId)
+        || null
+      );
+
       const renderFollows = (): void => {
         if (!(followsList instanceof HTMLElement)) {
           return;
@@ -454,6 +510,19 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           info.append(name, city);
           row.append(info);
 
+          const actions = document.createElement('div');
+          actions.className = 'profile-follows-item__actions';
+
+          if (userId) {
+            const profileButton = document.createElement('button');
+            profileButton.type = 'button';
+            profileButton.className = 'profile-follows-item__button profile-follows-item__button--profile ui-button ui-button--ghost ui-button--pill';
+            profileButton.dataset.role = 'profile-view-user';
+            profileButton.dataset.userId = userId;
+            profileButton.textContent = 'Профиль';
+            actions.append(profileButton);
+          }
+
           if (me?.id && userId && String(me.id) !== userId) {
             const isFollowingUser = Boolean(item.isFollowing);
             const actionButton = document.createElement('button');
@@ -466,7 +535,11 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
             actionButton.dataset.following = isFollowingUser ? '1' : '0';
             actionButton.disabled = pendingFollowUserId === userId;
             actionButton.textContent = isFollowingUser ? 'Отписаться' : 'Подписаться';
-            row.append(actionButton);
+            actions.append(actionButton);
+          }
+
+          if (actions.childElementCount > 0) {
+            row.append(actions);
           }
 
           followsList.append(row);
@@ -613,6 +686,23 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           return;
         }
 
+        const profileButton = target.closest<HTMLButtonElement>('[data-role="profile-view-user"]');
+        if (profileButton instanceof HTMLButtonElement) {
+          const userId = String(profileButton.dataset.userId || '').trim();
+          if (!userId) {
+            return;
+          }
+
+          const selectedUser = findUserById(userId);
+          if (selectedUser) {
+            saveProfilePreview(selectedUser);
+          }
+
+          closeFollowsModal();
+          navigate(String(me?.id || '').trim() === userId ? '/profile' : `/profile?userId=${encodeURIComponent(userId)}`);
+          return;
+        }
+
         const button = target.closest<HTMLButtonElement>('[data-role="profile-follow-toggle"]');
         if (!(button instanceof HTMLButtonElement)) {
           return;
@@ -657,10 +747,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           syncFollowCounters();
           renderFollows();
         } catch (error) {
-          const message = error instanceof Error
-            ? error.message
-            : 'Не удалось изменить подписку';
-          showToast(message, { type: 'error' });
+          showToast(getUserErrorMessage(error, 'Не удалось изменить подписку'), { type: 'error' });
         } finally {
           pendingFollowUserId = '';
           renderFollows();

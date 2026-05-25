@@ -1,11 +1,66 @@
-<section class="event-gallery {{galleryClass}}">
+<section class="event-gallery {{galleryClass}}" data-role="event-gallery">
   <div class="event-gallery__container">
     <div class="event-gallery__grid">
       {{#each images}}
         <article class="event-gallery__card">
-          <img src="{{imageUrl}}" alt="{{alt}}" class="event-gallery__image" />
+          <button
+            type="button"
+            class="event-gallery__button"
+            data-role="event-gallery-open"
+            data-index="{{@index}}"
+            data-image-url="{{imageUrl}}"
+            data-alt="{{alt}}"
+            aria-label="Открыть фото"
+          >
+            <img src="{{imageUrl}}" alt="{{alt}}" class="event-gallery__image" />
+          </button>
         </article>
       {{/each}}
     </div>
+  </div>
+
+  <div class="event-gallery__modal" data-role="event-gallery-modal" hidden>
+    <button
+      type="button"
+      class="event-gallery__modal-backdrop"
+      data-role="event-gallery-close"
+      aria-label="Закрыть фото"
+    ></button>
+
+    <section class="event-gallery__modal-dialog" role="dialog" aria-modal="true" aria-label="Просмотр фотографий события">
+      <button
+        type="button"
+        class="event-gallery__modal-close"
+        data-role="event-gallery-close"
+        aria-label="Закрыть фото"
+      >
+        ×
+      </button>
+
+      <button
+        type="button"
+        class="event-gallery__modal-nav event-gallery__modal-nav--prev"
+        data-role="event-gallery-prev"
+        aria-label="Предыдущее фото"
+      >
+        ‹
+      </button>
+
+      <figure class="event-gallery__modal-figure">
+        <img class="event-gallery__modal-image" data-role="event-gallery-modal-image" src="" alt="" />
+        <figcaption class="event-gallery__modal-caption">
+          <span class="event-gallery__modal-counter" data-role="event-gallery-modal-counter"></span>
+        </figcaption>
+      </figure>
+
+      <button
+        type="button"
+        class="event-gallery__modal-nav event-gallery__modal-nav--next"
+        data-role="event-gallery-next"
+        aria-label="Следующее фото"
+      >
+        ›
+      </button>
+    </section>
   </div>
 </section>
