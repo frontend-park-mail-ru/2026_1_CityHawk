@@ -56,6 +56,7 @@ export async function searchUsers(query: string, limit = 10): Promise<FollowUser
         id,
         username: first || title || 'Пользователь',
         userSurname: second || '',
+        email: email || undefined,
         avatarUrl: String(source.avatarUrl || '').trim() || null,
         city: source.city && typeof source.city === 'object'
           ? (source.city as FollowUser['city'])

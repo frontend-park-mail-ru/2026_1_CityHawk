@@ -2,7 +2,6 @@ import './event-page.css';
 import { getEventById, getEvents } from '../../api/events.api.js';
 import { createEventInvitations, searchEventInvitees } from '../../api/invitations.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
-import { createEventShareLink } from '../../api/share-links.api.js';
 import '../../modules/events/details/event-hero.css';
 import '../../modules/events/details/event-description.css';
 import '../../modules/events/details/event-gallery.css';
@@ -82,10 +81,13 @@ interface RecommendationViewModel {
 }
 
 function getFollowUserDisplayName(user: Partial<FollowUser> = {}): string {
+  const email = String(user.email || '').trim();
+
   return [user.username, user.userSurname]
     .map((part) => String(part || '').trim())
     .filter(Boolean)
     .join(' ')
+    || email
     || 'Пользователь';
 }
 
@@ -451,7 +453,7 @@ async function copyTextToClipboard(text: string): Promise<void> {
   }
 }
 
-function attachEventShareModal(root: ParentNode, eventId: string): () => void {
+function attachEventShareModal(root: ParentNode): () => void {
   const modal = root.querySelector<HTMLElement>('[data-role="event-share-modal"]');
   const openButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-action="event-share-open"]'));
   const closeButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-role="event-share-close"]'));
@@ -470,22 +472,15 @@ function attachEventShareModal(root: ParentNode, eventId: string): () => void {
 
   const onHeroShareClick = async (event: Event) => {
     const button = event.currentTarget;
-    const fallbackUrl = button instanceof HTMLButtonElement
+    const shareUrl = button instanceof HTMLButtonElement
       ? String(button.dataset.shareUrl || copyButton?.dataset.shareUrl || window.location.href)
       : String(copyButton?.dataset.shareUrl || window.location.href);
 
     try {
-      const shareLink = await createEventShareLink(eventId);
-      const shareUrl = shareLink.url || fallbackUrl;
       await copyTextToClipboard(shareUrl);
       showToast('Ссылка на событие скопирована', { type: 'success' });
     } catch {
-      try {
-        await copyTextToClipboard(fallbackUrl);
-        showToast('Ссылка на событие скопирована', { type: 'success' });
-      } catch {
-        showToast('Не удалось скопировать ссылку');
-      }
+      showToast('Не удалось скопировать ссылку');
     }
   };
 
@@ -880,7 +875,7 @@ export async function eventPage({ navigate, params = {} }: RouteContext): Promis
       const detachEventGallery = attachEventGallery(root);
       const detachEventHeroFavorite = attachEventHeroFavorite(root);
       const detachEventLocation = attachEventLocation(root);
-      const detachEventShareModal = attachEventShareModal(root, eventId);
+      const detachEventShareModal = attachEventShareModal(root);
       const detachEventInviteModal = attachEventInviteModal(root, eventId);
 
       const navigateByHeaderQuery = (nextQuery: string) => {

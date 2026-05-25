@@ -177,6 +177,7 @@ export interface FollowUser {
   id: string;
   username: string;
   userSurname?: string;
+  email?: string;
   avatarUrl?: string | null;
   city?: City | null;
   isFollowing?: boolean;

@@ -127,7 +127,8 @@ function getFallbackEvents(): EventCard[] {
 function getFollowDisplayName(user: Partial<FollowUser>): string {
   const first = String(user.username || '').trim();
   const last = String(user.userSurname || '').trim();
-  return [first, last].filter(Boolean).join(' ') || 'Пользователь';
+  const email = String(user.email || '').trim();
+  return [first, last].filter(Boolean).join(' ') || email || 'Пользователь';
 }
 
 function saveProfilePreview(user: Partial<FollowUser>): void {
@@ -143,6 +144,7 @@ function saveProfilePreview(user: Partial<FollowUser>): void {
         id: userId,
         username: String(user.username || '').trim(),
         userSurname: String(user.userSurname || '').trim(),
+        email: String(user.email || '').trim(),
         avatarUrl: String(user.avatarUrl || '').trim(),
         city: user.city || null,
         isFollowing: Boolean(user.isFollowing),
