@@ -2,7 +2,7 @@ import { updateInvitationStatus } from '../../api/invitations.api.js';
 import { getMyNotifications, markNotificationRead } from '../../api/notifications.api.js';
 import type { NotificationItem } from '../../types/api.js';
 
-type NotificationFilter = 'all' | 'invitations' | 'system';
+type NotificationFilter = 'all' | 'unread' | 'read';
 
 function formatNotificationTime(value: string): string {
   const date = new Date(value);
@@ -42,6 +42,63 @@ function createTextElement(tagName: string, className: string, text: string): HT
   return node;
 }
 
+function createEventTitleLink(item: NotificationItem): HTMLElement | null {
+  const eventId = String(item.event?.id || '').trim();
+  const eventTitle = String(item.event?.title || '').trim();
+
+  if (!eventId || !eventTitle) {
+    return null;
+  }
+
+  const link = document.createElement('a');
+  link.className = 'site-header__notification-event-link';
+  link.href = `/events/${encodeURIComponent(eventId)}`;
+  link.textContent = eventTitle;
+
+  return link;
+}
+
+function createNotificationTitle(item: NotificationItem): HTMLElement {
+  const title = document.createElement('h3');
+  title.className = 'site-header__notification-title';
+
+  const eventLink = createEventTitleLink(item);
+  const actorName = item.actor?.displayName || 'Пользователь';
+
+  if (!eventLink) {
+    title.textContent = item.title || 'Уведомление';
+    return title;
+  }
+
+  if (item.type === 'event_invitation') {
+    title.append(
+      document.createTextNode(`${actorName} пригласил(а) вас на `),
+      eventLink,
+    );
+    return title;
+  }
+
+  if (item.type === 'invitation_accepted') {
+    title.append(
+      document.createTextNode(`${actorName} принял(а) приглашение на `),
+      eventLink,
+    );
+    return title;
+  }
+
+  if (item.type === 'invitation_declined') {
+    title.append(
+      document.createTextNode(`${actorName} отклонил(а) приглашение на `),
+      eventLink,
+    );
+    return title;
+  }
+
+  title.textContent = item.title || 'Уведомление';
+
+  return title;
+}
+
 function renderNotification(item: NotificationItem): HTMLElement {
   const article = document.createElement('article');
   article.className = `site-header__notification${item.isRead ? '' : ' site-header__notification--unread'}`;
@@ -68,7 +125,7 @@ function renderNotification(item: NotificationItem): HTMLElement {
   const topLine = document.createElement('div');
   topLine.className = 'site-header__notification-topline';
   topLine.append(
-    createTextElement('h3', 'site-header__notification-title', item.title || 'Уведомление'),
+    createNotificationTitle(item),
     createTextElement('time', 'site-header__notification-time', formatNotificationTime(item.createdAt)),
   );
   body.append(topLine);
@@ -77,7 +134,16 @@ function renderNotification(item: NotificationItem): HTMLElement {
     body.append(createTextElement('p', 'site-header__notification-text', item.message));
   }
 
-  if (item.event?.title) {
+  const eventTitle = String(item.event?.title || '').trim();
+  const titleText = String(item.title || '').trim();
+  const titleAlreadyIncludesEventLink = item.type === 'event_invitation'
+    || item.type === 'invitation_accepted'
+    || item.type === 'invitation_declined';
+  const shouldShowEventTitle = Boolean(eventTitle)
+    && !titleAlreadyIncludesEventLink
+    && !titleText.includes(eventTitle);
+
+  if (shouldShowEventTitle) {
     body.append(createTextElement('p', 'site-header__notification-title site-header__notification-title--small', item.event.title));
   }
 
@@ -119,38 +185,112 @@ function renderNotification(item: NotificationItem): HTMLElement {
 
 export function attachHeaderNotifications(root: ParentNode): () => void {
   const host = root.querySelector<HTMLElement>('[data-role="header-notifications"]');
+  const trigger = root.querySelector<HTMLButtonElement>('[data-role="header-notifications-trigger"]');
+  const panel = root.querySelector<HTMLElement>('[data-role="header-notifications-panel"]');
   const list = root.querySelector<HTMLElement>('[data-role="header-notifications-list"]');
   const count = root.querySelector<HTMLElement>('[data-role="header-notifications-count"]');
   const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-role="header-notifications-tab"]'));
 
-  if (!(host instanceof HTMLElement) || !(list instanceof HTMLElement)) {
+  if (!(host instanceof HTMLElement)
+    || !(trigger instanceof HTMLButtonElement)
+    || !(panel instanceof HTMLElement)
+    || !(list instanceof HTMLElement)) {
     return () => {};
   }
 
   let disposed = false;
   let activeType: NotificationFilter = 'all';
 
-  const load = async () => {
+  const getFilteredItems = (items: NotificationItem[]): NotificationItem[] => {
+    if (activeType === 'unread') {
+      return items.filter((item) => !item.isRead);
+    }
+
+    if (activeType === 'read') {
+      return items.filter((item) => item.isRead);
+    }
+
+    return items;
+  };
+
+  const markSeenNotificationsRead = async (items: NotificationItem[]): Promise<Set<string>> => {
+    const notificationIds = items
+      .filter((item) => (
+        (item.type === 'invitation_accepted' || item.type === 'invitation_declined')
+        && !item.isRead
+      ))
+      .map((item) => String(item.id || '').trim())
+      .filter(Boolean);
+
+    if (notificationIds.length === 0) {
+      return new Set();
+    }
+
+    await Promise.all(notificationIds.map(async (notificationId) => {
+      await markNotificationRead(notificationId).catch(() => {});
+    }));
+
+    return new Set(notificationIds);
+  };
+
+  const open = (): void => {
+    host.classList.add('site-header__notifications--open');
+    trigger.setAttribute('aria-expanded', 'true');
+    void load(true);
+  };
+
+  const close = (): void => {
+    host.classList.remove('site-header__notifications--open');
+    trigger.setAttribute('aria-expanded', 'false');
+  };
+
+  const toggle = (): void => {
+    if (host.classList.contains('site-header__notifications--open')) {
+      close();
+      return;
+    }
+    open();
+  };
+
+  const load = async (markSeenAsRead = false) => {
     list.innerHTML = '';
     list.append(createTextElement('p', 'site-header__notifications-empty', 'Загрузка уведомлений...'));
 
     try {
-      const response = await getMyNotifications({ type: activeType, limit: 20 });
+      const response = await getMyNotifications({
+        type: 'all',
+        unreadOnly: activeType === 'unread' ? true : undefined,
+        limit: 100,
+      });
       if (disposed) {
         return;
       }
 
-      list.innerHTML = '';
       const items = Array.isArray(response.items) ? response.items : [];
-      if (items.length === 0) {
+      const autoReadIds = markSeenAsRead
+        ? await markSeenNotificationsRead(items)
+        : new Set<string>();
+      if (disposed) {
+        return;
+      }
+
+      const normalizedItems = items.map((item) => (
+        autoReadIds.has(String(item.id || '').trim())
+          ? { ...item, isRead: true }
+          : item
+      ));
+      const filteredItems = getFilteredItems(normalizedItems);
+      list.innerHTML = '';
+      if (filteredItems.length === 0) {
         list.append(createTextElement('p', 'site-header__notifications-empty', 'Уведомлений пока нет'));
       } else {
-        items.forEach((item) => list.append(renderNotification(item)));
+        filteredItems.forEach((item) => list.append(renderNotification(item)));
       }
 
       if (count instanceof HTMLElement) {
-        count.textContent = String(response.unreadCount || 0);
-        count.hidden = !response.unreadCount;
+        const unreadCount = normalizedItems.filter((item) => !item.isRead).length;
+        count.textContent = String(unreadCount);
+        count.hidden = unreadCount === 0;
       }
     } catch {
       list.innerHTML = '';
@@ -168,12 +308,18 @@ export function attachHeaderNotifications(root: ParentNode): () => void {
       return;
     }
 
-    const nextType = String(button.dataset.notificationType || 'all') as NotificationFilter;
+    const nextType = String(button.dataset.notificationFilter || 'all') as NotificationFilter;
     activeType = nextType;
     tabs.forEach((tab) => {
       tab.classList.toggle('site-header__notifications-tab--active', tab === button);
     });
-    void load();
+    void load(host.classList.contains('site-header__notifications--open'));
+  };
+
+  const onTriggerClick = (event: Event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggle();
   };
 
   const onListClick = async (event: Event) => {
@@ -186,6 +332,8 @@ export function attachHeaderNotifications(root: ParentNode): () => void {
     if (invitationButton instanceof HTMLButtonElement) {
       const invitationId = String(invitationButton.dataset.invitationId || '');
       const status = invitationButton.dataset.invitationStatus === 'declined' ? 'declined' : 'accepted';
+      const notification = invitationButton.closest<HTMLElement>('[data-notification-id]');
+      const notificationId = String(notification?.dataset.notificationId || '');
       if (!invitationId) {
         return;
       }
@@ -193,6 +341,9 @@ export function attachHeaderNotifications(root: ParentNode): () => void {
       invitationButton.disabled = true;
       try {
         await updateInvitationStatus(invitationId, status);
+        if (notificationId) {
+          await markNotificationRead(notificationId).catch(() => {});
+        }
         await load();
       } catch {
         invitationButton.disabled = false;
@@ -212,13 +363,37 @@ export function attachHeaderNotifications(root: ParentNode): () => void {
     }
   };
 
+  const onDocumentClick = (event: MouseEvent) => {
+    const target = event.target;
+    if (!(target instanceof Node)) {
+      return;
+    }
+
+    if (!host.contains(target)) {
+      close();
+    }
+  };
+
+  const onWindowKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      close();
+    }
+  };
+
+  trigger.addEventListener('click', onTriggerClick);
   tabs.forEach((tab) => tab.addEventListener('click', onTabClick));
   list.addEventListener('click', onListClick);
-  void load();
+  document.addEventListener('click', onDocumentClick);
+  window.addEventListener('keydown', onWindowKeydown);
+  void load(false);
 
   return () => {
     disposed = true;
+    trigger.removeEventListener('click', onTriggerClick);
     tabs.forEach((tab) => tab.removeEventListener('click', onTabClick));
     list.removeEventListener('click', onListClick);
+    document.removeEventListener('click', onDocumentClick);
+    window.removeEventListener('keydown', onWindowKeydown);
+    close();
   };
 }

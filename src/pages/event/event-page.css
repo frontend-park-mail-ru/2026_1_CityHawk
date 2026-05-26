@@ -345,6 +345,18 @@
     color: #ffffff;
 }
 
+.event-invite-modal__status {
+    justify-self: end;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(79, 142, 247, 0.18);
+    color: #d8e8ff;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+}
+
 .event-invite-modal__checkbox:checked ~ .event-invite-modal__person-info .event-invite-modal__person-name {
     color: #ffffff;
 }

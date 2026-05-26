@@ -86,13 +86,16 @@
               data-user-id="{{id}}"
               data-user-name="{{displayName}}"
               data-user-city="{{cityText}}"
+              {{#if invitationStatus}}data-invitation-status="{{invitationStatus}}"{{/if}}
             >
+              {{#unless invitationStatus}}
               <input
                 type="checkbox"
                 class="event-invite-modal__checkbox"
                 data-role="event-invite-checkbox"
                 value="{{id}}"
               />
+              {{/unless}}
               <span class="event-invite-modal__avatar">
                 {{#if avatarUrl}}
                   <img src="{{avatarUrl}}" alt="" />
@@ -104,20 +107,15 @@
                 <span class="event-invite-modal__person-name">{{displayName}}</span>
                 <span class="event-invite-modal__person-city">{{cityText}}</span>
               </span>
+              {{#if invitationStatus}}
+              <span class="event-invite-modal__status">Приглашён(а)</span>
+              {{else}}
               <span class="event-invite-modal__checkmark" aria-hidden="true">✓</span>
+              {{/if}}
             </label>
           {{/each}}
         {{/if}}
       </div>
-
-      <label class="event-invite-modal__message">
-        <span>Сообщение</span>
-        <textarea
-          data-role="event-invite-message"
-          rows="3"
-          placeholder="Привет! Хочу пригласить тебя на это событие."
-        ></textarea>
-      </label>
 
       <div class="event-invite-modal__footer">
         <p class="event-invite-modal__selected">

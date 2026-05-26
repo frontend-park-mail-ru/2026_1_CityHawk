@@ -115,9 +115,9 @@
               </header>
 
               <div class="site-header__notifications-tabs" role="tablist" aria-label="Фильтр уведомлений">
-                <button type="button" class="site-header__notifications-tab site-header__notifications-tab--active" data-role="header-notifications-tab" data-notification-type="all">Все</button>
-                <button type="button" class="site-header__notifications-tab" data-role="header-notifications-tab" data-notification-type="invitations">Приглашения</button>
-                <button type="button" class="site-header__notifications-tab" data-role="header-notifications-tab" data-notification-type="system">Системные</button>
+                <button type="button" class="site-header__notifications-tab site-header__notifications-tab--active" data-role="header-notifications-tab" data-notification-filter="all">Все</button>
+                <button type="button" class="site-header__notifications-tab" data-role="header-notifications-tab" data-notification-filter="unread">Непрочитанные</button>
+                <button type="button" class="site-header__notifications-tab" data-role="header-notifications-tab" data-notification-filter="read">Прочитанные</button>
               </div>
 
               <div class="site-header__notifications-list" data-role="header-notifications-list"></div>
@@ -126,10 +126,16 @@
 
         {{#if user}}
           <div class="site-header__user-menu">
-            <a href="/profile" class="site-header__link site-header__link--with-icon site-header__user">
+            <button
+              type="button"
+              class="site-header__link site-header__link--with-icon site-header__link--button site-header__user"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              data-role="header-user-menu-trigger"
+            >
               <img src="/public/static/icons/person.svg" alt="" class="site-header__link-icon" aria-hidden="true" />
               <span>{{user.displayName}}</span>
-            </a>
+            </button>
             <div class="site-header__user-dropdown" aria-label="Меню пользователя">
               <a href="/profile" class="site-header__user-dropdown-link">Профиль</a>
               <a href="/profile/settings" class="site-header__user-dropdown-link">Настройки</a>

@@ -50,12 +50,10 @@ export async function searchUsers(query: string, limit = 10): Promise<FollowUser
       const explicitEmail = String(source.email || '').trim();
       const email = explicitEmail || (label.includes('@') && !label.startsWith('@') ? label : '');
       const title = String(source.title || source.name || email || label || '').trim();
-      const [first = '', second = ''] = title.split(/\s+/, 2);
 
       return {
         id,
-        username: first || title || 'Пользователь',
-        userSurname: second || '',
+        username: title || 'Пользователь',
         email: email || undefined,
         avatarUrl: String(source.avatarUrl || '').trim() || null,
         city: source.city && typeof source.city === 'object'

@@ -83,10 +83,7 @@ interface RecommendationViewModel {
 function getFollowUserDisplayName(user: Partial<FollowUser> = {}): string {
   const email = String(user.email || '').trim();
 
-  return [user.username, user.userSurname]
-    .map((part) => String(part || '').trim())
-    .filter(Boolean)
-    .join(' ')
+  return String(user.username || '').trim()
     || email
     || 'Пользователь';
 }
@@ -566,17 +563,39 @@ function attachEventInviteModal(root: ParentNode, eventId: string): () => void {
   const list = root.querySelector<HTMLElement>('[data-role="event-invite-list"]');
   const selectedCount = root.querySelector<HTMLElement>('[data-role="event-invite-selected-count"]');
   const sendButton = root.querySelector<HTMLButtonElement>('[data-action="event-invite-send"]');
-  const messageInput = root.querySelector<HTMLTextAreaElement>('[data-role="event-invite-message"]');
 
   if (!(modal instanceof HTMLElement) || openButtons.length === 0) {
     return () => {};
   }
 
   const selectedIds = new Set<string>();
+  const invitedUserIds = new Set<string>();
   let previousActiveElement: Element | null = null;
   let searchTimerId: number | null = null;
 
   const getRows = () => Array.from(modal.querySelectorAll<HTMLElement>('[data-role="event-invite-user"]'));
+
+  const resetSelection = () => {
+    selectedIds.clear();
+    getRows().forEach((row) => {
+      const checkbox = row.querySelector<HTMLInputElement>('[data-role="event-invite-checkbox"]');
+      if (checkbox instanceof HTMLInputElement) {
+        checkbox.checked = false;
+      }
+    });
+    updateSelectedCount();
+  };
+
+  const syncInvitedUserIds = () => {
+    invitedUserIds.clear();
+    getRows().forEach((row) => {
+      const userId = String(row.dataset.userId || '').trim();
+      const invitationStatus = String(row.dataset.invitationStatus || '').trim();
+      if (userId && invitationStatus) {
+        invitedUserIds.add(userId);
+      }
+    });
+  };
 
   const updateSelectedCount = () => {
     if (selectedCount instanceof HTMLElement) {
@@ -588,7 +607,22 @@ function attachEventInviteModal(root: ParentNode, eventId: string): () => void {
     }
   };
 
+  const createInvitedStatus = (): HTMLSpanElement => {
+    const status = document.createElement('span');
+    status.className = 'event-invite-modal__status';
+    status.textContent = 'Приглашён(а)';
+    return status;
+  };
+
   const openModal = () => {
+    syncInvitedUserIds();
+    resetSelection();
+    if (searchInput instanceof HTMLInputElement) {
+      searchInput.value = '';
+    }
+    getRows().forEach((row) => {
+      row.hidden = false;
+    });
     previousActiveElement = document.activeElement;
     modal.hidden = false;
     document.body.style.overflow = 'hidden';
@@ -598,6 +632,7 @@ function attachEventInviteModal(root: ParentNode, eventId: string): () => void {
   };
 
   const closeModal = () => {
+    resetSelection();
     modal.hidden = true;
     document.body.style.overflow = '';
 
@@ -624,7 +659,7 @@ function attachEventInviteModal(root: ParentNode, eventId: string): () => void {
     const existingIds = new Set(getRows().map((row) => String(row.dataset.userId || '')));
     users
       .map(mapFollowUserToInviteViewModel)
-      .filter((user) => user.id && !existingIds.has(user.id))
+      .filter((user) => user.id && !existingIds.has(user.id) && !user.invitationStatus && !invitedUserIds.has(user.id))
       .forEach((user) => {
         const label = document.createElement('label');
         label.className = 'event-invite-modal__person';
@@ -638,7 +673,6 @@ function attachEventInviteModal(root: ParentNode, eventId: string): () => void {
         checkbox.className = 'event-invite-modal__checkbox';
         checkbox.dataset.role = 'event-invite-checkbox';
         checkbox.value = user.id;
-        checkbox.disabled = user.invitationStatus === 'pending' || user.invitationStatus === 'accepted';
 
         const avatar = document.createElement('span');
         avatar.className = 'event-invite-modal__avatar';
@@ -668,11 +702,6 @@ function attachEventInviteModal(root: ParentNode, eventId: string): () => void {
         mark.className = 'event-invite-modal__checkmark';
         mark.setAttribute('aria-hidden', 'true');
         mark.textContent = '✓';
-
-        if (user.invitationStatus) {
-          label.dataset.invitationStatus = user.invitationStatus;
-        }
-
         label.append(checkbox, avatar, info, mark);
         list.append(label);
       });
@@ -728,7 +757,6 @@ function attachEventInviteModal(root: ParentNode, eventId: string): () => void {
       return;
     }
 
-    const message = String(messageInput?.value || '').trim();
     const recipientIds = Array.from(selectedIds);
 
     if (sendButton instanceof HTMLButtonElement) {
@@ -738,10 +766,29 @@ function attachEventInviteModal(root: ParentNode, eventId: string): () => void {
     try {
       await createEventInvitations(eventId, {
         recipientIds,
-        ...(message ? { message } : {}),
       });
-      const suffix = message ? ' с сообщением' : '';
-      showToast(`Приглашение отправлено: ${recipientIds.length}${suffix}`, { type: 'success' });
+
+      recipientIds.forEach((recipientId) => {
+        invitedUserIds.add(recipientId);
+        const row = getRows().find((item) => String(item.dataset.userId || '').trim() === recipientId);
+        if (!(row instanceof HTMLElement)) {
+          return;
+        }
+
+        row.dataset.invitationStatus = 'pending';
+        const checkbox = row.querySelector<HTMLInputElement>('[data-role="event-invite-checkbox"]');
+        if (checkbox instanceof HTMLInputElement) {
+          checkbox.checked = false;
+          checkbox.remove();
+        }
+
+        if (!row.querySelector('.event-invite-modal__status')) {
+          row.querySelector('.event-invite-modal__checkmark')?.replaceWith(createInvitedStatus());
+        }
+      });
+
+      resetSelection();
+      showToast(`Приглашение отправлено: ${recipientIds.length}`, { type: 'success' });
       closeModal();
     } catch {
       showToast('Не удалось отправить приглашение');
@@ -762,6 +809,7 @@ function attachEventInviteModal(root: ParentNode, eventId: string): () => void {
   list?.addEventListener('change', handleListChange);
   sendButton?.addEventListener('click', handleSendInvite);
   document.addEventListener('keydown', onKeyDown);
+  syncInvitedUserIds();
   updateSelectedCount();
 
   return () => {

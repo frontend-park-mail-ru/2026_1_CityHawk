@@ -127,9 +127,7 @@
         visibility 0s linear 0.32s;
 }
 
-.site-header__menu:hover .site-header__sidebar,
-.site-header__menu.site-header__menu--open .site-header__sidebar,
-.site-header__menu:focus-within .site-header__sidebar {
+.site-header__menu.site-header__menu--open .site-header__sidebar {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -257,6 +255,7 @@
     background: none;
     border: none;
     cursor: pointer;
+    font: inherit;
 }
 
 .site-header__link-icon {
@@ -269,6 +268,8 @@
 .site-header__user {
     opacity: 1;
     color: var(--home-color-text);
+    font-size: var(--home-text-4);
+    font-weight: 600;
 }
 
 .site-header__notifications {
@@ -356,8 +357,7 @@
         visibility 0s linear 0.44s;
 }
 
-.site-header__notifications:hover .site-header__notifications-panel,
-.site-header__notifications:focus-within .site-header__notifications-panel {
+.site-header__notifications.site-header__notifications--open .site-header__notifications-panel {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -562,12 +562,25 @@
     margin: 0;
     color: #f2f6ff;
     font-size: 16px;
-    font-weight: 800;
+    font-weight: 500;
     line-height: 1.3;
 }
 
 .site-header__notification-title--small {
     margin-top: 8px;
+}
+
+.site-header__notification-event-link {
+    color: inherit;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.site-header__notification-event-link:hover,
+.site-header__notification-event-link:focus-visible {
+    color: var(--ui-interactive-border-hover, var(--color-accent-3));
+    text-decoration: underline;
+    outline: none;
 }
 
 .site-header__notification-time {
@@ -664,8 +677,7 @@
         visibility 0s linear 0.32s;
 }
 
-.site-header__user-menu:hover .site-header__user-dropdown,
-.site-header__user-menu:focus-within .site-header__user-dropdown {
+.site-header__user-menu.site-header__user-menu--open .site-header__user-dropdown {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;

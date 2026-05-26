@@ -36,29 +36,16 @@
                 {{/if}}
             </div>
 
-            <div class="profile__grid profile__grid--two">
-                {{> form-input
-                    fieldClass="profile__field"
-                    label="Имя"
-                    type="text"
-                    id="firstName"
-                    name="firstName"
-                    placeholder="Имя"
-                    value=user.firstName
-                    errorClass="form-field__error profile__name-error"
-                }}
-
-                {{> form-input
-                    fieldClass="profile__field"
-                    label="Фамилия"
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    placeholder="Фамилия"
-                    value=user.lastName
-                    errorClass="form-field__error profile__surname-error"
-                }}
-            </div>
+            {{> form-input
+                fieldClass="profile__field"
+                label="Имя"
+                type="text"
+                id="firstName"
+                name="firstName"
+                placeholder="Имя"
+                value=user.firstName
+                errorClass="form-field__error profile__name-error"
+            }}
 
             {{> form-input
                 fieldClass="profile__field profile__field--email"

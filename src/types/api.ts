@@ -35,6 +35,13 @@ export interface EventNextSession {
   placeName?: string;
 }
 
+export interface EventInviter {
+  id?: string;
+  username?: string;
+  displayName?: string;
+  avatarUrl?: string | null;
+}
+
 export interface EventCard {
   id: string;
   title: string;
@@ -43,6 +50,7 @@ export interface EventCard {
   tags: Tag[];
   nextSession?: EventNextSession | null;
   isFavorite?: boolean;
+  invitedBy?: EventInviter | null;
 }
 
 export interface EventAuthor {
@@ -165,7 +173,6 @@ export interface User {
   email: string;
   name?: string;
   username?: string;
-  userSurname?: string;
   role?: 'user' | 'organizer' | 'admin';
   birthday?: string;
   avatarUrl?: string;
@@ -176,7 +183,6 @@ export interface User {
 export interface FollowUser {
   id: string;
   username: string;
-  userSurname?: string;
   email?: string;
   avatarUrl?: string | null;
   city?: City | null;
@@ -235,6 +241,7 @@ export interface ShareLinkResponse {
 export type NotificationType =
   | 'event_invitation'
   | 'invitation_accepted'
+  | 'invitation_declined'
   | 'event_reminder'
   | 'collection_shared'
   | 'system';
@@ -285,6 +292,7 @@ export interface LoginPayload {
 }
 
 export interface RegisterPayload {
+  username: string;
   email: string;
   password: string;
 }
@@ -292,7 +300,6 @@ export interface RegisterPayload {
 export interface UpdateProfilePayload {
   email?: string;
   username?: string;
-  userSurname?: string;
   birthday?: string;
   cityId?: string;
   avatarUrl?: string;
@@ -307,7 +314,6 @@ export interface AuthUser {
   id: string;
   email: string;
   username: string;
-  userSurname?: string;
   avatarUrl?: string | null;
   createdAt?: string;
 }

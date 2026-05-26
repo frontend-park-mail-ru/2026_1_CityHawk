@@ -83,10 +83,7 @@ function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
           || typedItem.query
           || (item as Record<string, unknown>).text
           || (item as Record<string, unknown>).displayName
-          || [
-            (item as Record<string, unknown>).username,
-            (item as Record<string, unknown>).userSurname,
-          ].filter(Boolean).join(' ')
+          || (item as Record<string, unknown>).username
           || '',
         ).trim();
 

@@ -11,11 +11,13 @@ import {
 import {
   checkPasswordStrength,
   getEmailValidationError,
+  validatePersonName,
 } from '../shared/validators.js';
 import { attachOAuthButtons } from '../oauth.js';
 
 interface RegisterState {
   step?: number;
+  username?: string;
   email?: string;
   password?: string;
 }
@@ -86,28 +88,49 @@ function setupRegisterCredentials(
   onFinish?: () => void,
 ): () => void {
   const emailInput = root.querySelector('#email');
+  const usernameInput = root.querySelector('#username');
   const passwordInput = root.querySelector('#password');
   const confirmInput = root.querySelector('#password-confirm');
   const submitBtn = root.querySelector('[data-role="register-finish"]') || root.querySelector('.login__submit');
 
-  if (!(emailInput instanceof HTMLInputElement)
+  if (!(usernameInput instanceof HTMLInputElement)
+    || !(emailInput instanceof HTMLInputElement)
     || !(passwordInput instanceof HTMLInputElement)
     || !(confirmInput instanceof HTMLInputElement)
     || !(submitBtn instanceof HTMLButtonElement)) {
     return () => {};
   }
 
+  const safeUsernameInput: HTMLInputElement = usernameInput;
   const safeEmailInput: HTMLInputElement = emailInput;
   const safePasswordInput: HTMLInputElement = passwordInput;
   const safeConfirmInput: HTMLInputElement = confirmInput;
   const safeSubmitBtn: HTMLButtonElement = submitBtn;
 
+  let usernameError = false;
   let emailError = false;
   let passError = false;
   let confirmError = false;
   let submitAttempted = false;
 
+  safeUsernameInput.value = state.username || '';
   safeEmailInput.value = state.email || '';
+
+  function validateUsername(): void {
+    const wrapper = safeUsernameInput.closest('.login__field-error-wrapper');
+    const value = safeUsernameInput.value;
+
+    if (!submitAttempted && !usernameError) return;
+
+    const validationError = validatePersonName(value, 'Имя');
+    if (validationError) {
+      showFieldMessage(wrapper, validationError, 'var(--color-mid)', true);
+      usernameError = true;
+    } else {
+      hideFieldMessage(wrapper);
+      usernameError = false;
+    }
+  }
 
   function validateEmail(): void {
     const wrapper = safeEmailInput.closest('.login__field-error-wrapper');
@@ -131,7 +154,7 @@ function setupRegisterCredentials(
     const result = checkPasswordStrength(pass);
     let showText = true;
 
-    if (!result.isError && submitAttempted && (emailError || confirmError)) {
+    if (!result.isError && submitAttempted && (usernameError || emailError || confirmError)) {
       showText = false;
     }
 
@@ -204,19 +227,22 @@ function setupRegisterCredentials(
     event.preventDefault();
 
     submitAttempted = true;
+    validateUsername();
     validateEmail();
     updatePasswordField();
     updateConfirmField();
 
-    if (emailError || passError || confirmError) {
+    if (usernameError || emailError || passError || confirmError) {
       return;
     }
 
+    state.username = safeUsernameInput.value.trim();
     state.email = safeEmailInput.value.trim();
     state.password = safePasswordInput.value.trim();
 
     try {
       await register({
+        username: state.username,
         email: state.email,
         password: state.password,
       });
@@ -239,6 +265,15 @@ function setupRegisterCredentials(
           );
           return;
         }
+        if (apiError?.details?.username) {
+          showFieldMessage(
+            safeUsernameInput.closest('.login__field-error-wrapper'),
+            'Имя: от 3 до 32 символов',
+            'var(--color-mid)',
+            true,
+          );
+          return;
+        }
         showFieldMessage(wrapper, apiError.message || 'Проверьте данные', 'var(--color-mid)', true);
         return;
       }
@@ -255,6 +290,7 @@ function setupRegisterCredentials(
     onFinish?.();
   };
 
+  safeUsernameInput.addEventListener('input', validateUsername);
   safeEmailInput.addEventListener('input', validateEmail);
   safePasswordInput.addEventListener('input', updatePasswordField);
   safePasswordInput.addEventListener('focus', updatePasswordField);
@@ -265,6 +301,7 @@ function setupRegisterCredentials(
   safeSubmitBtn.addEventListener('click', handleSubmitClick);
 
   return () => {
+    safeUsernameInput.removeEventListener('input', validateUsername);
     safeEmailInput.removeEventListener('input', validateEmail);
     safePasswordInput.removeEventListener('input', updatePasswordField);
     safePasswordInput.removeEventListener('focus', updatePasswordField);

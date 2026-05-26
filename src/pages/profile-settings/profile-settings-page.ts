@@ -127,7 +127,6 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
   const user = {
     name: displayName,
     firstName: me?.username || '',
-    lastName: me?.userSurname || '',
     email: me?.email || 'address@service.com',
     birthdate: me?.birthday || '',
     cityId: me?.city?.id || '',
@@ -157,8 +156,6 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
       const avatarInput = root.querySelector('[data-role="profile-avatar-input"]');
       const firstNameInput = root.querySelector('#firstName');
       const firstNameError = root.querySelector('.profile__name-error');
-      const lastNameInput = root.querySelector('#lastName');
-      const lastNameError = root.querySelector('.profile__surname-error');
       const emailInput = root.querySelector('#email');
       const emailError = root.querySelector('.profile__email-error');
       const interestsInput = root.querySelector('[data-role="profile-interests-input"]');
@@ -192,10 +189,6 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
 
       const setFirstNameError = (message = ''): void => {
         setFieldError(firstNameInput, firstNameError, message);
-      };
-
-      const setLastNameError = (message = ''): void => {
-        setFieldError(lastNameInput, lastNameError, message);
       };
 
       const interestIdToLabel = new Map<string, string>();
@@ -284,12 +277,9 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
         const formData = new FormData(profileForm);
         const email = String(formData.get('email') || '').trim();
         const firstName = String(formData.get('firstName') || '').trim();
-        const lastName = String(formData.get('lastName') || '').trim();
 
         const firstNameValidationError = validatePersonName(firstName, 'Имя');
-        const lastNameValidationError = validatePersonName(lastName, 'Фамилия');
         setFirstNameError(firstNameValidationError || '');
-        setLastNameError(lastNameValidationError || '');
 
         const emailValidationError = getEmailValidationError(email);
         if (emailValidationError) {
@@ -298,14 +288,13 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
         }
         setEmailError('');
 
-        if (firstNameValidationError || lastNameValidationError) {
+        if (firstNameValidationError) {
           return;
         }
 
         const payload: UpdateProfilePayload = {
           email,
           username: firstName,
-          userSurname: lastName,
           birthday: String(formData.get('birthdate') || '').trim(),
           cityId: String(formData.get('city') || '').trim(),
         };
@@ -341,13 +330,10 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
           if (details.username) {
             setFirstNameError('Имя: от 3 до 32 символов');
           }
-          if (details.userSurname) {
-            setLastNameError('Фамилия: от 3 до 32 символов');
-          }
           if (details.email) {
             setEmailError(getEmailValidationError(email) || 'Проверьте email');
           }
-          if (details.username || details.userSurname || details.email) {
+          if (details.username || details.email) {
             return;
           }
 
@@ -377,15 +363,6 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
 
         const message = validatePersonName(firstNameInput.value, 'Имя');
         setFirstNameError(message || '');
-      };
-
-      const handleLastNameInput = (): void => {
-        if (!(lastNameInput instanceof HTMLInputElement)) {
-          return;
-        }
-
-        const message = validatePersonName(lastNameInput.value, 'Фамилия');
-        setLastNameError(message || '');
       };
 
       const handleInterestsInput = (): void => {
@@ -494,10 +471,6 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
         firstNameInput.addEventListener('input', handleFirstNameInput);
       }
 
-      if (lastNameInput instanceof HTMLInputElement) {
-        lastNameInput.addEventListener('input', handleLastNameInput);
-      }
-
       if (interestsInput instanceof HTMLInputElement) {
         interestsInput.addEventListener('change', handleInterestsInput);
         interestsInput.addEventListener('keydown', handleInterestsKeydown);
@@ -533,10 +506,6 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
 
         if (firstNameInput instanceof HTMLInputElement) {
           firstNameInput.removeEventListener('input', handleFirstNameInput);
-        }
-
-        if (lastNameInput instanceof HTMLInputElement) {
-          lastNameInput.removeEventListener('input', handleLastNameInput);
         }
 
         if (interestsInput instanceof HTMLInputElement) {
