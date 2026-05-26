@@ -951,10 +951,14 @@
     }
 
     .site-header__sidebar {
-        left: 0;
-        right: 0;
+        position: fixed;
+        top: var(--site-header-offset);
+        left: 12px;
+        right: 12px;
+        width: auto;
         min-width: 0;
         max-width: none;
+        max-height: calc(100vh - var(--site-header-offset) - 16px);
     }
 
     .site-header__actions {

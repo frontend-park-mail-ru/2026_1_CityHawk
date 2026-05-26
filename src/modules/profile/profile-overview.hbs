@@ -19,13 +19,16 @@
         <div class="profile-hero__head">
           <h1 class="profile-hero__name">{{user.name}}</h1>
         </div>
-        <div class="profile-hero__location">Город: {{user.cityName}}</div>
-        <p class="profile-hero__bio">{{user.bio}}</p>
 
-        <div class="profile-hero__tags">
-          {{#each user.tags}}
-          <span class="profile-hero__tag">{{this}}</span>
-          {{/each}}
+        <div class="profile-hero__details">
+          <div class="profile-hero__location">Город: {{user.cityName}}</div>
+          <p class="profile-hero__bio">{{user.bio}}</p>
+
+          <div class="profile-hero__tags">
+            {{#each user.tags}}
+            <span class="profile-hero__tag">{{this}}</span>
+            {{/each}}
+          </div>
         </div>
       </div>
 

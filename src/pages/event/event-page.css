@@ -94,6 +94,11 @@
     padding: 24px;
 }
 
+.event-invite-modal {
+    align-items: flex-start;
+    padding-top: max(24px, 7vh);
+}
+
 .event-share-modal__backdrop,
 .event-invite-modal__backdrop {
     position: absolute;
@@ -574,11 +579,20 @@
         padding: 12px;
     }
 
+    .event-invite-modal {
+        align-items: flex-start;
+        padding: 56px 12px 12px;
+    }
+
     .event-share-modal__dialog,
     .event-invite-modal__dialog {
         max-height: calc(100vh - 24px);
         padding: 24px 18px 18px;
         border-radius: 16px;
+    }
+
+    .event-invite-modal__dialog {
+        max-height: calc(100vh - 68px);
     }
 
     .event-share-modal__close,
