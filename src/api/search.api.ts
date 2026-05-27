@@ -3,11 +3,8 @@ import type { FollowUser } from '../types/api.js';
 
 export interface SearchSuggestionItem {
   id?: string;
-  type?: string;
   label?: string;
   title?: string;
-  name?: string;
-  email?: string;
 }
 
 export interface SearchResultsResponse {
@@ -25,42 +22,8 @@ export async function searchUsers(query: string, limit = 10): Promise<FollowUser
     return [];
   }
 
-  const normalizedLimit = Math.max(5, Math.min(10, Math.trunc(limit) || 10));
-  const response = await searchAll(normalizedQuery, normalizedLimit);
-  const items = Array.isArray(response?.items) ? response.items : [];
-
-  return items
-    .map((item) => {
-      if (!item || typeof item !== 'object') {
-        return null;
-      }
-
-      const source = item as Record<string, unknown>;
-      const type = String(source.type || '').trim().toLowerCase();
-      if (type !== 'user') {
-        return null;
-      }
-
-      const id = String(source.id || '').trim();
-      if (!id) {
-        return null;
-      }
-
-      const label = String(source.label || '').trim();
-      const explicitEmail = String(source.email || '').trim();
-      const email = explicitEmail || (label.includes('@') && !label.startsWith('@') ? label : '');
-      const title = String(source.title || source.name || email || label || '').trim();
-
-      return {
-        id,
-        username: title || 'Пользователь',
-        email: email || undefined,
-        avatarUrl: String(source.avatarUrl || '').trim() || null,
-        city: source.city && typeof source.city === 'object'
-          ? (source.city as FollowUser['city'])
-          : null,
-        isFollowing: Boolean(source.isFollowing),
-      } satisfies FollowUser;
-    })
-    .filter((item): item is FollowUser => Boolean(item));
+  // `/api/search` now returns only generic search suggestions for events/categories/tags.
+  // User discovery needs a dedicated backend endpoint.
+  void limit;
+  return [];
 }

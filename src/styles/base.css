@@ -103,11 +103,6 @@ body {
     text-rendering: optimizeLegibility;
 }
 
-#root {
-    min-height: 100%;
-    padding-top: var(--site-app-top-offset, 0px);
-}
-
 /* 10. Заголовки без жирности (потом зададим свою) */
 h1, h2, h3, h4, h5, h6 {
     font-weight: normal;

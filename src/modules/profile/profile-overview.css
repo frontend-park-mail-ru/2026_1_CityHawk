@@ -714,6 +714,20 @@
     margin-bottom: 20px;
   }
 
+  .profile-follows-modal__tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .profile-follows-modal__tab {
+    --ui-button-height: 36px;
+    --ui-button-padding-x: 8px;
+    font-size: 12px;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
   .profile-follows-modal__title {
     font-size: 24px;
   }

@@ -21,6 +21,7 @@ export interface Tag {
   id: string;
   name: string;
   slug: string;
+  group?: string;
 }
 
 export interface Category {
@@ -49,6 +50,8 @@ export interface EventCard {
   coverImageUrl?: string;
   tags: Tag[];
   nextSession?: EventNextSession | null;
+  placeName?: string;
+  place?: Place | null;
   isFavorite?: boolean;
   invitedBy?: EventInviter | null;
 }

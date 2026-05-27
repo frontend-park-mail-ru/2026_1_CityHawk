@@ -10,8 +10,8 @@
 }
 
 .event-list-filters__grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+    display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     align-items: center;
 }
@@ -20,6 +20,7 @@
     display: flex;
     position: relative;
     min-width: 0;
+    flex: 1 1 180px;
 }
 
 .event-list-filters__input {
@@ -143,6 +144,7 @@
     gap: 12px;
     min-height: 40px;
     padding-left: 4px;
+    margin-left: auto;
 }
 
 .event-list-filters__reset {
@@ -173,7 +175,7 @@
     }
 
     .event-list-filters__grid {
-        grid-template-columns: repeat(4, minmax(180px, 1fr)) auto;
+        flex-wrap: nowrap;
         min-width: max-content;
     }
 }
@@ -185,9 +187,12 @@
     }
 
     .event-list-filters__grid {
-        grid-template-columns: repeat(4, minmax(170px, 1fr)) auto;
         gap: 8px;
         min-width: max-content;
+    }
+
+    .event-list-filters__field {
+        flex-basis: 170px;
     }
 
     .event-list-filters__actions {

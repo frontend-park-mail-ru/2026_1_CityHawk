@@ -360,8 +360,12 @@ function mapEventToRecommendationViewModel(item: Partial<EventCard> = {}): Recom
     item.nextSession?.placeName || item.nextSession?.place?.name,
     item.nextSession?.place?.addressLine,
   ].filter(Boolean);
+  const fallbackPlaceParts = [
+    item.placeName || item.place?.name,
+    item.place?.addressLine,
+  ].filter(Boolean);
   const dateText = formatEventDateOrPeriod(item);
-  const placeText = placeParts.join(', ');
+  const placeText = placeParts.join(', ') || fallbackPlaceParts.join(', ');
   const tags = Array.isArray(item.tags)
     ? item.tags.map((tag) => tag?.name || '').filter(Boolean)
     : [];

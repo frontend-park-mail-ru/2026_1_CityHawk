@@ -45,6 +45,10 @@ function mapFeaturedEventToCardViewModel(event: Partial<EventCard> = {}): HomeEv
     event.nextSession?.placeName || event.nextSession?.place?.name,
     event.nextSession?.place?.addressLine,
   ].filter(Boolean);
+  const fallbackPlaceParts = [
+    event.placeName || event.place?.name,
+    event.place?.addressLine,
+  ].filter(Boolean);
 
   return {
     id: event.id || '',
@@ -52,7 +56,7 @@ function mapFeaturedEventToCardViewModel(event: Partial<EventCard> = {}): HomeEv
     title: event.title || '',
     tags,
     dateText: formatEventDateOrPeriod(event),
-    placeText: placeParts.join(', '),
+    placeText: placeParts.join(', ') || fallbackPlaceParts.join(', '),
     isFavorite: Boolean(event.isFavorite),
   };
 }

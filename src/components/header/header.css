@@ -1,6 +1,5 @@
 :root {
-    --site-header-offset: 90px;
-    --site-app-top-offset: max(90px, env(safe-area-inset-top));
+    --site-header-offset: 104px;
 }
 
 .site-header__container {
@@ -12,7 +11,7 @@
 
 .site-header {
     position: fixed;
-    top: var(--site-app-top-offset);
+    top: 0;
     left: 0;
     right: 0;
     z-index: 1200;
@@ -34,10 +33,6 @@
 .event-list-page__header,
 .profile-page__header {
     min-height: var(--site-header-offset);
-}
-
-.home-page__hero {
-    padding-top: var(--site-header-offset);
 }
 
 .site-header__row {
@@ -916,7 +911,6 @@
 @media (max-width: 768px) {
     :root {
         --site-header-offset: 76px;
-        --site-app-top-offset: max(16px, env(safe-area-inset-top));
     }
 
     .site-header__container {
@@ -977,11 +971,11 @@
 
     .site-header__notifications-panel {
         position: fixed;
-        top: calc(var(--site-header-offset) + var(--site-app-top-offset));
+        top: var(--site-header-offset);
         left: 12px;
         right: 12px;
         width: auto;
-        max-height: calc(100vh - var(--site-header-offset) - var(--site-app-top-offset) - 16px);
+        max-height: calc(100vh - var(--site-header-offset) - 16px);
         padding: 16px;
     }
 

@@ -18,17 +18,6 @@ function normalizeSuggestionType(value: unknown): string {
   return String(value || '').trim().toLowerCase();
 }
 
-const SUGGESTION_META_LABELS: Record<string, string> = {
-  category: 'Категория',
-  'категория': 'Категория',
-  tag: 'Тег',
-  'тег': 'Тег',
-  event: 'Событие',
-  'событие': 'Событие',
-  user: 'Пользователь',
-  'пользователь': 'Пользователь',
-};
-
 function isHeaderSearchSuggestion(item: HeaderSearchSuggestion | null): item is HeaderSearchSuggestion {
   return item !== null;
 }
@@ -79,11 +68,7 @@ function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
         const label = String(
           typedItem.label
           || typedItem.title
-          || typedItem.name
-          || typedItem.query
           || (item as Record<string, unknown>).text
-          || (item as Record<string, unknown>).displayName
-          || (item as Record<string, unknown>).username
           || '',
         ).trim();
 
@@ -94,22 +79,14 @@ function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
         return {
           id: String(
             typedItem.id
-            || (item as Record<string, unknown>).tagId
-            || (item as Record<string, unknown>).categoryId
-            || (item as Record<string, unknown>).eventId
             || '',
           ).trim(),
-          type: normalizeSuggestionType(typedItem.type || 'query') || 'query',
+          type: 'query',
           label,
         } satisfies HeaderSearchSuggestion;
       })
       .filter(isHeaderSearchSuggestion)
     : [];
-}
-
-function getSuggestionMetaLabel(type: string): string {
-  const normalizedType = normalizeSuggestionType(type);
-  return SUGGESTION_META_LABELS[normalizedType] || '';
 }
 
 export function attachHeaderSearchSuggestions(
@@ -158,16 +135,7 @@ export function attachHeaderSearchSuggestions(
         const title = document.createElement('span');
         title.className = 'site-header__search-suggestion-title';
         title.textContent = item.label;
-
-        const metaText = getSuggestionMetaLabel(item.type);
-        if (metaText) {
-          const meta = document.createElement('span');
-          meta.className = 'site-header__search-suggestion-meta';
-          meta.textContent = metaText;
-          button.append(title, meta);
-        } else {
-          button.append(title);
-        }
+        button.append(title);
         panel.append(button);
       });
 

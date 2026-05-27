@@ -1,18 +1,19 @@
 import { getEvents } from '../../api/events.api.js';
-import { getCategories } from '../../api/categories.api.js';
 import { getTags } from '../../api/tags.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
 import { attachHeaderSearchSuggestions } from '../../components/header/header-search-suggestions.js';
-import type { HeaderSearchSuggestion } from '../../components/header/header-search-suggestions.js';
 import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
-import { localizeCategoryName } from '../../modules/events/common/category-localization.js';
 import { renderEventListCatalog } from '../../modules/events/list/event-list-catalog.js';
-import { attachEventListFilters, renderEventListFilters } from '../../modules/events/list/event-list-filters.js';
+import {
+  attachEventListFilters,
+  renderEventListFilters,
+  type TagGroupFilter,
+} from '../../modules/events/list/event-list-filters.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { formatEventDateOrPeriod } from '../../modules/events/common/event-date-label.js';
 import { isVisibleEvent } from '../../modules/events/common/event-visibility.js';
-import type { Category, EventCard, Tag, User } from '../../types/api.js';
+import type { EventCard, Tag, User } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
 interface CatalogCardViewModel {
@@ -27,7 +28,6 @@ interface CatalogCardViewModel {
 
 interface CatalogData {
   items: EventCard[];
-  categories: Category[];
   tags: Tag[];
   total: number;
 }
@@ -36,10 +36,7 @@ interface FilterState {
   query: string;
   city: string;
   cityId: string;
-  categoryId: string;
   tagId: string;
-  datePreset: string;
-  sort: string;
   page: number;
 }
 
@@ -51,6 +48,13 @@ interface PaginationItem {
 }
 
 const EVENTS_PER_PAGE = 12;
+const TAG_GROUPS: Record<string, string> = {
+  format: 'Чем заняться',
+  genre: 'Тематика',
+  mood: 'Вайб',
+  audience: 'Для кого',
+  price: 'По бюджету',
+};
 
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -63,6 +67,9 @@ function mapEventToCatalogCardViewModel(event: Partial<EventCard> = {}): Catalog
   const placeText = [
     event.nextSession?.placeName || event.nextSession?.place?.name,
     event.nextSession?.place?.addressLine,
+  ].filter(Boolean).join(', ') || [
+    event.placeName || event.place?.name,
+    event.place?.addressLine,
   ].filter(Boolean).join(', ');
 
   return {
@@ -132,16 +139,10 @@ function getFallbackCatalogData(): CatalogData {
         },
       },
     ],
-    categories: [
-      { id: 'concert', name: 'Концерты', slug: 'concert' },
-      { id: 'show', name: 'Шоу', slug: 'show' },
-      { id: 'exhibition', name: 'Выставки', slug: 'exhibition' },
-      { id: 'theatre', name: 'Театр', slug: 'theatre' },
-    ],
     tags: [
-      { id: '11111111-1111-4111-8111-111111111111', name: 'Комедия', slug: 'comedy' },
-      { id: '22222222-2222-4222-8222-222222222222', name: 'Для детей', slug: 'kids' },
-      { id: '33333333-3333-4333-8333-333333333333', name: 'Шоу', slug: 'show' },
+      { id: '11111111-1111-4111-8111-111111111111', name: 'Кино', slug: 'kino', group: 'format' },
+      { id: '22222222-2222-4222-8222-222222222222', name: 'Комедия', slug: 'comedy', group: 'genre' },
+      { id: '33333333-3333-4333-8333-333333333333', name: 'Свидание', slug: 'date', group: 'mood' },
     ],
     total: 4,
   };
@@ -149,7 +150,6 @@ function getFallbackCatalogData(): CatalogData {
 
 function getFilterStateFromLocation(): FilterState {
   const params = new URLSearchParams(window.location.search);
-  const rawCategoryId = params.get('categoryId') || '';
   const rawTagId = params.get('tagId') || '';
   const rawCityId = params.get('cityId') || '';
   const rawPage = Number(params.get('page') || '1');
@@ -158,10 +158,7 @@ function getFilterStateFromLocation(): FilterState {
     query: params.get('query') || '',
     city: params.get('city') || '',
     cityId: isUuid(rawCityId) ? rawCityId : '',
-    categoryId: isUuid(rawCategoryId) ? rawCategoryId : '',
     tagId: rawTagId.trim(),
-    datePreset: params.get('datePreset') || '',
-    sort: params.get('sort') || '',
     page: Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1,
   };
 }
@@ -179,17 +176,8 @@ function buildEventListPath(filters: FilterState, overrides: Partial<FilterState
   if (next.city) {
     params.set('city', next.city);
   }
-  if (next.categoryId) {
-    params.set('categoryId', next.categoryId);
-  }
   if (next.tagId) {
     params.set('tagId', next.tagId);
-  }
-  if (next.datePreset) {
-    params.set('datePreset', next.datePreset);
-  }
-  if (next.sort) {
-    params.set('sort', next.sort);
   }
   if (next.page > 1) {
     params.set('page', String(next.page));
@@ -239,25 +227,6 @@ function buildPaginationItems(filters: FilterState, currentPage: number, totalPa
   return items;
 }
 
-function getDateRangeFromPreset(preset: string): { dateFrom?: string; dateTo?: string } {
-  if (!preset) {
-    return {};
-  }
-
-  const date = new Date();
-
-  if (preset === 'tomorrow') {
-    date.setDate(date.getDate() + 1);
-  }
-
-  const isoDate = date.toISOString().slice(0, 10);
-
-  return {
-    dateFrom: isoDate,
-    dateTo: isoDate,
-  };
-}
-
 export async function eventListPage({ navigate }: RouteContext): Promise<RouteView> {
   const filters = getFilterStateFromLocation();
   const me = await getMeOrNull();
@@ -271,29 +240,20 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
   let catalogData = getFallbackCatalogData();
 
   try {
-    const dateRange = getDateRangeFromPreset(filters.datePreset);
-    const [eventsResult, categoriesResult, tagsResult] = await Promise.allSettled([
+    const [eventsResult, tagsResult] = await Promise.allSettled([
       getEvents({
         query: filters.query,
         cityId: filters.cityId,
-        categoryId: filters.categoryId,
         tagId: filters.tagId,
-        ...dateRange,
-        sort: filters.sort,
         limit: EVENTS_PER_PAGE,
         offset: (filters.page - 1) * EVENTS_PER_PAGE,
       }),
-      getCategories(),
       getTags(),
     ]);
 
     const items = eventsResult.status === 'fulfilled' && Array.isArray(eventsResult.value?.items)
       ? eventsResult.value.items.filter(isVisibleEvent)
       : catalogData.items;
-    const categories = categoriesResult.status === 'fulfilled'
-      && Array.isArray(categoriesResult.value?.items)
-      ? categoriesResult.value.items
-      : catalogData.categories;
     const tags = tagsResult.status === 'fulfilled'
       && Array.isArray(tagsResult.value?.items)
       ? tagsResult.value.items
@@ -301,7 +261,6 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
 
     catalogData = {
       items,
-      categories,
       tags,
       total: eventsResult.status === 'fulfilled' ? Number(eventsResult.value?.total || items.length) : items.length,
     };
@@ -312,39 +271,31 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
   const cards = catalogData.items.map(mapEventToCatalogCardViewModel);
   const totalPages = Math.max(1, Math.ceil(catalogData.total / EVENTS_PER_PAGE));
   const currentPage = Math.min(filters.page, totalPages);
-  const categoryOptions = catalogData.categories
-    .filter((category) => isUuid(String(category.id || '')))
-    .map((category) => ({
-      value: category.id,
-      label: localizeCategoryName(category),
-      selected: String(category.id || '') === String(filters.categoryId || ''),
-    }));
-  const tagOptions = catalogData.tags
-    .map((tag) => ({
-      value: String(tag.id || ''),
-      label: String(tag.name || ''),
-      selected: String(tag.id || '') === String(filters.tagId || ''),
-    }));
-  const datePresetOptions = [
-    { value: 'today', label: 'Сегодня' },
-    { value: 'tomorrow', label: 'Завтра' },
-  ].map((option) => ({
-    ...option,
-    selected: option.value === filters.datePreset,
-  }));
-  const sortOptions = [
-    { value: 'dateAsc', label: 'Сначала ближайшие' },
-    { value: 'dateDesc', label: 'Сначала поздние' },
-    { value: 'titleAsc', label: 'По названию А-Я' },
-  ].map((option) => ({
-    ...option,
-    selected: option.value === filters.sort,
-  }));
+  const tagGroupFilters: TagGroupFilter[] = Object.entries(TAG_GROUPS)
+    .map(([groupKey, groupLabel]) => {
+      const options = catalogData.tags
+        .filter((tag) => String(tag.group || '').trim() === groupKey)
+        .map((tag) => ({
+          value: String(tag.id || ''),
+          label: String(tag.name || ''),
+          selected: String(tag.id || '') === String(filters.tagId || ''),
+        }));
+
+      if (!options.length) {
+        return null;
+      }
+
+      return {
+        key: groupKey,
+        label: groupLabel,
+        fieldName: `tagGroup-${groupKey}`,
+        options,
+      } satisfies TagGroupFilter;
+    })
+    .filter((item): item is TagGroupFilter => Boolean(item));
+
   const eventListFilters = renderEventListFilters({
-    categories: categoryOptions,
-    tags: tagOptions,
-    datePresetOptions,
-    sortOptions,
+    tagGroups: tagGroupFilters,
   });
   const eventListCatalog = renderEventListCatalog({
     cards,
@@ -378,80 +329,35 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
       }
 
       const detachEventListFilters = attachEventListFilters(root, {
-        onChange(form) {
+        onChange(form, target) {
           const formData = new FormData(form);
-          const params = new URLSearchParams();
-          const categoryId = String(formData.get('categoryId') || '').trim();
-          const tagId = String(formData.get('tagId') || '').trim();
-          const datePreset = String(formData.get('datePreset') || '').trim();
-          const sort = String(formData.get('sort') || '').trim();
           const currentParams = new URLSearchParams(window.location.search);
           const currentCityId = String(currentParams.get('cityId') || '').trim();
           const currentCityName = String(currentParams.get('city') || '').trim();
+          const targetName = String(target.name || '').trim();
+          const tagId = targetName
+            ? String(formData.get(targetName) || '').trim()
+            : '';
 
           const query = getCurrentQuery();
-          if (query) {
-            params.set('query', query);
-          }
-          if (currentCityId && isUuid(currentCityId)) {
-            params.set('cityId', currentCityId);
-          }
-          if (currentCityName) {
-            params.set('city', currentCityName);
-          }
-          if (categoryId && isUuid(categoryId)) {
-            params.set('categoryId', categoryId);
-          }
-          if (tagId) {
-            params.set('tagId', tagId);
-          }
-          if (datePreset) {
-            params.set('datePreset', datePreset);
-          }
-          if (sort) {
-            params.set('sort', sort);
-          }
 
           navigate(buildEventListPath({
             query,
             city: currentCityName,
             cityId: currentCityId && isUuid(currentCityId) ? currentCityId : '',
-            categoryId: categoryId && isUuid(categoryId) ? categoryId : '',
             tagId,
-            datePreset,
-            sort,
             page: 1,
           }));
         },
       });
 
-      const navigateByHeaderQuery = (nextQuery: string, suggestion?: HeaderSearchSuggestion) => {
-        const params = new URLSearchParams(window.location.search);
-        const type = String(suggestion?.type || '').trim().toLowerCase();
-        const suggestionID = String(suggestion?.id || '').trim();
-
-        if (nextQuery) {
-          params.set('query', nextQuery);
-        } else {
-          params.delete('query');
-        }
-
-        if (isUuid(suggestionID) && (type === 'category' || type === 'категория')) {
-          params.set('categoryId', suggestionID);
-          params.delete('tagId');
-        } else if (suggestionID && (type === 'tag' || type === 'тег')) {
-          params.set('tagId', suggestionID);
-          params.delete('categoryId');
-        }
-
+      const navigateByHeaderQuery = (nextQuery: string) => {
+        const currentParams = new URLSearchParams(window.location.search);
         navigate(buildEventListPath({
-          query: String(params.get('query') || '').trim(),
-          city: String(params.get('city') || '').trim(),
-          cityId: String(params.get('cityId') || '').trim(),
-          categoryId: String(params.get('categoryId') || '').trim(),
-          tagId: String(params.get('tagId') || '').trim(),
-          datePreset: String(params.get('datePreset') || '').trim(),
-          sort: String(params.get('sort') || '').trim(),
+          query: nextQuery,
+          city: String(currentParams.get('city') || '').trim(),
+          cityId: String(currentParams.get('cityId') || '').trim(),
+          tagId: String(currentParams.get('tagId') || '').trim(),
           page: 1,
         }));
       };
@@ -472,8 +378,8 @@ export async function eventListPage({ navigate }: RouteContext): Promise<RouteVi
       if (headerSearchForm instanceof HTMLFormElement) {
         headerSearchForm.addEventListener('submit', handleHeaderSearchSubmit);
         detachHeaderSuggestions = attachHeaderSearchSuggestions(headerSearchForm, {
-          onPick(query, suggestion) {
-            navigateByHeaderQuery(query, suggestion);
+          onPick(query) {
+            navigateByHeaderQuery(query);
           },
         });
       }
