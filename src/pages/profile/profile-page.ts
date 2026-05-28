@@ -739,7 +739,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         searchDebounceTimer = window.setTimeout(async () => {
           const requestId = ++searchRequestSeq;
           try {
-            const users = await searchUsers(query, 10);
+            const users = await searchUsers(query, 20, 0);
             if (requestId !== searchRequestSeq) {
               return;
             }

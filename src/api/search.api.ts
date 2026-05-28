@@ -1,5 +1,5 @@
 import { request } from './client.js';
-import type { FollowUser } from '../types/api.js';
+import type { FollowListResponse, FollowUser } from '../types/api.js';
 
 export interface SearchSuggestionItem {
   id?: string;
@@ -16,14 +16,19 @@ export async function searchAll(query: string, limit = 5): Promise<SearchResults
   return request<SearchResultsResponse>(`/api/search?${params.toString()}`);
 }
 
-export async function searchUsers(query: string, limit = 10): Promise<FollowUser[]> {
+export async function searchUsers(query: string, limit = 20, offset = 0): Promise<FollowUser[]> {
   const normalizedQuery = String(query || '').trim();
   if (normalizedQuery.length < 2) {
     return [];
   }
 
-  // `/api/search` now returns only generic search suggestions for events/categories/tags.
-  // User discovery needs a dedicated backend endpoint.
-  void limit;
-  return [];
+  const normalizedLimit = Math.max(1, Math.min(20, Math.trunc(limit) || 20));
+  const normalizedOffset = Math.max(0, Math.trunc(offset) || 0);
+  const params = new URLSearchParams({
+    query: normalizedQuery,
+    limit: String(normalizedLimit),
+    offset: String(normalizedOffset),
+  });
+  const response = await request<FollowListResponse>(`/api/users/search?${params.toString()}`);
+  return Array.isArray(response?.items) ? response.items : [];
 }
