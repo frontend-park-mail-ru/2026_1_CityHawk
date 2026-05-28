@@ -1,6 +1,6 @@
 .app-toast-root {
     position: fixed;
-    top: 24px;
+    bottom: 24px;
     right: 24px;
     z-index: 2200;
     pointer-events: none;
@@ -19,7 +19,7 @@
     box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
     border: 1px solid rgba(255, 255, 255, 0.14);
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(8px);
     transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
@@ -40,7 +40,7 @@
 
 @media (max-width: 640px) {
     .app-toast-root {
-        top: 14px;
+        bottom: 14px;
         right: 12px;
         left: 12px;
     }

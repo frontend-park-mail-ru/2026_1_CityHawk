@@ -60,7 +60,7 @@ export const APP_SHELL_URLS = [
   '/index.html',
   '/offline.html',
   '/runtime-config.js',
-  '/public/static/favicons/site.webmanifest',
+  '/manifest.webmanifest',
   '/public/static/favicons/apple-touch-icon.png',
   '/public/static/favicons/favicon-32x32.png',
   '/public/static/favicons/favicon-16x16.png',

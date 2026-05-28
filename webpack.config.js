@@ -96,6 +96,10 @@ module.exports = (_, argv = {}) => {
           from: path.resolve(__dirname, 'public/runtime-config.js'),
           to: 'runtime-config.js',
         },
+        {
+          from: path.resolve(__dirname, 'public/manifest.webmanifest'),
+          to: 'manifest.webmanifest',
+        },
       ],
     }),
     ...(isProduction
