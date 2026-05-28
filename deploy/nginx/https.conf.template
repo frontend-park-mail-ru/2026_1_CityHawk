@@ -4,12 +4,6 @@ upstream cityhawk_backend {
 }
 
 server {
-    listen 3000;
-    server_name ${SERVER_NAME};
-
-}
-
-server {
     listen 80;
     server_name ${SERVER_NAME};
 

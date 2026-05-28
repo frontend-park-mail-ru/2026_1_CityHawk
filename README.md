@@ -55,7 +55,7 @@ npm ci
 npm run dev
 ```
 
-Frontend поднимется на `http://localhost:3000`.
+Frontend поднимется на `http://localhost:8000`.
 
 ### 2) Production-like запуск
 
@@ -72,7 +72,7 @@ docker compose up --build
 
 ## Переменные окружения
 
-- `PORT` — порт frontend-сервера (по умолчанию `3000`)
+- `PORT` — порт frontend-сервера (по умолчанию `8000`)
 - `API_BASE_URL` — базовый URL backend API (по умолчанию `http://localhost:8080`)
 - `YANDEX_MAPS_API_KEY` — ключ JavaScript API Яндекс Карт для страницы `/events-map`
 

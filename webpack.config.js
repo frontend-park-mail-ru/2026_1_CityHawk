@@ -182,7 +182,7 @@ module.exports = (_, argv = {}) => {
       directory: publicPath,
     },
     historyApiFallback: true,
-    port: 3000,
+    port: 8000,
   },
   };
 };
