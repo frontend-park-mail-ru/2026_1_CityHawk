@@ -1,5 +1,6 @@
 import { API_BASE_URL } from './config.js';
 import { refresh } from './auth.api.js';
+import { translateApiErrorMessage } from './errors.js';
 import type { ApiError } from '../types/api.js';
 
 type RequestBody = object | string | number | boolean | null | RequestBody[];
@@ -132,7 +133,7 @@ export async function request<T = RequestBody>(
       errorMessage = `HTTP ${response.status}`;
     }
 
-    const error: ApiError = new Error(errorMessage);
+    const error: ApiError = new Error(translateApiErrorMessage(errorMessage, response.status));
     error.status = response.status;
     if (errorDetails) {
       error.details = errorDetails;

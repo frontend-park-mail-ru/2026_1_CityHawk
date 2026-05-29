@@ -19,6 +19,17 @@ export async function networkFirstNavigationStrategy(
       return cachedResponse;
     }
 
-    return new Response('Offline', { status: 503, statusText: 'Offline' });
+    const offlineResponse = await cache.match('/offline.html');
+    if (offlineResponse) {
+      return offlineResponse;
+    }
+
+    return new Response('Нет соединения', {
+      status: 503,
+      statusText: 'Нет соединения',
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
+    });
   }
 }

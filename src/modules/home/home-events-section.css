@@ -41,13 +41,18 @@
 }
 
 .home-events__link {
+    border: 0;
+    padding: 0;
+    background: transparent;
     flex-shrink: 0;
     color: var(--home-color-text);
+    font-family: inherit;
     font-size: var(--home-text-5);
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
     opacity: 0.75;
+    cursor: pointer;
     transition: opacity 0.2s ease;
 }
 

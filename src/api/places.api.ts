@@ -37,9 +37,12 @@ export async function getPlaceSuggestions(query: string, limit = 5): Promise<Pla
   return request<PlaceSuggestionsResponse>(`/api/place-suggestions?${params.toString()}`);
 }
 
-export async function resolvePlaceSuggestion(token: string): Promise<ResolvePlaceResponse> {
+export async function resolvePlaceSuggestion(token: string, name = ''): Promise<ResolvePlaceResponse> {
   return request<ResolvePlaceResponse>('/api/places/resolve', {
     method: 'POST',
-    body: { token },
+    body: {
+      token,
+      name: String(name || '').trim(),
+    },
   });
 }

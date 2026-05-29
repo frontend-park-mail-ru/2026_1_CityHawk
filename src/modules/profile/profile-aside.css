@@ -219,7 +219,7 @@
     }
 
     .profile__brand-name {
-        font-size: 42px;
+        font-size: 30px;
     }
 
     .profile__avatar-wrapper {
@@ -228,7 +228,7 @@
     }
 
     .profile__user-name {
-        font-size: 24px;
+        font-size: 20px;
     }
 
     .profile__menu-item {
@@ -245,6 +245,6 @@
 
 @media (max-width: 480px) {
     .profile__brand-name {
-        font-size: 34px;
+        font-size: 30px;
     }
 }

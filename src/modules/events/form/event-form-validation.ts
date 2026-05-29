@@ -94,8 +94,12 @@ export function createEventFormValidator({
       return false;
     }
 
-    if (!validateRequiredField(values.placeId, elements.placeInput, elements.placeError, 'Укажи место события')) {
+    if (!values.isAnytime && !validateRequiredField(values.placeId, elements.placeInput, elements.placeError, 'Укажи место события')) {
       return false;
+    }
+
+    if (values.isAnytime) {
+      clearFieldError(elements.placeInput, elements.placeError);
     }
 
     if (!validateRequiredField(values.category, elements.categoryInput, elements.categoryError, 'Укажи категорию из доступных вариантов')) {

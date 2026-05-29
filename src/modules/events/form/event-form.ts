@@ -20,6 +20,28 @@ import { clearFieldError, showFieldError } from './event-form-validation.js';
 const GALLERY_PREVIEW_SLOTS = 4;
 const PLACE_SUGGESTIONS_LIMIT = 5;
 
+function getTodayDateInputValue(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getEventImageUploadErrorMessage(error: unknown): string {
+  const source = error instanceof Error ? error.message : '';
+
+  if (/too large|file is too large/i.test(source)) {
+    return 'Загрузите изображения до 5 МБ';
+  }
+
+  if (/image/i.test(source)) {
+    return 'Загрузите PNG, JPEG, GIF или WebP';
+  }
+
+  return source || 'Не удалось подготовить изображения';
+}
+
 export interface EventFormMultipleRow {
   date: string;
   startTime: string;
@@ -155,7 +177,7 @@ function normalizeInitialValues(
     periodEnd: String(initialValues.periodEnd || '').trim(),
     isAnytime: Boolean(initialValues.isAnytime),
     placeId: String(initialValues.placeId || '').trim(),
-    placeQuery: '',
+    placeQuery: String(initialValues.placeQuery || '').trim(),
     category: String(initialValues.category || '').trim(),
     categoryQuery: '',
     tags: normalizeTags(initialValues.tags),
@@ -382,7 +404,7 @@ function createPlaceLookupController(form: HTMLFormElement): PlaceLookupControll
         return value;
       }
 
-      const resolved = await resolvePlaceSuggestion(token);
+      const resolved = await resolvePlaceSuggestion(token, value);
       const resolvedPlaceID = String(resolved?.id || '').trim();
 
       if (!resolvedPlaceID) {
@@ -724,10 +746,14 @@ export function renderEventForm(state: EventFormRenderState = {}): string {
   };
   const submitLabel = state.submitLabel
     || (mode === 'edit' ? 'Сохранить изменения' : 'Опубликовать событие');
+  const isCreateMode = mode === 'create';
+  const minDate = getTodayDateInputValue();
 
   return renderTemplate('event-form', {
     categories,
     deleteHref: state.deleteHref || '',
+    isCreateMode,
+    minDate,
     places,
     tags,
     initialValues: resolvedInitialValues,
@@ -769,6 +795,7 @@ function collectFormValues(form: HTMLFormElement): EventFormValues {
       formData.get('place'),
       { allowRawValue: true },
     ),
+    placeName: String(formData.get('place') || '').trim(),
     category: resolveReferenceId(form, 'event-create-category-options', formData.get('category')),
     tags: resolveReferenceIdsFromCsv(form, 'event-create-tag-options', formData.get('tags')),
     description: String(formData.get('description') || '').trim(),
@@ -823,21 +850,23 @@ export function attachEventForm(root: ParentNode, options: EventFormOptions = {}
     }
 
     const values = collectFormValues(form);
-    try {
-      values.placeId = await placeLookup.resolvePlaceValue(values.placeId);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Не удалось подтвердить выбранное место';
-      showFieldError(elements.placeInput, elements.placeError, message);
-      return;
-    }
+    if (!values.isAnytime) {
+      try {
+        values.placeId = await placeLookup.resolvePlaceValue(values.placeId);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Не удалось подтвердить выбранное место';
+        showFieldError(elements.placeInput, elements.placeError, message);
+        return;
+      }
 
-    if (!isUuid(values.placeId)) {
-      showFieldError(
-        elements.placeInput,
-        elements.placeError,
-        'Выбери место из подсказок, чтобы добавить событие',
-      );
-      return;
+      if (!isUuid(values.placeId)) {
+        showFieldError(
+          elements.placeInput,
+          elements.placeError,
+          'Выбери место из подсказок, чтобы добавить событие',
+        );
+        return;
+      }
     }
     clearFieldError(elements.placeInput, elements.placeError);
 
@@ -856,8 +885,7 @@ export function attachEventForm(root: ParentNode, options: EventFormOptions = {}
         options.onSubmit(payload, form, event);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Не удалось подготовить изображения';
-      showToast(message, { type: 'error' });
+      showToast(getEventImageUploadErrorMessage(error), { type: 'error' });
     }
   };
 

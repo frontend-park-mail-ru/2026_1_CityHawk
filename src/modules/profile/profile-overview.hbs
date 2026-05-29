@@ -19,17 +19,21 @@
         <div class="profile-hero__head">
           <h1 class="profile-hero__name">{{user.name}}</h1>
         </div>
-        <div class="profile-hero__location">Город: {{user.cityName}}</div>
-        <p class="profile-hero__bio">{{user.bio}}</p>
 
-        <div class="profile-hero__tags">
-          {{#each user.tags}}
-          <span class="profile-hero__tag">{{this}}</span>
-          {{/each}}
+        <div class="profile-hero__details">
+          <div class="profile-hero__location">Город: {{user.cityName}}</div>
+          <p class="profile-hero__bio">{{user.bio}}</p>
+
+          <div class="profile-hero__tags">
+            {{#each user.tags}}
+            <span class="profile-hero__tag">{{this}}</span>
+            {{/each}}
+          </div>
         </div>
       </div>
 
       <div class="profile-hero__stats">
+        {{#if isOwnProfile}}
         <div class="profile-hero__stats-row">
           <button class="profile-stat profile-stat--button" type="button" data-role="profile-open-follows" data-tab="followers">
             <div class="profile-stat__value">{{stats.myEvents}}</div>
@@ -46,13 +50,22 @@
         <button class="profile__button profile__button--secondary profile-hero__find ui-button ui-button--ghost ui-button--pill" type="button" data-role="profile-open-friends">
           Найти друзей
         </button>
+        {{/if}}
       </div>
     </section>
 
     <section class="profile-section profile-section--home-like">
       <div class="home-events__head">
-        <h2 class="home-events__title">Мои события</h2>
-        <a href="/events" class="home-events__link">показать ещё...</a>
+        <h2 class="home-events__title">{{#if isOwnProfile}}Иду с друзьями{{else}}События пользователя{{/if}}</h2>
+        {{#if myEventCardsMore.length}}
+        <button
+          type="button"
+          class="home-events__link"
+          data-role="profile-expand-events"
+          data-target="profile-my-events-more"
+          aria-expanded="false"
+        >показать ещё...</button>
+        {{/if}}
       </div>
 
       {{#if myEventCards.length}}
@@ -61,15 +74,31 @@
         {{{this}}}
         {{/each}}
       </div>
+      {{#if myEventCardsMore.length}}
+      <div class="profile-event-grid home-events__grid" data-role="profile-my-events-more" hidden>
+        {{#each myEventCardsMore}}
+        {{{this}}}
+        {{/each}}
+      </div>
+      {{/if}}
       {{else}}
-      <p class="profile-section__empty">Пока нет событий. Создай первое мероприятие.</p>
+      <p class="profile-section__empty">{{#if isOwnProfile}}Пока нет принятых приглашений на события.{{else}}Пока нет событий.{{/if}}</p>
       {{/if}}
     </section>
 
+    {{#if isOwnProfile}}
     <section class="profile-section profile-section--home-like">
       <div class="home-events__head">
-        <h2 class="home-events__title">Избранное</h2>
-        <a href="{{favoriteMoreHref}}" class="home-events__link">{{favoriteMoreLabel}}</a>
+        <h2 class="home-events__title">Хочу сходить</h2>
+        {{#if favoriteEventCardsMore.length}}
+        <button
+          type="button"
+          class="home-events__link"
+          data-role="profile-expand-events"
+          data-target="profile-favorite-events-more"
+          aria-expanded="false"
+        >показать ещё...</button>
+        {{/if}}
       </div>
 
       {{#if favoriteEventCards.length}}
@@ -78,28 +107,87 @@
         {{{this}}}
         {{/each}}
       </div>
+      {{#if favoriteEventCardsMore.length}}
+      <div class="profile-event-grid home-events__grid" data-role="profile-favorite-events-more" hidden>
+        {{#each favoriteEventCardsMore}}
+        {{{this}}}
+        {{/each}}
+      </div>
+      {{/if}}
       {{else}}
       <p class="profile-section__empty">Добавляй мероприятия в избранное, чтобы они появились здесь.</p>
       {{/if}}
     </section>
+
+    <section class="profile-section profile-section--home-like">
+      <div class="home-events__head">
+        <h2 class="home-events__title">Организую</h2>
+        {{#if createdEventCardsMore.length}}
+        <button
+          type="button"
+          class="home-events__link"
+          data-role="profile-expand-events"
+          data-target="profile-created-events-more"
+          aria-expanded="false"
+        >показать ещё...</button>
+        {{/if}}
+      </div>
+
+      {{#if createdEventCards.length}}
+      <div class="profile-event-grid home-events__grid">
+        {{#each createdEventCards}}
+        {{{this}}}
+        {{/each}}
+      </div>
+      {{#if createdEventCardsMore.length}}
+      <div class="profile-event-grid home-events__grid" data-role="profile-created-events-more" hidden>
+        {{#each createdEventCardsMore}}
+        {{{this}}}
+        {{/each}}
+      </div>
+      {{/if}}
+      {{else}}
+      <p class="profile-section__empty">Созданные тобой события появятся здесь.</p>
+      {{/if}}
+    </section>
+    {{/if}}
   </div>
 
+  {{#if isOwnProfile}}
   <div class="profile-follows-modal" data-role="profile-follows-modal" hidden>
     <div class="profile-follows-modal__backdrop" data-role="profile-follows-close"></div>
     <section class="profile-follows-modal__dialog" role="dialog" aria-modal="true" aria-label="Друзья и подписки">
+      <button type="button" class="profile-follows-modal__close" data-role="profile-follows-close" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6l12 12" />
+          <path d="M18 6 6 18" />
+        </svg>
+      </button>
       <header class="profile-follows-modal__header">
-        <button type="button" class="profile-follows-modal__close" data-role="profile-follows-close" aria-label="Закрыть">
-          ×
-        </button>
+        <svg class="profile-follows-modal__header-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
+          <circle cx="9.5" cy="7" r="4" />
+          <path d="M20 8v6" />
+          <path d="M23 11h-6" />
+        </svg>
+        <div>
+          <h2 class="profile-follows-modal__title">Друзья и подписки</h2>
+        </div>
       </header>
       <div class="profile-follows-modal__search-row">
-        <input
-          type="text"
-          class="profile-follows-modal__search-input"
-          data-role="profile-follows-search"
-          placeholder="Поиск друзей по имени или городу"
-          autocomplete="off"
-        />
+        <label class="profile-follows-modal__search">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m16 16 4 4" />
+          </svg>
+          <input
+            type="text"
+            class="profile-follows-modal__search-input"
+            data-role="profile-follows-search"
+            placeholder="Поиск друзей по имени или городу"
+            autocomplete="off"
+          />
+        </label>
         <div class="profile-follows-modal__tabs">
           <button type="button" class="profile-follows-modal__tab ui-button ui-button--ghost" data-role="profile-follows-tab" data-tab="discover">
             Найти друзей
@@ -115,4 +203,5 @@
       <div class="profile-follows-modal__list" data-role="profile-follows-list"></div>
     </section>
   </div>
+  {{/if}}
 </section>

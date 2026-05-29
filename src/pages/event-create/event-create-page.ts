@@ -3,6 +3,7 @@ import { getMeOrNull } from '../../api/profile.api.js';
 import '../../modules/events/form/event-editor-screen.css';
 import '../../modules/events/form/event-form.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
+import { showToast } from '../../app/ui/toast.js';
 import { renderEventForm } from '../../modules/events/form/event-form.js';
 import {
   attachEventEditorScreen,
@@ -10,10 +11,28 @@ import {
 } from '../../modules/events/form/event-editor-screen.js';
 import { mapEventFormPayloadToEventPayload } from '../../modules/events/form/event-form-payload.js';
 import { loadEventFormReferenceData } from '../../modules/events/form/event-form-reference-data.js';
-import type { User } from '../../types/api.js';
+import type { ApiError, User } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
 type HeaderUser = User & { displayName: string };
+
+function getEventCreateErrorMessage(error: unknown): string {
+  const apiError = error as ApiError | undefined;
+  const details = apiError?.details || {};
+  const detail = Object.values(details).find((value) => typeof value === 'string' && value);
+  const message = error instanceof Error ? error.message : '';
+  const source = detail || message;
+
+  if (/too large|file is too large/i.test(source)) {
+    return 'Загрузите изображения до 5 МБ';
+  }
+
+  if (/image/i.test(source)) {
+    return 'Загрузите PNG, JPEG, GIF или WebP';
+  }
+
+  return message || 'Не удалось опубликовать событие';
+}
 
 /**
  * Страница создания события.
@@ -65,8 +84,7 @@ export async function eventCreatePage({ navigate }: RouteContext): Promise<Route
 
             navigate('/events');
           } catch (error) {
-            const message = error instanceof Error ? error.message : 'Не удалось опубликовать событие';
-            window.alert(message);
+            showToast(getEventCreateErrorMessage(error), { type: 'error' });
           }
         },
         onCancel() {

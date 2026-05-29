@@ -1,5 +1,6 @@
 import { applyCsrfHeader, normalizeApiResponse, request } from './client.js';
 import { API_BASE_URL } from './config.js';
+import { translateApiErrorMessage } from './errors.js';
 import type {
   ApiError,
   EventDetails,
@@ -46,10 +47,36 @@ export async function updateEvent(
   });
 }
 
+async function clearEventCache(): Promise<void> {
+  if (!('caches' in window)) {
+    return;
+  }
+
+  const cacheNames = await caches.keys();
+  await Promise.all(cacheNames.map(async (cacheName) => {
+    const cache = await caches.open(cacheName);
+    const requests = await cache.keys();
+
+    await Promise.all(
+      requests
+        .filter((cachedRequest) => {
+          const url = new URL(cachedRequest.url);
+          return url.pathname.startsWith('/api/events')
+            || url.pathname.startsWith('/api/me/favorites');
+        })
+        .map((cachedRequest) => cache.delete(cachedRequest)),
+    );
+  }));
+}
+
 export async function deleteEvent(eventId: string | number): Promise<{ ok: true }> {
-  return request<{ ok: true }>(`/api/events/${eventId}`, {
+  const response = await request<{ ok: true }>(`/api/events/${eventId}`, {
     method: 'DELETE',
   });
+
+  await clearEventCache().catch(() => {});
+
+  return response;
 }
 
 function appendJsonField(formData: FormData, key: string, value: unknown): void {
@@ -89,6 +116,7 @@ async function requestMultipart<TResponse>(
 
   if (!response.ok) {
     let errorMessage = `HTTP ${response.status}`;
+    let errorDetails: Record<string, string> | undefined;
 
     try {
       const errorData = await response.json() as { error?: string; details?: Record<string, string> };
@@ -96,6 +124,7 @@ async function requestMultipart<TResponse>(
         errorMessage = errorData.error;
       }
       if (errorData?.details && typeof errorData.details === 'object') {
+        errorDetails = errorData.details;
         const firstDetail = Object.values(errorData.details).find((value) => typeof value === 'string' && value);
         if (firstDetail) {
           errorMessage = `${errorMessage}: ${firstDetail}`;
@@ -105,8 +134,11 @@ async function requestMultipart<TResponse>(
       errorMessage = `HTTP ${response.status}`;
     }
 
-    const error: ApiError = new Error(errorMessage);
+    const error: ApiError = new Error(translateApiErrorMessage(errorMessage, response.status));
     error.status = response.status;
+    if (errorDetails) {
+      error.details = errorDetails;
+    }
     throw error;
   }
 

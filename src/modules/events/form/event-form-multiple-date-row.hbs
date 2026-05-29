@@ -6,6 +6,7 @@
       class="event-create-form__input"
       name="multipleDates"
       data-role="event-create-multiple-date-input"
+      {{#if isCreateMode}}min="{{minDate}}"{{/if}}
     />
   </label>
   <label class="event-create-form__field event-create-form__field--compact">

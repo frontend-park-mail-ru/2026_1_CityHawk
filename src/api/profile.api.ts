@@ -1,5 +1,6 @@
 import { applyCsrfHeader, normalizeApiResponse, request } from './client.js';
 import { API_BASE_URL } from './config.js';
+import { translateApiErrorMessage } from './errors.js';
 import type { ApiError, UpdateProfilePayload, User } from '../types/api.js';
 
 export async function getMe(): Promise<User> {
@@ -51,9 +52,6 @@ export async function updateProfileMultipart(
   if (payload.email !== undefined) {
     formData.append('email', payload.email);
   }
-  if (payload.userSurname !== undefined) {
-    formData.append('userSurname', payload.userSurname);
-  }
   if (payload.birthday !== undefined) {
     formData.append('birthday', payload.birthday);
   }
@@ -78,18 +76,25 @@ export async function updateProfileMultipart(
 
   if (!response.ok) {
     let errorMessage = `HTTP ${response.status}`;
+    let errorDetails: Record<string, string> | undefined;
 
     try {
-      const errorData = await response.json() as { error?: string };
+      const errorData = await response.json() as { error?: string; details?: Record<string, string> };
       if (typeof errorData?.error === 'string' && errorData.error) {
         errorMessage = errorData.error;
+      }
+      if (errorData?.details && typeof errorData.details === 'object') {
+        errorDetails = errorData.details;
       }
     } catch {
       errorMessage = `HTTP ${response.status}`;
     }
 
-    const error: ApiError = new Error(errorMessage);
+    const error: ApiError = new Error(translateApiErrorMessage(errorMessage, response.status));
     error.status = response.status;
+    if (errorDetails) {
+      error.details = errorDetails;
+    }
     throw error;
   }
 

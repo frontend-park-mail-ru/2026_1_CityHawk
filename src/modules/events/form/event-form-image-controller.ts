@@ -1,8 +1,17 @@
+import { showToast } from '../../../app/ui/toast.js';
+
 export interface ImageFieldControllerOptions {
   trigger: Element | null;
   input: Element | null;
   removeButton: Element | null;
   initialPreviewUrl?: string;
+}
+
+const IMAGE_MAX_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
+
+function isSupportedImageFile(file: File): boolean {
+  return ALLOWED_IMAGE_TYPES.has(file.type);
 }
 
 export interface ImageFieldController {
@@ -51,6 +60,16 @@ export async function buildImageData(
     ...(posterFile ? [posterFile] : []),
     ...galleryFiles,
   ];
+  const hasTooLargeImage = imageFiles.some((file) => file.size > IMAGE_MAX_SIZE_BYTES);
+  const hasUnsupportedImage = imageFiles.some((file) => !isSupportedImageFile(file));
+
+  if (hasTooLargeImage) {
+    throw new Error('Загрузите изображения до 5 МБ');
+  }
+
+  if (hasUnsupportedImage) {
+    throw new Error('Загрузите PNG, JPEG, GIF или WebP');
+  }
 
   const fallbackPreviewUrls = [
     posterController.getPreviewUrl(),
@@ -121,6 +140,18 @@ export function createImageFieldController({
 
     const nextFile = input.files?.[0];
     if (!nextFile) {
+      return;
+    }
+
+    if (!isSupportedImageFile(nextFile)) {
+      showToast('Загрузите PNG, JPEG, GIF или WebP', { type: 'error' });
+      input.value = '';
+      return;
+    }
+
+    if (nextFile.size > IMAGE_MAX_SIZE_BYTES) {
+      showToast('Загрузите изображение до 5 МБ', { type: 'error' });
+      input.value = '';
       return;
     }
 

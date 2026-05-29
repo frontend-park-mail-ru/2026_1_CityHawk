@@ -1,0 +1,24 @@
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY webpack.config.js babel.config.json tsconfig.json tsconfig.server.json eslint.config.mjs ./
+COPY public ./public
+COPY server ./server
+COPY src ./src
+
+RUN npm run build
+
+FROM nginx:1.29-alpine AS runtime
+
+ARG NGINX_TEMPLATE=default.conf.template
+
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY deploy/nginx/${NGINX_TEMPLATE} /etc/nginx/templates/default.conf.template
+
+EXPOSE 80 443
+
+CMD ["nginx", "-g", "daemon off;"]

@@ -18,32 +18,34 @@ function normalizeSuggestionType(value: unknown): string {
   return String(value || '').trim().toLowerCase();
 }
 
-const SUGGESTION_META_LABELS: Record<string, string> = {
-  category: 'Категория',
-  'категория': 'Категория',
-  tag: 'Тег',
-  'тег': 'Тег',
-  event: 'Событие',
-  'событие': 'Событие',
-  user: 'Пользователь',
-  'пользователь': 'Пользователь',
-};
-
 function isHeaderSearchSuggestion(item: HeaderSearchSuggestion | null): item is HeaderSearchSuggestion {
   return item !== null;
 }
 
-function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
+function getSuggestionItemsSource(payload: unknown): unknown[] {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
   if (!payload || typeof payload !== 'object') {
     return [];
   }
 
-  const source = payload as {
-    items?: unknown;
-  };
+  const source = payload as Record<string, unknown>;
+  const directList = source.items || source.results || source.suggestions || source.data;
 
-  return Array.isArray(source.items)
-    ? source.items
+  if (Array.isArray(directList)) {
+    return directList;
+  }
+
+  return Object.values(source).flatMap((value) => (Array.isArray(value) ? value : []));
+}
+
+function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
+  const items = getSuggestionItemsSource(payload);
+
+  return items.length
+    ? items
       .map((item, index) => {
         if (typeof item === 'string') {
           const label = item.trim();
@@ -66,8 +68,7 @@ function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
         const label = String(
           typedItem.label
           || typedItem.title
-          || typedItem.name
-          || typedItem.query
+          || (item as Record<string, unknown>).text
           || '',
         ).trim();
 
@@ -76,18 +77,16 @@ function normalizeSuggestions(payload: unknown): HeaderSearchSuggestion[] {
         }
 
         return {
-          id: String(typedItem.id || '').trim(),
-          type: normalizeSuggestionType(typedItem.type || 'query') || 'query',
+          id: String(
+            typedItem.id
+            || '',
+          ).trim(),
+          type: 'query',
           label,
         } satisfies HeaderSearchSuggestion;
       })
       .filter(isHeaderSearchSuggestion)
     : [];
-}
-
-function getSuggestionMetaLabel(type: string): string {
-  const normalizedType = normalizeSuggestionType(type);
-  return SUGGESTION_META_LABELS[normalizedType] || '';
 }
 
 export function attachHeaderSearchSuggestions(
@@ -136,16 +135,7 @@ export function attachHeaderSearchSuggestions(
         const title = document.createElement('span');
         title.className = 'site-header__search-suggestion-title';
         title.textContent = item.label;
-
-        const metaText = getSuggestionMetaLabel(item.type);
-        if (metaText) {
-          const meta = document.createElement('span');
-          meta.className = 'site-header__search-suggestion-meta';
-          meta.textContent = metaText;
-          button.append(title, meta);
-        } else {
-          button.append(title);
-        }
+        button.append(title);
         panel.append(button);
       });
 

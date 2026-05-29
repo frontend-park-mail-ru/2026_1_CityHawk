@@ -1,5 +1,6 @@
 import { addEventToFavorites, removeEventFromFavorites } from '../../api/favorites.api.js';
 import { showToast } from '../../app/ui/toast.js';
+import { getUserErrorMessage } from '../../api/errors.js';
 import type { ApiError } from '../../types/api.js';
 
 function setFavoriteUiState(
@@ -71,8 +72,7 @@ export function attachEventCardFavorites(root: HTMLElement): () => void {
         return;
       }
 
-      const message = error instanceof Error ? error.message : 'Не удалось обновить избранное';
-      showToast(message, { type: 'error' });
+      showToast(getUserErrorMessage(error, 'Не удалось обновить избранное'), { type: 'error' });
     } finally {
       pendingByEventId.delete(eventId);
     }

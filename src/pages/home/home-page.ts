@@ -1,4 +1,5 @@
 import { getHome } from '../../api/home.api.js';
+import { getMyFavorites } from '../../api/favorites.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
 import { logout } from '../../api/auth.api.js';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
@@ -8,7 +9,7 @@ import { renderHomeMoodSection } from '../../modules/home/home-mood-section.js';
 import { attachHeroSearch, renderHeroSearch } from '../../modules/home/hero-search.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { formatEventDateOrPeriod } from '../../modules/events/common/event-date-label.js';
-import type { EventCard, HomeResponse, User } from '../../types/api.js';
+import type { Collection, EventCard, HomeResponse, User } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
 interface HomeEventCardViewModel {
@@ -25,7 +26,7 @@ interface MoodViewModel {
   imageUrl: string;
   title: string;
   modifier?: string;
-  tagId: string;
+  collectionId: string;
   href: string;
 }
 
@@ -41,8 +42,12 @@ function mapFeaturedEventToCardViewModel(event: Partial<EventCard> = {}): HomeEv
     ? event.tags.map((tag) => tag?.name || '').filter(Boolean)
     : [];
   const placeParts = [
-    event.nextSession?.place?.name,
+    event.nextSession?.placeName || event.nextSession?.place?.name,
     event.nextSession?.place?.addressLine,
+  ].filter(Boolean);
+  const fallbackPlaceParts = [
+    event.placeName || event.place?.name,
+    event.place?.addressLine,
   ].filter(Boolean);
 
   return {
@@ -51,54 +56,21 @@ function mapFeaturedEventToCardViewModel(event: Partial<EventCard> = {}): HomeEv
     title: event.title || '',
     tags,
     dateText: formatEventDateOrPeriod(event),
-    placeText: placeParts.join(', '),
+    placeText: placeParts.join(', ') || fallbackPlaceParts.join(', '),
     isFavorite: Boolean(event.isFavorite),
   };
 }
 
-function buildPopularTagMoodCards(events: EventCard[]): MoodViewModel[] {
-  const stats = new Map<string, { id: string; title: string; count: number; imageUrl: string }>();
-
-  events.forEach((event) => {
-    const eventImage = String(event?.coverImageUrl || '').trim();
-    const tags = Array.isArray(event?.tags) ? event.tags : [];
-
-    tags.forEach((tag) => {
-      const id = String(tag?.id || '').trim();
-      const name = String(tag?.name || '').trim();
-
-      if (!id || !name) {
-        return;
-      }
-
-      const existing = stats.get(id);
-
-      if (existing) {
-        existing.count += 1;
-        if (!existing.imageUrl && eventImage) {
-          existing.imageUrl = eventImage;
-        }
-        return;
-      }
-
-      stats.set(id, {
-        id,
-        title: name,
-        count: 1,
-        imageUrl: eventImage,
-      });
-    });
-  });
-
-  const top = Array.from(stats.values())
-    .sort((a, b) => b.count - a.count || a.title.localeCompare(b.title, 'ru'))
+function buildCollectionMoodCards(collections: Collection[]): MoodViewModel[] {
+  const top = collections
     .slice(0, 5)
     .map((item, index) => ({
-      tagId: item.id,
-      title: item.title,
-      imageUrl: item.imageUrl || FALLBACK_MOOD_IMAGES[index % FALLBACK_MOOD_IMAGES.length],
-      href: `/events?tagId=${encodeURIComponent(item.id)}`,
-    }));
+      collectionId: String(item.id || '').trim(),
+      title: String(item.title || '').trim() || 'Подборка',
+      imageUrl: String(item.imageUrl || '').trim() || FALLBACK_MOOD_IMAGES[index % FALLBACK_MOOD_IMAGES.length],
+      href: `/events-map?collectionId=${encodeURIComponent(String(item.id || '').trim())}`,
+    }))
+    .filter((item) => item.collectionId);
 
   if (top.length === 5) {
     return top;
@@ -109,10 +81,10 @@ function buildPopularTagMoodCards(events: EventCard[]): MoodViewModel[] {
 
   for (let index = result.length; index < 5; index += 1) {
     result.push({
-      tagId: '',
+      collectionId: '',
       title: fallbackTitles[index] || 'Популярное',
       imageUrl: FALLBACK_MOOD_IMAGES[index % FALLBACK_MOOD_IMAGES.length],
-      href: '/events',
+      href: '/events-map',
     });
   }
 
@@ -222,6 +194,30 @@ export async function homePage({ navigate }: RouteContext): Promise<RouteView> {
   } catch {
     me = null;
   }
+
+  if (me) {
+    try {
+      const favoritesResponse = await getMyFavorites(100, 0);
+      const favoriteIds = new Set(
+        Array.isArray(favoritesResponse?.items)
+          ? favoritesResponse.items.map((item) => String(item.id || '').trim()).filter(Boolean)
+          : [],
+      );
+
+      if (favoriteIds.size > 0) {
+        homeData = {
+          ...homeData,
+          featuredEvents: homeData.featuredEvents.map((event) => ({
+            ...event,
+            isFavorite: Boolean(event?.isFavorite) || favoriteIds.has(String(event?.id || '').trim()),
+          })),
+        };
+      }
+    } catch {
+      // Keep homepage resilient even if favorites sync is temporarily unavailable.
+    }
+  }
+
   const user: (User & { displayName: string }) | null = me
     ? {
       ...me,
@@ -230,7 +226,7 @@ export async function homePage({ navigate }: RouteContext): Promise<RouteView> {
     : null;
 
   const eventCards = homeData.featuredEvents.map(mapFeaturedEventToCardViewModel);
-  const moodCards = buildPopularTagMoodCards(homeData.featuredEvents);
+  const moodCards = buildCollectionMoodCards(homeData.collections);
   const moodLeft = moodCards.slice(0, 3).map((card, index) => ({
     ...card,
     modifier: index === 0 ? 'mood-card--wide' : '',

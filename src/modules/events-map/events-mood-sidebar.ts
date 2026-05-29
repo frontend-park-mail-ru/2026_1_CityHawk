@@ -7,13 +7,11 @@ export interface EventsMapMoodCard {
 }
 
 export interface EventsMapMoodSidebarState {
-  heading: string;
   cards: EventsMapMoodCard[];
 }
 
 export function renderEventsMapMoodSidebar(state: EventsMapMoodSidebarState): string {
   return renderTemplate('events-mood-sidebar', {
-    heading: state.heading,
     cards: Array.isArray(state.cards) ? state.cards : [],
   });
 }

@@ -1,10 +1,9 @@
 <section class="event-list-catalog">
-  <div class="event-list-catalog__head">
-    <h2 class="event-list-catalog__title">События</h2>
-    {{#if canCreateEvent}}
+  {{#if canCreateEvent}}
+    <div class="event-list-catalog__head">
       <a href="/events/new" class="event-list-catalog__create">Создать событие</a>
-    {{/if}}
-  </div>
+    </div>
+  {{/if}}
 
   {{#if hasCards}}
     <div class="event-list-catalog__grid">
@@ -12,6 +11,38 @@
         {{{this}}}
       {{/each}}
     </div>
+
+    {{#if hasPagination}}
+      <nav class="event-list-catalog__pagination" aria-label="Пагинация событий">
+        {{#if prevHref}}
+          <a href="{{prevHref}}" class="event-list-catalog__page-link">Назад</a>
+        {{else}}
+          <span class="event-list-catalog__page-link event-list-catalog__page-link--disabled">Назад</span>
+        {{/if}}
+
+        <div class="event-list-catalog__page-list">
+          {{#each pages}}
+            {{#if isGap}}
+              <span class="event-list-catalog__page-gap">{{label}}</span>
+            {{else}}
+              <a
+                href="{{href}}"
+                class="event-list-catalog__page-link{{#if active}} event-list-catalog__page-link--active{{/if}}"
+                {{#if active}}aria-current="page"{{/if}}
+              >
+                {{label}}
+              </a>
+            {{/if}}
+          {{/each}}
+        </div>
+
+        {{#if nextHref}}
+          <a href="{{nextHref}}" class="event-list-catalog__page-link">Далее</a>
+        {{else}}
+          <span class="event-list-catalog__page-link event-list-catalog__page-link--disabled">Далее</span>
+        {{/if}}
+      </nav>
+    {{/if}}
   {{else}}
     <div class="event-list-catalog__empty">
       <h2 class="event-list-catalog__empty-title">Ничего не найдено</h2>

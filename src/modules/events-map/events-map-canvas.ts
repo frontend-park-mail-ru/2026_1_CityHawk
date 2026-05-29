@@ -1,14 +1,6 @@
 import { YANDEX_MAPS_API_KEY } from '../../api/config.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 
-type MapFilterName = 'district' | 'style' | 'season' | 'sort';
-
-export interface EventsMapFilterOption {
-  value: string;
-  label: string;
-  selected: boolean;
-}
-
 export interface EventsMapPin {
   id: string;
   title: string;
@@ -20,16 +12,11 @@ export interface EventsMapPin {
 }
 
 export interface EventsMapCanvasState {
-  districtOptions: EventsMapFilterOption[];
-  styleOptions: EventsMapFilterOption[];
-  seasonOptions: EventsMapFilterOption[];
-  sortOptions: EventsMapFilterOption[];
   hasPins: boolean;
 }
 
 export interface EventsMapCanvasAttachOptions {
   pins: EventsMapPin[];
-  onFilterChange?: (name: MapFilterName, value: string) => void;
   onPinPick?: (pinId: string) => void;
 }
 
@@ -276,221 +263,9 @@ export function attachEventsMapCanvas(
     return () => {};
   }
 
-  const detachCustomSelects = attachMapCustomDropdowns(host);
-  const selects = Array.from(host.querySelectorAll<HTMLSelectElement>('select.events-map-canvas__input'));
-  const handleFilterChange = (event: Event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLSelectElement)) {
-      return;
-    }
-
-    const name = String(target.name || '').trim() as MapFilterName;
-    if (!['district', 'style', 'season', 'sort'].includes(name)) {
-      return;
-    }
-
-    options.onFilterChange?.(name, String(target.value || '').trim());
-  };
-
-  selects.forEach((select) => {
-    select.addEventListener('change', handleFilterChange);
-  });
-
   const detachMap = attachYandexMap(host, options.pins, options.onPinPick);
 
   return () => {
-    detachCustomSelects();
     detachMap();
-    selects.forEach((select) => {
-      select.removeEventListener('change', handleFilterChange);
-    });
-  };
-}
-
-function attachMapCustomDropdowns(host: HTMLElement): () => void {
-  const selects = Array.from(host.querySelectorAll<HTMLSelectElement>('select.events-map-canvas__input'));
-  const detachList: Array<() => void> = [];
-  let openMenu: HTMLElement | null = null;
-  const defaultMenuParent = new WeakMap<HTMLElement, HTMLElement>();
-
-  const placeMenu = (menu: HTMLElement, trigger: HTMLButtonElement) => {
-    const rect = trigger.getBoundingClientRect();
-    menu.style.position = 'fixed';
-    menu.style.left = `${Math.round(rect.left)}px`;
-    menu.style.top = `${Math.round(rect.bottom + 8)}px`;
-    menu.style.width = `${Math.round(rect.width)}px`;
-  };
-
-  const restoreMenu = (menu: HTMLElement) => {
-    const parent = defaultMenuParent.get(menu);
-    if (parent instanceof HTMLElement) {
-      parent.append(menu);
-    }
-    menu.style.position = '';
-    menu.style.left = '';
-    menu.style.top = '';
-    menu.style.width = '';
-  };
-
-  const closeOpenMenu = () => {
-    if (!openMenu) {
-      return;
-    }
-
-    const trigger = openMenu.closest('.events-map-canvas__custom-select')
-      ?.querySelector<HTMLButtonElement>('.events-map-canvas__custom-trigger');
-    openMenu.hidden = true;
-    restoreMenu(openMenu);
-    trigger?.setAttribute('aria-expanded', 'false');
-    openMenu = null;
-  };
-
-  selects.forEach((select) => {
-    const field = select.closest('.events-map-canvas__filter');
-    if (!(field instanceof HTMLElement)) {
-      return;
-    }
-
-    const optionItems = Array.from(select.options).map((option) => ({
-      value: option.value,
-      label: option.textContent || '',
-    }));
-
-    const custom = document.createElement('div');
-    custom.className = 'events-map-canvas__custom-select';
-
-    const trigger = document.createElement('button');
-    trigger.type = 'button';
-    trigger.className = 'events-map-canvas__custom-trigger';
-    trigger.setAttribute('aria-haspopup', 'listbox');
-    trigger.setAttribute('aria-expanded', 'false');
-
-    const menu = document.createElement('div');
-    menu.className = 'events-map-canvas__custom-menu';
-    menu.setAttribute('role', 'listbox');
-    menu.hidden = true;
-
-    optionItems.forEach((item) => {
-      const optionButton = document.createElement('button');
-      optionButton.type = 'button';
-      optionButton.className = 'events-map-canvas__custom-option';
-      optionButton.dataset.value = item.value;
-      optionButton.textContent = item.label;
-      menu.append(optionButton);
-    });
-
-    custom.append(trigger, menu);
-    defaultMenuParent.set(menu, custom);
-    field.append(custom);
-    select.classList.add('events-map-canvas__input--hidden');
-
-    const sync = () => {
-      const selectedOption = select.selectedOptions.item(0);
-      trigger.textContent = selectedOption?.textContent || optionItems[0]?.label || '';
-      trigger.classList.toggle('events-map-canvas__custom-trigger--active', select.value !== '');
-
-      Array.from(menu.querySelectorAll<HTMLButtonElement>('.events-map-canvas__custom-option'))
-        .forEach((button) => {
-          const isActive = button.dataset.value === select.value;
-          button.classList.toggle('events-map-canvas__custom-option--active', isActive);
-          button.setAttribute('aria-selected', isActive ? 'true' : 'false');
-        });
-    };
-
-    sync();
-
-    const handleTriggerClick = () => {
-      if (openMenu && openMenu !== menu) {
-        closeOpenMenu();
-      }
-
-      if (menu.hidden) {
-        if (menu.parentElement !== document.body) {
-          document.body.append(menu);
-        }
-        placeMenu(menu, trigger);
-        menu.hidden = false;
-        trigger.setAttribute('aria-expanded', 'true');
-        openMenu = menu;
-      } else {
-        closeOpenMenu();
-      }
-    };
-
-    const handleMenuClick = (event: Event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLElement)) {
-        return;
-      }
-
-      const optionButton = target.closest<HTMLButtonElement>('.events-map-canvas__custom-option');
-      if (!(optionButton instanceof HTMLButtonElement)) {
-        return;
-      }
-
-      const value = String(optionButton.dataset.value || '');
-      if (select.value !== value) {
-        select.value = value;
-        select.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-      sync();
-      closeOpenMenu();
-    };
-
-    const handleDocumentClick = (event: Event) => {
-      const target = event.target;
-      if (!(target instanceof Node)) {
-        return;
-      }
-
-      if (!custom.contains(target) && openMenu === menu) {
-        closeOpenMenu();
-      }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && openMenu === menu) {
-        closeOpenMenu();
-      }
-    };
-
-    const handleSelectChange = () => {
-      sync();
-    };
-
-    const handleWindowChange = () => {
-      if (openMenu === menu) {
-        placeMenu(menu, trigger);
-      }
-    };
-
-    trigger.addEventListener('click', handleTriggerClick);
-    menu.addEventListener('click', handleMenuClick);
-    document.addEventListener('click', handleDocumentClick);
-    document.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('scroll', handleWindowChange, true);
-    window.addEventListener('resize', handleWindowChange);
-    select.addEventListener('change', handleSelectChange);
-
-    detachList.push(() => {
-      trigger.removeEventListener('click', handleTriggerClick);
-      menu.removeEventListener('click', handleMenuClick);
-      document.removeEventListener('click', handleDocumentClick);
-      document.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('scroll', handleWindowChange, true);
-      window.removeEventListener('resize', handleWindowChange);
-      select.removeEventListener('change', handleSelectChange);
-      select.classList.remove('events-map-canvas__input--hidden');
-      restoreMenu(menu);
-      custom.remove();
-      if (openMenu === menu) {
-        openMenu = null;
-      }
-    });
-  });
-
-  return () => {
-    closeOpenMenu();
-    detachList.forEach((detach) => detach());
   };
 }

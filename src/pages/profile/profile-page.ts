@@ -1,6 +1,7 @@
 import { getMeOrNull } from '../../api/profile.api.js';
 import { getEvents } from '../../api/events.api.js';
 import { getMyFavorites } from '../../api/favorites.api.js';
+import { getMyInvitedEvents } from '../../api/invited-events.api.js';
 import { getTags } from '../../api/tags.api.js';
 import {
   followUser,
@@ -17,10 +18,16 @@ import { attachHeaderSearchSuggestions } from '../../components/header/header-se
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { renderEventCard } from '../../components/event-card/event-card.js';
 import { showToast } from '../../app/ui/toast.js';
+import { getUserErrorMessage } from '../../api/errors.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { formatEventDateOrPeriod } from '../../modules/events/common/event-date-label.js';
+import { isVisibleEvent } from '../../modules/events/common/event-visibility.js';
 import type { EventCard, FollowUser } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
+
+const PROFILE_PREVIEW_STORAGE_PREFIX = 'cityhawk.profile-preview.';
+const PROFILE_EVENTS_PREVIEW_LIMIT = 4;
+const PROFILE_EVENTS_FETCH_LIMIT = 100;
 
 function getUserInitials(name?: string): string {
   const parts = String(name || '')
@@ -55,22 +62,33 @@ function formatBirthday(value?: string): string {
   }).format(date);
 }
 
-function mapEventToProfileCard(item: Partial<EventCard> = {}): string {
+type ProfileEventCardSource = Partial<EventCard> & {
+  dateText?: string;
+  placeText?: string;
+};
+
+function mapEventToProfileCard(
+  item: ProfileEventCardSource = {},
+  { showInviter = false, hideTags = false }: { showInviter?: boolean; hideTags?: boolean } = {},
+): string {
   const tags = Array.isArray(item.tags)
     ? item.tags.map((tag) => String(tag?.name || '').trim()).filter(Boolean).slice(0, 3)
     : [];
   const placeText = [
-    String(item.nextSession?.place?.name || '').trim(),
+    String(item.nextSession?.placeName || item.nextSession?.place?.name || '').trim(),
     String(item.nextSession?.place?.addressLine || '').trim(),
-  ].filter(Boolean).join(', ') || 'Место уточняется';
+  ].filter(Boolean).join(', ') || String(item.placeText || '').trim() || 'Место уточняется';
+  const dateText = String(item.dateText || '').trim() || formatEventDateOrPeriod(item);
 
   return renderEventCard({
     id: item.id || '',
     imageUrl: item.coverImageUrl || '/public/static/img/concert.jpeg',
     title: item.title || 'Без названия',
-    textLines: [formatEventDateOrPeriod(item), placeText],
+    textLines: [dateText, placeText],
     tags,
+    hideTags,
     isFavorite: Boolean(item.isFavorite),
+    invitedBy: showInviter ? item.invitedBy || null : null,
     cardClass: 'profile-overview__event-card',
   });
 }
@@ -122,8 +140,48 @@ function getFallbackEvents(): EventCard[] {
 
 function getFollowDisplayName(user: Partial<FollowUser>): string {
   const first = String(user.username || '').trim();
-  const last = String(user.userSurname || '').trim();
-  return [first, last].filter(Boolean).join(' ') || 'Пользователь';
+  const email = String(user.email || '').trim();
+  return first || email || 'Пользователь';
+}
+
+function saveProfilePreview(user: Partial<FollowUser>): void {
+  const userId = String(user.id || '').trim();
+  if (!userId) {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(
+      `${PROFILE_PREVIEW_STORAGE_PREFIX}${userId}`,
+      JSON.stringify({
+        id: userId,
+        username: String(user.username || '').trim(),
+        email: String(user.email || '').trim(),
+        avatarUrl: String(user.avatarUrl || '').trim(),
+        city: user.city || null,
+        isFollowing: Boolean(user.isFollowing),
+      }),
+    );
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function loadProfilePreview(userId: string): FollowUser | null {
+  if (!userId) {
+    return null;
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(`${PROFILE_PREVIEW_STORAGE_PREFIX}${userId}`);
+    if (!raw) {
+      return null;
+    }
+
+    return JSON.parse(raw) as FollowUser;
+  } catch {
+    return null;
+  }
 }
 
 function normalizeInterestValues(raw: unknown): string[] {
@@ -161,7 +219,6 @@ function getFallbackFollowers(): FollowUser[] {
     {
       id: 'a0a00000-0000-4000-8000-000000000001',
       username: 'Мария',
-      userSurname: 'Соколова',
       avatarUrl: '',
       city: { id: '', name: 'Москва', countryName: '', timezone: '' },
       isFollowing: true,
@@ -169,7 +226,6 @@ function getFallbackFollowers(): FollowUser[] {
     {
       id: 'a0a00000-0000-4000-8000-000000000002',
       username: 'Даниил',
-      userSurname: 'Орлов',
       avatarUrl: '',
       city: { id: '', name: 'Санкт-Петербург', countryName: '', timezone: '' },
       isFollowing: false,
@@ -182,7 +238,6 @@ function getFallbackFollowing(): FollowUser[] {
     {
       id: 'a0a00000-0000-4000-8000-000000000003',
       username: 'Елена',
-      userSurname: 'Павлова',
       avatarUrl: '',
       city: { id: '', name: 'Казань', countryName: '', timezone: '' },
       isFollowing: true,
@@ -190,7 +245,6 @@ function getFallbackFollowing(): FollowUser[] {
     {
       id: 'a0a00000-0000-4000-8000-000000000004',
       username: 'Илья',
-      userSurname: 'Киселев',
       avatarUrl: '',
       city: { id: '', name: 'Екатеринбург', countryName: '', timezone: '' },
       isFollowing: true,
@@ -200,31 +254,47 @@ function getFallbackFollowing(): FollowUser[] {
 
 export async function profilePage({ navigate }: RouteContext): Promise<RouteView> {
   const searchParams = new URLSearchParams(window.location.search);
-  const showAllFavorites = String(searchParams.get('favorites') || '').trim() === 'all';
-  const favoriteLimit = showAllFavorites ? 24 : 4;
+  const viewedUserId = String(searchParams.get('userId') || '').trim();
 
   const me = await getMeOrNull().catch(() => null);
-  const displayName = getHeaderUserDisplayName(me) || 'Пользователь';
+  const isOwnProfile = !viewedUserId || String(me?.id || '').trim() === viewedUserId;
+  const previewUser = !isOwnProfile ? loadProfilePreview(viewedUserId) : null;
+  const profileSource = isOwnProfile ? me : previewUser;
+  const headerDisplayName = getHeaderUserDisplayName(me) || 'Пользователь';
+  const profileDisplayName = getHeaderUserDisplayName(profileSource) || 'Пользователь';
   const fallbackEvents = getFallbackEvents();
   const fallbackFollowers = getFallbackFollowers();
   const fallbackFollowing = getFallbackFollowing();
 
-  const [myEventsResult, favoriteEventsResult, followersResult, followingResult, tagsResult] = await Promise.allSettled([
-    me?.id
-      ? getEvents({ authorId: String(me.id), limit: 4, offset: 0 })
+  const [myEventsResult, createdEventsResult, favoriteEventsResult, followersResult, followingResult, tagsResult] = await Promise.allSettled([
+    isOwnProfile
+      ? getMyInvitedEvents({ limit: PROFILE_EVENTS_FETCH_LIMIT, offset: 0, status: 'accepted' })
+      : viewedUserId
+      ? getEvents({ authorId: String(isOwnProfile ? me?.id : viewedUserId), limit: PROFILE_EVENTS_FETCH_LIMIT, offset: 0 })
       : Promise.resolve({ items: fallbackEvents }),
-    getMyFavorites(favoriteLimit, 0),
-    getMyFollowers(100, 0),
-    getMyFollowing(100, 0),
+    isOwnProfile && me?.id
+      ? getEvents({ authorId: String(me.id), limit: PROFILE_EVENTS_FETCH_LIMIT, offset: 0 })
+      : Promise.resolve({ items: [] }),
+    isOwnProfile ? getMyFavorites(PROFILE_EVENTS_FETCH_LIMIT, 0) : Promise.resolve({ items: [] }),
+    isOwnProfile ? getMyFollowers(100, 0) : Promise.resolve({ items: [] }),
+    isOwnProfile ? getMyFollowing(100, 0) : Promise.resolve({ items: [] }),
     getTags(),
   ]);
 
   const myEvents = myEventsResult.status === 'fulfilled' && Array.isArray(myEventsResult.value?.items)
-    ? myEventsResult.value.items
-    : fallbackEvents;
+    ? (myEventsResult.value.items as EventCard[])
+      .filter((event) => event.invitationStatus === 'accepted')
+      .filter(isVisibleEvent)
+    : isOwnProfile
+      ? []
+      : fallbackEvents;
   const favoriteEvents = favoriteEventsResult.status === 'fulfilled'
     && Array.isArray(favoriteEventsResult.value?.items)
-    ? favoriteEventsResult.value.items
+    ? favoriteEventsResult.value.items.filter(isVisibleEvent)
+    : [];
+  const createdEvents = createdEventsResult.status === 'fulfilled'
+    && Array.isArray(createdEventsResult.value?.items)
+    ? createdEventsResult.value.items.filter(isVisibleEvent)
     : [];
   const followers = followersResult.status === 'fulfilled'
     && Array.isArray(followersResult.value?.items)
@@ -243,41 +313,52 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       .map((tag) => [String(tag?.id || '').trim(), String(tag?.name || '').trim()] as const)
       .filter(([id, name]) => Boolean(id && name)),
   );
-  const rawInterestValues = normalizeInterestValues((me as { interestTagIds?: unknown; interests?: unknown } | null)?.interestTagIds)
-    .concat(normalizeInterestValues((me as { interestTagIds?: unknown; interests?: unknown } | null)?.interests));
+  const rawInterestValues = normalizeInterestValues((profileSource as { interestTagIds?: unknown; interests?: unknown } | null)?.interestTagIds)
+    .concat(normalizeInterestValues((profileSource as { interestTagIds?: unknown; interests?: unknown } | null)?.interests));
   const interestLabels = Array.from(new Set(
     rawInterestValues
       .map((value) => interestIdToLabel.get(value) || value)
       .map((value) => String(value || '').trim())
       .filter(Boolean),
   ));
-  const bio = String((me as { bio?: string } | null)?.bio || '').trim();
+  const bio = String((profileSource as { bio?: string } | null)?.bio || '').trim();
 
   const user = {
-    displayName,
-    name: displayName,
-    firstName: me?.username || 'Не указано',
-    lastName: me?.userSurname || '',
-    email: me?.email || 'Не указан',
-    birthdateLabel: formatBirthday(me?.birthday || ''),
-    cityName: me?.city?.name || 'Не указан',
-    initials: getUserInitials(displayName),
-    avatarUrl: me?.avatarUrl || '',
+    displayName: headerDisplayName,
+    name: profileDisplayName,
+    firstName: profileSource?.username || 'Не указано',
+    email: isOwnProfile ? me?.email || 'Не указан' : 'Скрыт',
+    birthdateLabel: isOwnProfile ? formatBirthday(me?.birthday || '') : 'Скрыта',
+    cityName: profileSource?.city?.name || 'Не указан',
+    initials: getUserInitials(profileDisplayName),
+    avatarUrl: profileSource?.avatarUrl || '',
     bio: bio || 'Описание пока не добавлено',
     tags: interestLabels,
   };
 
+  const myEventCards = myEvents.map((event) => mapEventToProfileCard(event, {
+    showInviter: isOwnProfile,
+    hideTags: isOwnProfile,
+  }));
+  const favoriteEventCards = favoriteEvents.map(mapEventToProfileCard);
+  const createdEventCards = createdEvents.map((event) => mapEventToProfileCard(event, {
+    hideTags: true,
+  }));
+
   const html = renderTemplate('profile', {
     user,
     headerSearch: { query: '' },
-    myEventCards: myEvents.slice(0, 4).map(mapEventToProfileCard),
-    favoriteEventCards: favoriteEvents.slice(0, favoriteLimit).map(mapEventToProfileCard),
-    favoriteMoreHref: showAllFavorites ? '/profile' : '/profile?favorites=all',
-    favoriteMoreLabel: showAllFavorites ? 'свернуть' : 'показать ещё...',
+    myEventCards: myEventCards.slice(0, PROFILE_EVENTS_PREVIEW_LIMIT),
+    myEventCardsMore: myEventCards.slice(PROFILE_EVENTS_PREVIEW_LIMIT),
+    favoriteEventCards: favoriteEventCards.slice(0, PROFILE_EVENTS_PREVIEW_LIMIT),
+    favoriteEventCardsMore: favoriteEventCards.slice(PROFILE_EVENTS_PREVIEW_LIMIT),
+    createdEventCards: createdEventCards.slice(0, PROFILE_EVENTS_PREVIEW_LIMIT),
+    createdEventCardsMore: createdEventCards.slice(PROFILE_EVENTS_PREVIEW_LIMIT),
     stats: {
       myEvents: followers.length,
       favorites: following.length,
     },
+    isOwnProfile,
     isProfilePage: true,
     isSettingsPage: false,
     enableAvatarUpload: false,
@@ -303,6 +384,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       );
       const followersCountNode = root.querySelector<HTMLElement>('[data-role="profile-open-follows"][data-tab="followers"] .profile-stat__value');
       const followingCountNode = root.querySelector<HTMLElement>('[data-role="profile-open-follows"][data-tab="following"] .profile-stat__value');
+      const expandListButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-role="profile-expand-events"]'));
       const detachCityPicker = attachHeaderCityPicker(root, { navigate, targetPath: '/events' });
       let followersState = Array.isArray(followers) ? [...followers] : [];
       let followingState = Array.isArray(following) ? [...following] : [];
@@ -338,6 +420,27 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         navigateByHeaderQuery(query);
       };
 
+      const handleExpandListClick = (event: Event): void => {
+        const button = event.currentTarget;
+        if (!(button instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        const targetRole = String(button.dataset.target || '').trim();
+        const target = targetRole
+          ? root.querySelector<HTMLElement>(`[data-role="${targetRole}"]`)
+          : null;
+
+        if (!(target instanceof HTMLElement)) {
+          return;
+        }
+
+        const isExpanded = !target.hidden;
+        target.hidden = isExpanded;
+        button.textContent = isExpanded ? 'показать ещё...' : 'свернуть';
+        button.setAttribute('aria-expanded', String(!isExpanded));
+      };
+
       const syncFollowCounters = (): void => {
         if (followersCountNode instanceof HTMLElement) {
           followersCountNode.textContent = String(followersState.length);
@@ -352,7 +455,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           return;
         }
         followsSearchInput.placeholder = activeFollowTab === 'discover'
-          ? 'Найти друзей по имени'
+          ? 'Найти друзей по имени или email'
           : 'Поиск по имени или городу';
       };
 
@@ -363,6 +466,38 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           button.classList.toggle('profile-follows-modal__tab--active', isActive);
         });
         setSearchPlaceholder();
+      };
+
+      const normalizeFollowUser = (user: FollowUser): FollowUser => {
+        const userId = String(user.id || '').trim();
+        const existingUser = userId ? findUserById(userId) : null;
+        return {
+          ...user,
+          username: String(user.username || '').trim()
+            || String(existingUser?.username || '').trim()
+            || String(user.email || '').trim()
+            || 'Пользователь',
+          email: String(user.email || '').trim() || existingUser?.email || undefined,
+          avatarUrl: user.avatarUrl ?? existingUser?.avatarUrl ?? null,
+          city: user.city ?? existingUser?.city ?? null,
+          isFollowing: typeof user.isFollowing === 'boolean'
+            ? user.isFollowing
+            : existingUser?.isFollowing,
+        };
+      };
+
+      const refreshFollowLists = async (): Promise<void> => {
+        const [followersResponse, followingResponse] = await Promise.all([
+          getMyFollowers(100, 0),
+          getMyFollowing(100, 0),
+        ]);
+
+        followersState = Array.isArray(followersResponse?.items)
+          ? followersResponse.items.map(normalizeFollowUser)
+          : [];
+        followingState = Array.isArray(followingResponse?.items)
+          ? followingResponse.items.map((item) => ({ ...normalizeFollowUser(item), isFollowing: true }))
+          : [];
       };
 
       const ensureFollowingState = (userId: string, shouldFollow: boolean, user: FollowUser): void => {
@@ -382,6 +517,13 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           followingState = [...followingState];
         }
       };
+
+      const findUserById = (userId: string): FollowUser | null => (
+        followersState.find((item) => String(item.id || '').trim() === userId)
+        || followingState.find((item) => String(item.id || '').trim() === userId)
+        || searchResults.find((item) => String(item.id || '').trim() === userId)
+        || null
+      );
 
       const renderFollows = (): void => {
         if (!(followsList instanceof HTMLElement)) {
@@ -454,6 +596,19 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           info.append(name, city);
           row.append(info);
 
+          const actions = document.createElement('div');
+          actions.className = 'profile-follows-item__actions';
+
+          if (userId) {
+            const profileButton = document.createElement('button');
+            profileButton.type = 'button';
+            profileButton.className = 'profile-follows-item__button profile-follows-item__button--profile ui-button ui-button--ghost ui-button--pill';
+            profileButton.dataset.role = 'profile-view-user';
+            profileButton.dataset.userId = userId;
+            profileButton.textContent = 'Профиль';
+            actions.append(profileButton);
+          }
+
           if (me?.id && userId && String(me.id) !== userId) {
             const isFollowingUser = Boolean(item.isFollowing);
             const actionButton = document.createElement('button');
@@ -466,7 +621,11 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
             actionButton.dataset.following = isFollowingUser ? '1' : '0';
             actionButton.disabled = pendingFollowUserId === userId;
             actionButton.textContent = isFollowingUser ? 'Отписаться' : 'Подписаться';
-            row.append(actionButton);
+            actions.append(actionButton);
+          }
+
+          if (actions.childElementCount > 0) {
+            row.append(actions);
           }
 
           followsList.append(row);
@@ -491,6 +650,15 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         renderFollows();
         followsModal.hidden = false;
         document.body.style.overflow = 'hidden';
+
+        if (tab !== 'discover') {
+          void refreshFollowLists()
+            .then(() => {
+              syncFollowCounters();
+              renderFollows();
+            })
+            .catch(() => {});
+        }
       };
 
       const openFriendsModal = (): void => {
@@ -538,6 +706,15 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
             : 'followers';
         setFollowTab(tab);
         renderFollows();
+
+        if (tab !== 'discover') {
+          void refreshFollowLists()
+            .then(() => {
+              syncFollowCounters();
+              renderFollows();
+            })
+            .catch(() => {});
+        }
       };
 
       const handleFollowsCloseClick = (): void => {
@@ -576,7 +753,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         searchDebounceTimer = window.setTimeout(async () => {
           const requestId = ++searchRequestSeq;
           try {
-            const users = await searchUsers(query, 10);
+            const users = await searchUsers(query, 20, 0);
             if (requestId !== searchRequestSeq) {
               return;
             }
@@ -610,6 +787,23 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
       const handleFollowsListClick = async (event: Event): Promise<void> => {
         const target = event.target;
         if (!(target instanceof Element)) {
+          return;
+        }
+
+        const profileButton = target.closest<HTMLButtonElement>('[data-role="profile-view-user"]');
+        if (profileButton instanceof HTMLButtonElement) {
+          const userId = String(profileButton.dataset.userId || '').trim();
+          if (!userId) {
+            return;
+          }
+
+          const selectedUser = findUserById(userId);
+          if (selectedUser) {
+            saveProfilePreview(selectedUser);
+          }
+
+          closeFollowsModal();
+          navigate(String(me?.id || '').trim() === userId ? '/profile' : `/profile?userId=${encodeURIComponent(userId)}`);
           return;
         }
 
@@ -656,11 +850,12 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
           ));
           syncFollowCounters();
           renderFollows();
+
+          await refreshFollowLists().catch(() => {});
+          syncFollowCounters();
+          renderFollows();
         } catch (error) {
-          const message = error instanceof Error
-            ? error.message
-            : 'Не удалось изменить подписку';
-          showToast(message, { type: 'error' });
+          showToast(getUserErrorMessage(error, 'Не удалось изменить подписку'), { type: 'error' });
         } finally {
           pendingFollowUserId = '';
           renderFollows();
@@ -684,6 +879,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         openFriendsButton.addEventListener('click', openFriendsModal);
       }
       openFollowsButtons.forEach((button) => button.addEventListener('click', handleOpenFollowsClick));
+      expandListButtons.forEach((button) => button.addEventListener('click', handleExpandListClick));
       followsTabButtons.forEach((button) => button.addEventListener('click', handleFollowsTabClick));
       closeFollowsButtons.forEach((button) => button.addEventListener('click', handleFollowsCloseClick));
       if (followsSearchInput instanceof HTMLInputElement) {
@@ -712,6 +908,7 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
         }
 
         openFollowsButtons.forEach((button) => button.removeEventListener('click', handleOpenFollowsClick));
+        expandListButtons.forEach((button) => button.removeEventListener('click', handleExpandListClick));
         followsTabButtons.forEach((button) => button.removeEventListener('click', handleFollowsTabClick));
         closeFollowsButtons.forEach((button) => button.removeEventListener('click', handleFollowsCloseClick));
         if (followsSearchInput instanceof HTMLInputElement) {

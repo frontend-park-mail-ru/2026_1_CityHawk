@@ -21,6 +21,7 @@ export interface Tag {
   id: string;
   name: string;
   slug: string;
+  group?: string;
 }
 
 export interface Category {
@@ -31,7 +32,15 @@ export interface Category {
 
 export interface EventNextSession {
   startAt: string;
-  place: PlacePreview;
+  place?: PlacePreview | null;
+  placeName?: string;
+}
+
+export interface EventInviter {
+  id?: string;
+  username?: string;
+  displayName?: string;
+  avatarUrl?: string | null;
 }
 
 export interface EventCard {
@@ -41,7 +50,11 @@ export interface EventCard {
   coverImageUrl?: string;
   tags: Tag[];
   nextSession?: EventNextSession | null;
+  placeName?: string;
+  place?: Place | null;
   isFavorite?: boolean;
+  invitedBy?: EventInviter | null;
+  invitationStatus?: InvitationStatus | null;
 }
 
 export interface EventAuthor {
@@ -61,6 +74,7 @@ export interface EventSession {
   endAt: string;
   price: number;
   placeId?: string;
+  placeName?: string;
   place?: Place | null;
 }
 
@@ -80,6 +94,8 @@ export interface EventDetails {
   updatedAt: string;
   isFavorite: boolean;
   isOwner: boolean;
+  placeName?: string;
+  place?: Place | null;
   coverImageUrl?: string;
 }
 
@@ -161,7 +177,6 @@ export interface User {
   email: string;
   name?: string;
   username?: string;
-  userSurname?: string;
   role?: 'user' | 'organizer' | 'admin';
   birthday?: string;
   avatarUrl?: string;
@@ -172,7 +187,7 @@ export interface User {
 export interface FollowUser {
   id: string;
   username: string;
-  userSurname?: string;
+  email?: string;
   avatarUrl?: string | null;
   city?: City | null;
   isFollowing?: boolean;
@@ -180,6 +195,96 @@ export interface FollowUser {
 
 export interface FollowListResponse {
   items: FollowUser[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'cancelled';
+
+export interface EventInvitee extends FollowUser {
+  invitationStatus?: InvitationStatus | null;
+}
+
+export interface EventInviteeSearchResponse {
+  items: EventInvitee[];
+}
+
+export interface CreateEventInvitationsPayload {
+  recipientIds: string[];
+  message?: string;
+  eventSessionId?: string;
+}
+
+export interface EventInvitation {
+  id: string;
+  eventId: string;
+  eventSessionId?: string | null;
+  senderId: string;
+  recipientId: string;
+  status: InvitationStatus;
+  message?: string;
+  respondedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface EventInvitationsResponse {
+  items: EventInvitation[];
+}
+
+export interface ShareLinkResponse {
+  id: string;
+  url: string;
+  token: string;
+  eventId?: string;
+  collectionId?: string;
+  createdAt: string;
+}
+
+export type NotificationType =
+  | 'event_invitation'
+  | 'invitation_accepted'
+  | 'invitation_declined'
+  | 'event_reminder'
+  | 'collection_shared'
+  | 'system';
+
+export interface NotificationActor {
+  id: string;
+  displayName: string;
+  avatarUrl?: string | null;
+}
+
+export interface NotificationEventSummary {
+  id: string;
+  title: string;
+  coverImageUrl?: string;
+  dateText?: string;
+  placeText?: string;
+}
+
+export interface NotificationInvitationSummary {
+  id: string;
+  status: InvitationStatus;
+}
+
+export interface NotificationItem {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message?: string;
+  isRead: boolean;
+  readAt?: string | null;
+  createdAt: string;
+  actor?: NotificationActor | null;
+  event?: NotificationEventSummary | null;
+  invitation?: NotificationInvitationSummary | null;
+}
+
+export interface NotificationsResponse {
+  items: NotificationItem[];
+  unreadCount: number;
   total: number;
   limit: number;
   offset: number;
@@ -193,16 +298,12 @@ export interface LoginPayload {
 export interface RegisterPayload {
   username: string;
   email: string;
-  userSurname: string;
   password: string;
-  birthday?: string;
-  cityId?: string;
 }
 
 export interface UpdateProfilePayload {
   email?: string;
   username?: string;
-  userSurname?: string;
   birthday?: string;
   cityId?: string;
   avatarUrl?: string;
@@ -217,7 +318,6 @@ export interface AuthUser {
   id: string;
   email: string;
   username: string;
-  userSurname?: string;
   avatarUrl?: string | null;
   createdAt?: string;
 }
@@ -326,10 +426,11 @@ export interface MapSpot {
   eventId: string;
   title: string;
   address: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
+  place?: Place | null;
   imageUrl?: string;
-  startAt: string;
+  startAt?: string;
   popularity: number;
   tags: Tag[];
 }

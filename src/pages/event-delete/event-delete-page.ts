@@ -9,6 +9,7 @@ import {
   renderEventDeleteScreen,
 } from '../../modules/events/delete/event-delete-screen.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
+import { showToast } from '../../app/ui/toast.js';
 import type { ApiError, User } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
@@ -77,10 +78,10 @@ export async function eventDeletePage({ navigate, params }: RouteContext): Promi
         async onConfirm() {
           try {
             await deleteEvent(eventId);
-            navigate('/events');
+            navigate('/events', { replace: true });
           } catch (error) {
             const apiError = error instanceof Error ? (error as ApiError) : undefined;
-            window.alert(getEventActionErrorMessage(apiError, 'удалить событие'));
+            showToast(getEventActionErrorMessage(apiError, 'удалить событие'), { type: 'error' });
           }
         },
       });

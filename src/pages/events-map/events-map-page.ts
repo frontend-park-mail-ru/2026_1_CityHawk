@@ -4,7 +4,6 @@ import '../../modules/events-map/events-mood-sidebar.css';
 import {
   getMapCollectionSpots,
   getMapCollections,
-  getMapFilters,
 } from '../../api/map.api.js';
 import { getMeOrNull } from '../../api/profile.api.js';
 import { attachHeaderCityPicker } from '../../components/header/header-city-picker.js';
@@ -14,20 +13,17 @@ import { renderTemplate } from '../../app/templates/renderer.js';
 import {
   attachEventsMapCanvas,
   renderEventsMapCanvas,
-  type EventsMapFilterOption,
   type EventsMapPin,
 } from '../../modules/events-map/events-map-canvas.js';
 import { renderEventsMapMoodSidebar } from '../../modules/events-map/events-mood-sidebar.js';
 import type {
   MapCollection,
-  MapFiltersResponse,
   MapSpot,
   User,
 } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
 
 type SortValue = 'popular' | 'name' | 'dateAsc' | 'dateDesc';
-type FilterSelectName = 'district' | 'style' | 'season' | 'sort';
 
 type DatePreset = 'today' | 'weekend' | '';
 
@@ -88,27 +84,6 @@ function buildPagePath(updates: Record<string, string | null | undefined>): stri
   return `${ROUTE_PATH}${suffix}`;
 }
 
-function toMapFilterOptions(
-  items: Array<{ id?: string; name?: string; value?: string; label?: string }> = [],
-  selected: string,
-): EventsMapFilterOption[] {
-  return items
-    .map((item) => {
-      const value = String(item.id || item.value || '').trim();
-      const label = String(item.name || item.label || '').trim();
-      if (!value || !label) {
-        return null;
-      }
-
-      return {
-        value,
-        label,
-        selected: value === selected,
-      };
-    })
-    .filter((item): item is EventsMapFilterOption => Boolean(item));
-}
-
 function getDateRangeByPreset(preset: DatePreset): { dateFrom?: string; dateTo?: string } {
   if (!preset) {
     return {};
@@ -137,17 +112,27 @@ function getDateRangeByPreset(preset: DatePreset): { dateFrom?: string; dateTo?:
 
 function toPins(spots: MapSpot[], active: string): EventsMapPin[] {
   return spots
-    .filter((spot) => Number.isFinite(Number(spot.latitude)) && Number.isFinite(Number(spot.longitude)))
-    .map((spot) => ({
-      id: String(spot.eventId || spot.id || '').trim(),
-      title: String(spot.title || '').trim() || 'Без названия',
-      address: String(spot.address || '').trim() || 'Адрес не указан',
-      imageUrl: String(spot.imageUrl || '').trim() || '/public/static/img/photo.jpeg',
-      latitude: Number(spot.latitude),
-      longitude: Number(spot.longitude),
-      active: String(spot.eventId || spot.id || '').trim() === active,
-    }))
-    .filter((pin) => Boolean(pin.id));
+    .map((spot) => {
+      const place = spot.place || null;
+      const latitude = Number(spot.latitude ?? place?.latitude);
+      const longitude = Number(spot.longitude ?? place?.longitude);
+      const id = String(spot.eventId || spot.id || '').trim();
+      const placeAddress = [
+        place?.name,
+        place?.addressLine,
+      ].filter(Boolean).join(', ');
+
+      return {
+        id,
+        title: String(spot.title || '').trim() || 'Без названия',
+        address: String(spot.address || '').trim() || placeAddress || 'Адрес не указан',
+        imageUrl: String(spot.imageUrl || '').trim() || '/public/static/img/photo.jpeg',
+        latitude,
+        longitude,
+        active: id === active,
+      };
+    })
+    .filter((pin) => Boolean(pin.id) && Number.isFinite(pin.latitude) && Number.isFinite(pin.longitude));
 }
 
 function buildMoodCards(collections: MapCollection[]): MoodCard[] {
@@ -163,32 +148,32 @@ function buildMoodCards(collections: MapCollection[]): MoodCard[] {
     }));
 }
 
-function resolveMoodHeading(collectionId: string): string {
-  return collectionId ? 'Выбранная подборка' : 'Выбери подборку';
-}
-
 function pickCollectionId(collections: MapCollection[], currentCollectionId: string): string {
-  if (!currentCollectionId) {
+  if (!collections.length) {
     return '';
   }
+
+  if (!currentCollectionId) {
+    return String(collections[0]?.id || '').trim();
+  }
+
   return collections.some((item) => item.id === currentCollectionId) ? currentCollectionId : '';
 }
 
 async function loadMapData(filters: FilterState): Promise<{
   collections: MapCollection[];
-  mapFilters: MapFiltersResponse;
   spots: MapSpot[];
 }> {
-  const [collectionsResponse, mapFilters] = await Promise.all([
-    getMapCollections({ cityId: filters.cityId || undefined, limit: 5 }).catch(() => ({ items: [] })),
-    getMapFilters(filters.cityId || undefined).catch(() => ({ tags: [], datePresets: [], sortOptions: [] })),
-  ]);
+  const collectionsResponse = await getMapCollections({
+    cityId: filters.cityId || undefined,
+    limit: 5,
+  }).catch(() => ({ items: [] }));
 
   const collections = Array.isArray(collectionsResponse.items) ? collectionsResponse.items : [];
   const collectionId = pickCollectionId(collections, filters.collectionId);
 
   if (!collectionId) {
-    return { collections, mapFilters, spots: [] };
+    return { collections, spots: [] };
   }
 
   const dateRange = getDateRangeByPreset(filters.season);
@@ -205,7 +190,6 @@ async function loadMapData(filters: FilterState): Promise<{
 
   return {
     collections,
-    mapFilters,
     spots: Array.isArray(spotsResponse.items) ? spotsResponse.items : [],
   };
 }
@@ -220,7 +204,7 @@ export async function eventsMapPage({ navigate }: RouteContext): Promise<RouteVi
     }
     : null;
 
-  const { collections, mapFilters, spots } = await loadMapData(filters);
+  const { collections, spots } = await loadMapData(filters);
   const selectedCollectionId = pickCollectionId(collections, filters.collectionId);
 
   const activeId = spots.some((spot) => String(spot.eventId || spot.id || '').trim() === filters.active)
@@ -230,18 +214,10 @@ export async function eventsMapPage({ navigate }: RouteContext): Promise<RouteVi
   const pins = toPins(spots, activeId);
 
   const eventsMapCanvas = renderEventsMapCanvas({
-    districtOptions: toMapFilterOptions(
-      collections.map((item) => ({ value: item.id, label: item.title })),
-      selectedCollectionId,
-    ),
-    styleOptions: toMapFilterOptions(mapFilters.tags, filters.style),
-    seasonOptions: toMapFilterOptions(mapFilters.datePresets, filters.season),
-    sortOptions: toMapFilterOptions(mapFilters.sortOptions, filters.sort),
     hasPins: pins.length > 0,
   });
 
   const eventsMapMoodSidebar = renderEventsMapMoodSidebar({
-    heading: resolveMoodHeading(selectedCollectionId),
     cards: buildMoodCards(collections),
   });
 
@@ -259,20 +235,6 @@ export async function eventsMapPage({ navigate }: RouteContext): Promise<RouteVi
       const detachCityPicker = attachHeaderCityPicker(root, { navigate, targetPath: ROUTE_PATH });
       const detachEventsMapCanvas = attachEventsMapCanvas(root, {
         pins,
-        onFilterChange(name, value) {
-          if (name === 'district') {
-            navigate(buildPagePath({
-              collectionId: value || null,
-              active: null,
-            }));
-            return;
-          }
-
-          navigate(buildPagePath({
-            [name as FilterSelectName]: value || null,
-            active: null,
-          }));
-        },
         onPinPick(eventId) {
           navigate(`/events/${encodeURIComponent(eventId)}`);
         },

@@ -1,4 +1,5 @@
 import { SUPPORT_CATEGORIES, SUPPORT_STATUSES } from './support.constants.js';
+import { getUserErrorMessage } from '../../api/errors.js';
 import type { SupportCategory, SupportStatus } from '../../types/api.js';
 
 export function formatSupportCategory(value?: string | null): string {
@@ -30,9 +31,5 @@ export function formatSupportDate(value?: string | null): string {
 }
 
 export function getSupportErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  return fallback;
+  return getUserErrorMessage(error, fallback);
 }

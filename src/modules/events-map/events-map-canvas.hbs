@@ -6,45 +6,6 @@
       aria-label="Интерактивная карта"
     ></div>
 
-    <div class="events-map-canvas__toolbar">
-      <div class="events-map-canvas__filters">
-        <label class="events-map-canvas__filter">
-          <select name="district" class="events-map-canvas__input">
-            <option value="">Все подборки</option>
-            {{#each districtOptions}}
-              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-        </label>
-
-        <label class="events-map-canvas__filter">
-          <select name="style" class="events-map-canvas__input">
-            <option value="">Все стили</option>
-            {{#each styleOptions}}
-              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-        </label>
-
-        <label class="events-map-canvas__filter">
-          <select name="season" class="events-map-canvas__input">
-            <option value="">Любой сезон</option>
-            {{#each seasonOptions}}
-              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-        </label>
-
-        <label class="events-map-canvas__filter">
-          <select name="sort" class="events-map-canvas__input">
-            {{#each sortOptions}}
-              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-        </label>
-      </div>
-    </div>
-
     {{#unless hasPins}}
       <div class="events-map-canvas__empty">
         <h2 class="events-map-canvas__empty-title">Ничего не найдено</h2>

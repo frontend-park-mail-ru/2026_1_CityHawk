@@ -8,12 +8,33 @@ import '../../modules/profile/profile-form.css';
 import { getHeaderUserDisplayName } from '../../components/header/header-user.js';
 import { renderTemplate } from '../../app/templates/renderer.js';
 import { showToast } from '../../app/ui/toast.js';
+import { getUserErrorMessage } from '../../api/errors.js';
 import {
   getEmailValidationError,
   validatePersonName,
 } from '../../modules/auth/shared/validators.js';
 import type { ApiError, UpdateProfilePayload } from '../../types/api.js';
 import type { RouteContext, RouteView } from '../../types/router.js';
+
+const AVATAR_MAX_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_AVATAR_TYPES = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
+
+function getAvatarUploadErrorMessage(error: unknown): string {
+  const apiError = error as ApiError | undefined;
+  const detail = String(apiError?.details?.avatar || '').trim();
+  const message = error instanceof Error ? error.message : '';
+  const source = detail || message;
+
+  if (/too large|file is too large/i.test(source)) {
+    return 'Загрузите изображение до 5 МБ';
+  }
+
+  if (/image/i.test(source)) {
+    return 'Загрузите PNG, JPEG, GIF или WebP';
+  }
+
+  return message || 'Не удалось обновить аватар';
+}
 
 function animateLoginAside(root: HTMLElement): void {
   const loginEl = root.classList.contains('login') ? root : root.querySelector('.login');
@@ -106,7 +127,6 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
   const user = {
     name: displayName,
     firstName: me?.username || '',
-    lastName: me?.userSurname || '',
     email: me?.email || 'address@service.com',
     birthdate: me?.birthday || '',
     cityId: me?.city?.id || '',
@@ -136,8 +156,6 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
       const avatarInput = root.querySelector('[data-role="profile-avatar-input"]');
       const firstNameInput = root.querySelector('#firstName');
       const firstNameError = root.querySelector('.profile__name-error');
-      const lastNameInput = root.querySelector('#lastName');
-      const lastNameError = root.querySelector('.profile__surname-error');
       const emailInput = root.querySelector('#email');
       const emailError = root.querySelector('.profile__email-error');
       const interestsInput = root.querySelector('[data-role="profile-interests-input"]');
@@ -171,10 +189,6 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
 
       const setFirstNameError = (message = ''): void => {
         setFieldError(firstNameInput, firstNameError, message);
-      };
-
-      const setLastNameError = (message = ''): void => {
-        setFieldError(lastNameInput, lastNameError, message);
       };
 
       const interestIdToLabel = new Map<string, string>();
@@ -263,12 +277,9 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
         const formData = new FormData(profileForm);
         const email = String(formData.get('email') || '').trim();
         const firstName = String(formData.get('firstName') || '').trim();
-        const lastName = String(formData.get('lastName') || '').trim();
 
         const firstNameValidationError = validatePersonName(firstName, 'Имя');
-        const lastNameValidationError = validatePersonName(lastName, 'Фамилия');
         setFirstNameError(firstNameValidationError || '');
-        setLastNameError(lastNameValidationError || '');
 
         const emailValidationError = getEmailValidationError(email);
         if (emailValidationError) {
@@ -277,14 +288,13 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
         }
         setEmailError('');
 
-        if (firstNameValidationError || lastNameValidationError) {
+        if (firstNameValidationError) {
           return;
         }
 
         const payload: UpdateProfilePayload = {
           email,
           username: firstName,
-          userSurname: lastName,
           birthday: String(formData.get('birthdate') || '').trim(),
           cityId: String(formData.get('city') || '').trim(),
         };
@@ -318,19 +328,16 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
           const details = apiError?.details || {};
 
           if (details.username) {
-            setFirstNameError('Имя должно быть от 3 до 32 символов');
-          }
-          if (details.userSurname) {
-            setLastNameError('Фамилия должна быть от 3 до 32 символов');
+            setFirstNameError('Имя: от 3 до 32 символов');
           }
           if (details.email) {
-            setEmailError(getEmailValidationError(email) || 'Введите корректный email');
+            setEmailError(getEmailValidationError(email) || 'Проверьте email');
           }
-          if (details.username || details.userSurname || details.email) {
+          if (details.username || details.email) {
             return;
           }
 
-          const message = error instanceof Error ? error.message : 'Не удалось обновить профиль';
+          const message = getUserErrorMessage(error, 'Не удалось обновить профиль');
           if (String(message).toLowerCase().includes('email')) {
             setEmailError(message);
             return;
@@ -356,15 +363,6 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
 
         const message = validatePersonName(firstNameInput.value, 'Имя');
         setFirstNameError(message || '');
-      };
-
-      const handleLastNameInput = (): void => {
-        if (!(lastNameInput instanceof HTMLInputElement)) {
-          return;
-        }
-
-        const message = validatePersonName(lastNameInput.value, 'Фамилия');
-        setLastNameError(message || '');
       };
 
       const handleInterestsInput = (): void => {
@@ -427,12 +425,23 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
           return;
         }
 
+        if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
+          showToast('Загрузите PNG, JPEG, GIF или WebP', { type: 'error' });
+          avatarInput.value = '';
+          return;
+        }
+
+        if (file.size > AVATAR_MAX_SIZE_BYTES) {
+          showToast('Загрузите изображение до 5 МБ', { type: 'error' });
+          avatarInput.value = '';
+          return;
+        }
+
         try {
           await updateProfileMultipart({}, file);
           navigate('/profile/settings', { replace: true });
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Не удалось обновить аватар';
-          showToast(message, { type: 'error' });
+          showToast(getAvatarUploadErrorMessage(error), { type: 'error' });
         } finally {
           avatarInput.value = '';
         }
@@ -460,10 +469,6 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
 
       if (firstNameInput instanceof HTMLInputElement) {
         firstNameInput.addEventListener('input', handleFirstNameInput);
-      }
-
-      if (lastNameInput instanceof HTMLInputElement) {
-        lastNameInput.addEventListener('input', handleLastNameInput);
       }
 
       if (interestsInput instanceof HTMLInputElement) {
@@ -501,10 +506,6 @@ export async function profileSettingsPage({ navigate }: RouteContext): Promise<R
 
         if (firstNameInput instanceof HTMLInputElement) {
           firstNameInput.removeEventListener('input', handleFirstNameInput);
-        }
-
-        if (lastNameInput instanceof HTMLInputElement) {
-          lastNameInput.removeEventListener('input', handleLastNameInput);
         }
 
         if (interestsInput instanceof HTMLInputElement) {

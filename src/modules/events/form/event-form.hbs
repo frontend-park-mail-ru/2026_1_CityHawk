@@ -1,4 +1,10 @@
-<form class="event-create-form" data-role="event-create-form">
+<form
+  class="event-create-form"
+  data-role="event-create-form"
+  data-is-create-mode="{{#unless isEditMode}}true{{else}}false{{/unless}}"
+  data-min-date="{{minDate}}"
+  autocomplete="off"
+>
   <div class="event-create-form__hero">
     <div class="event-create-form__fields">
       <label class="event-create-form__field">
@@ -70,6 +76,8 @@
                 name="singleDate"
                 data-role="event-create-date"
                 value="{{initialValues.singleDate}}"
+                autocomplete="off"
+                {{#if isCreateMode}}min="{{minDate}}"{{/if}}
               />
             </label>
 
@@ -81,6 +89,7 @@
                 name="singleStartTime"
                 data-role="event-create-start-time"
                 value="{{initialValues.singleStartTime}}"
+                autocomplete="off"
               />
             </label>
 
@@ -92,6 +101,7 @@
                 name="singleEndTime"
                 data-role="event-create-end-time"
                 value="{{initialValues.singleEndTime}}"
+                autocomplete="off"
               />
             </label>
           </div>
@@ -113,6 +123,8 @@
                       name="multipleDates"
                       data-role="event-create-multiple-date-input"
                       value="{{this.date}}"
+                      autocomplete="off"
+                      {{#if ../isCreateMode}}min="{{../minDate}}"{{/if}}
                     />
                   </label>
                   <label class="event-create-form__field event-create-form__field--compact">
@@ -123,6 +135,7 @@
                       name="multipleStartTimes"
                       data-role="event-create-multiple-time-input"
                       value="{{this.startTime}}"
+                      autocomplete="off"
                     />
                   </label>
                   <label class="event-create-form__field event-create-form__field--compact">
@@ -133,6 +146,7 @@
                       name="multipleEndTimes"
                       data-role="event-create-multiple-time-input"
                       value="{{this.endTime}}"
+                      autocomplete="off"
                     />
                   </label>
                   <button
@@ -170,6 +184,8 @@
                 name="periodStart"
                 data-role="event-create-period-start"
                 value="{{initialValues.periodStart}}"
+                autocomplete="off"
+                {{#if isCreateMode}}min="{{minDate}}"{{/if}}
               />
             </label>
 
@@ -181,6 +197,8 @@
                 name="periodEnd"
                 data-role="event-create-period-end"
                 value="{{initialValues.periodEnd}}"
+                autocomplete="off"
+                {{#if isCreateMode}}min="{{minDate}}"{{/if}}
               />
             </label>
           </div>
@@ -193,7 +211,7 @@
               data-role="event-create-anytime"
               {{#if initialValues.isAnytime}}checked{{/if}}
             />
-            <span class="event-create-form__checkbox-text">В любое время</span>
+            <span class="event-create-form__checkbox-text">Любая дата</span>
           </label>
           <span class="event-create-form__error" data-role="event-create-date-error" hidden></span>
         </div>
