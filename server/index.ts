@@ -6,7 +6,7 @@ const app = express();
 const distPath = path.resolve(__dirname, '..', 'dist');
 const publicPath = path.resolve(__dirname, '..', 'public');
 
-const FRONTEND_PORT = Number(process.env.PORT || 8000);
+const FRONTEND_PORT = Number(process.env.PORT || 3000);
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8080';
 const YANDEX_MAPS_API_KEY = process.env.YANDEX_MAPS_API_KEY || '';
 

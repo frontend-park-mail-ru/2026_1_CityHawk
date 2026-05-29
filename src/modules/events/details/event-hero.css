@@ -216,6 +216,10 @@
         padding: 0 var(--home-side-padding-mobile);
     }
 
+    .event-hero__grid {
+        gap: 16px;
+    }
+
     .event-hero__content {
         padding-top: 18px;
     }
@@ -230,5 +234,37 @@
 
     .event-hero__meta-text {
         font-size: 15px;
+    }
+
+    .event-hero__actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 48px;
+        gap: 8px;
+        align-items: stretch;
+        margin-top: 18px;
+    }
+
+    .event-hero__action {
+        min-height: 42px;
+        min-width: 0;
+        padding: 0 12px;
+        gap: 8px;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .event-hero__action--icon {
+        width: 48px;
+        min-height: 42px;
+        justify-self: end;
+    }
+
+    .event-hero__action-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .event-hero__action:not(.event-hero__action--icon) .event-hero__action-icon {
+        display: none;
     }
 }

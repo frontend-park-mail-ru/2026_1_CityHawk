@@ -597,10 +597,10 @@
     grid-column: 1 / -1;
     grid-row: 3;
     width: 100%;
-    min-height: 42px;
-    font-size: 15px;
-    gap: 10px;
-    padding: 0 14px;
+    min-height: 38px;
+    font-size: 14px;
+    gap: 8px;
+    padding: 0 12px;
     border-radius: 12px;
   }
 
@@ -608,10 +608,10 @@
     grid-column: 1 / -1;
     grid-row: 4;
     width: 100%;
-    min-height: 40px;
-    font-size: 15px;
-    gap: 10px;
-    padding: 0 14px;
+    min-height: 38px;
+    font-size: 14px;
+    gap: 8px;
+    padding: 0 12px;
     border-radius: 12px;
     border-color: rgba(139, 188, 233, 0.22);
     background: rgba(8, 20, 38, 0.28);
@@ -620,8 +620,8 @@
   .profile-hero__edit::before,
   .profile-hero__find::before {
     content: "";
-    width: 17px;
-    height: 17px;
+    width: 15px;
+    height: 15px;
     flex: 0 0 auto;
     background: currentColor;
   }
@@ -637,16 +637,16 @@
   }
 
   .profile-hero__name {
-    font-size: 28px;
+    font-size: 20px;
     overflow-wrap: anywhere;
   }
 
   .profile-stat__value {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .profile-stat__label {
-    font-size: 12px;
+    font-size: 14px;
     white-space: nowrap;
   }
 
@@ -684,12 +684,24 @@
   }
 
   .profile-hero__avatar-initials {
-    font-size: 38px;
+    font-size: 20px;
   }
 
   .profile-event-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 22px;
+  }
+
+  .profile-section--home-like .home-events__title {
+    font-size: 20px;
+  }
+
+  .profile-section--home-like .home-events__link {
+    font-size: 14px;
+  }
+
+  .profile-section__empty {
+    font-size: 14px;
   }
 
   .profile-follows-modal {
@@ -700,7 +712,7 @@
   .profile-follows-modal__dialog {
     width: min(100%, 640px);
     max-height: calc(100vh - 72px);
-    padding: 24px 20px 24px;
+    padding: 24px 8px 24px;
   }
 
   .profile-follows-modal__close {
@@ -709,32 +721,55 @@
   }
 
   .profile-follows-modal__header {
+    align-items: center;
     gap: 14px;
     padding-right: 40px;
     margin-bottom: 20px;
   }
 
+  .profile-follows-modal__header-icon {
+    margin-top: 0;
+  }
+
+  .profile-follows-modal__search {
+    min-height: 46px;
+    padding: 0 14px;
+  }
+
+  .profile-follows-modal__search svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .profile-follows-modal__search-input {
+    font-size: 14px;
+  }
+
+  .profile-follows-modal__search-input::placeholder {
+    font-size: 14px;
+  }
+
   .profile-follows-modal__tabs {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
+    gap: 4px;
   }
 
   .profile-follows-modal__tab {
     --ui-button-height: 36px;
     --ui-button-padding-x: 8px;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.1;
     white-space: nowrap;
   }
 
   .profile-follows-modal__title {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .profile-follows-modal__subtitle {
-    margin-top: 12px;
-    font-size: 15px;
+    margin-top: 10px;
+    font-size: 14px;
   }
 
   .profile-follows-modal__list {
@@ -747,8 +782,14 @@
   }
 
   .profile-follows-item__actions {
-    grid-column: 2;
+    grid-column: 1 / -1;
     justify-content: flex-start;
     flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .profile-follows-item__button {
+    min-width: 104px;
+    font-size: 14px;
   }
 }

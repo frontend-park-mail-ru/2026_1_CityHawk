@@ -1,10 +1,9 @@
 <section class="event-list-catalog">
-  <div class="event-list-catalog__head">
-    <h2 class="event-list-catalog__title">События</h2>
-    {{#if canCreateEvent}}
+  {{#if canCreateEvent}}
+    <div class="event-list-catalog__head">
       <a href="/events/new" class="event-list-catalog__create">Создать событие</a>
-    {{/if}}
-  </div>
+    </div>
+  {{/if}}
 
   {{#if hasCards}}
     <div class="event-list-catalog__grid">
