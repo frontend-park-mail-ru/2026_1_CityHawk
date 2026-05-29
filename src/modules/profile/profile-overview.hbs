@@ -56,7 +56,7 @@
 
     <section class="profile-section profile-section--home-like">
       <div class="home-events__head">
-        <h2 class="home-events__title">{{#if isOwnProfile}}Мои события{{else}}События пользователя{{/if}}</h2>
+        <h2 class="home-events__title">{{#if isOwnProfile}}Иду с друзьями{{else}}События пользователя{{/if}}</h2>
         {{#if myEventCardsMore.length}}
         <button
           type="button"
@@ -89,7 +89,7 @@
     {{#if isOwnProfile}}
     <section class="profile-section profile-section--home-like">
       <div class="home-events__head">
-        <h2 class="home-events__title">Избранное</h2>
+        <h2 class="home-events__title">Хочу сходить</h2>
         {{#if favoriteEventCardsMore.length}}
         <button
           type="button"
@@ -116,6 +116,38 @@
       {{/if}}
       {{else}}
       <p class="profile-section__empty">Добавляй мероприятия в избранное, чтобы они появились здесь.</p>
+      {{/if}}
+    </section>
+
+    <section class="profile-section profile-section--home-like">
+      <div class="home-events__head">
+        <h2 class="home-events__title">Организую</h2>
+        {{#if createdEventCardsMore.length}}
+        <button
+          type="button"
+          class="home-events__link"
+          data-role="profile-expand-events"
+          data-target="profile-created-events-more"
+          aria-expanded="false"
+        >показать ещё...</button>
+        {{/if}}
+      </div>
+
+      {{#if createdEventCards.length}}
+      <div class="profile-event-grid home-events__grid">
+        {{#each createdEventCards}}
+        {{{this}}}
+        {{/each}}
+      </div>
+      {{#if createdEventCardsMore.length}}
+      <div class="profile-event-grid home-events__grid" data-role="profile-created-events-more" hidden>
+        {{#each createdEventCardsMore}}
+        {{{this}}}
+        {{/each}}
+      </div>
+      {{/if}}
+      {{else}}
+      <p class="profile-section__empty">Созданные тобой события появятся здесь.</p>
       {{/if}}
     </section>
     {{/if}}

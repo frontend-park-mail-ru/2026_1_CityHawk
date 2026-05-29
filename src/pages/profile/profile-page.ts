@@ -266,12 +266,15 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
   const fallbackFollowers = getFallbackFollowers();
   const fallbackFollowing = getFallbackFollowing();
 
-  const [myEventsResult, favoriteEventsResult, followersResult, followingResult, tagsResult] = await Promise.allSettled([
+  const [myEventsResult, createdEventsResult, favoriteEventsResult, followersResult, followingResult, tagsResult] = await Promise.allSettled([
     isOwnProfile
-      ? getMyInvitedEvents({ limit: PROFILE_EVENTS_FETCH_LIMIT, offset: 0 })
+      ? getMyInvitedEvents({ limit: PROFILE_EVENTS_FETCH_LIMIT, offset: 0, status: 'accepted' })
       : viewedUserId
       ? getEvents({ authorId: String(isOwnProfile ? me?.id : viewedUserId), limit: PROFILE_EVENTS_FETCH_LIMIT, offset: 0 })
       : Promise.resolve({ items: fallbackEvents }),
+    isOwnProfile && me?.id
+      ? getEvents({ authorId: String(me.id), limit: PROFILE_EVENTS_FETCH_LIMIT, offset: 0 })
+      : Promise.resolve({ items: [] }),
     isOwnProfile ? getMyFavorites(PROFILE_EVENTS_FETCH_LIMIT, 0) : Promise.resolve({ items: [] }),
     isOwnProfile ? getMyFollowers(100, 0) : Promise.resolve({ items: [] }),
     isOwnProfile ? getMyFollowing(100, 0) : Promise.resolve({ items: [] }),
@@ -279,13 +282,19 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
   ]);
 
   const myEvents = myEventsResult.status === 'fulfilled' && Array.isArray(myEventsResult.value?.items)
-    ? (myEventsResult.value.items as EventCard[]).filter(isVisibleEvent)
+    ? (myEventsResult.value.items as EventCard[])
+      .filter((event) => event.invitationStatus === 'accepted')
+      .filter(isVisibleEvent)
     : isOwnProfile
       ? []
       : fallbackEvents;
   const favoriteEvents = favoriteEventsResult.status === 'fulfilled'
     && Array.isArray(favoriteEventsResult.value?.items)
     ? favoriteEventsResult.value.items.filter(isVisibleEvent)
+    : [];
+  const createdEvents = createdEventsResult.status === 'fulfilled'
+    && Array.isArray(createdEventsResult.value?.items)
+    ? createdEventsResult.value.items.filter(isVisibleEvent)
     : [];
   const followers = followersResult.status === 'fulfilled'
     && Array.isArray(followersResult.value?.items)
@@ -332,6 +341,9 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
     hideTags: isOwnProfile,
   }));
   const favoriteEventCards = favoriteEvents.map(mapEventToProfileCard);
+  const createdEventCards = createdEvents.map((event) => mapEventToProfileCard(event, {
+    hideTags: true,
+  }));
 
   const html = renderTemplate('profile', {
     user,
@@ -340,6 +352,8 @@ export async function profilePage({ navigate }: RouteContext): Promise<RouteView
     myEventCardsMore: myEventCards.slice(PROFILE_EVENTS_PREVIEW_LIMIT),
     favoriteEventCards: favoriteEventCards.slice(0, PROFILE_EVENTS_PREVIEW_LIMIT),
     favoriteEventCardsMore: favoriteEventCards.slice(PROFILE_EVENTS_PREVIEW_LIMIT),
+    createdEventCards: createdEventCards.slice(0, PROFILE_EVENTS_PREVIEW_LIMIT),
+    createdEventCardsMore: createdEventCards.slice(PROFILE_EVENTS_PREVIEW_LIMIT),
     stats: {
       myEvents: followers.length,
       favorites: following.length,

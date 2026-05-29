@@ -1,12 +1,14 @@
 import { request } from './client.js';
 import type {
   EventCard,
+  InvitationStatus,
   PaginatedResponse,
 } from '../types/api.js';
 
 export interface InvitedEventsQueryParams {
   limit?: number;
   offset?: number;
+  status?: InvitationStatus;
 }
 
 export async function getMyInvitedEvents(
@@ -19,6 +21,9 @@ export async function getMyInvitedEvents(
   }
   if (typeof params.offset === 'number') {
     query.set('offset', String(params.offset));
+  }
+  if (params.status) {
+    query.set('status', params.status);
   }
 
   const suffix = query.toString() ? `?${query.toString()}` : '';

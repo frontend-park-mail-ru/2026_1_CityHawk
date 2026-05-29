@@ -1500,6 +1500,65 @@ Query параметры:
 
 - `401 Unauthorized`
 
+### GET /api/me/notifications/events
+
+События, на которые текущий пользователь получил приглашение. Используется в профиле для блока «Иду с друзьями».
+
+Требование:
+
+- cookie `access_token`
+
+Query параметры:
+
+- `status` — опционально: `pending`, `accepted`, `declined`, `cancelled`; для блока «Иду с друзьями» frontend отправляет `accepted`
+- `limit` — положительное число, по умолчанию `12`
+- `offset` — неотрицательное число, по умолчанию `0`
+
+Успешный ответ `200 OK`:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Rock concert",
+      "shortDescription": "Best rock night",
+      "coverImageUrl": "https://example.com/event.jpg",
+      "isFavorite": false,
+      "invitationStatus": "accepted",
+      "invitedBy": {
+        "id": "uuid",
+        "username": "Alice",
+        "displayName": "Alice",
+        "avatarUrl": null
+      },
+      "tags": [],
+      "nextSession": {
+        "startAt": "2026-03-30T19:00:00Z",
+        "place": {
+          "name": "Arena",
+          "addressLine": "Lenina 1"
+        }
+      }
+    }
+  ],
+  "total": 1,
+  "limit": 12,
+  "offset": 0
+}
+```
+
+Примечания:
+
+- при `status=accepted` backend должен возвращать только принятые приглашения;
+- события с `declined`, `pending`, `cancelled` не должны попадать в ответ для `status=accepted`;
+- формат элемента такой же, как у карточки события, плюс `invitationStatus` и опциональный `invitedBy`.
+
+Возможные ошибки:
+
+- `400 Validation failed`
+- `401 Unauthorized`
+
 ### POST /api/me/notifications/{notificationId}/read
 
 Помечает одно уведомление прочитанным.
@@ -2278,10 +2337,12 @@ Endpoint'ы, которые реально используются текущи
 - `POST /api/auth/logout`
 - `GET /api/me`
 - `PATCH /api/me` (`application/json` и `multipart/form-data`)
+- `GET /api/me/favorites`
 - `POST /api/me/favorites/{eventId}`
 - `DELETE /api/me/favorites/{eventId}`
 - `GET /api/me/followers`
 - `GET /api/me/following`
+- `GET /api/me/notifications/events`
 - `POST /api/users/{userId}/follow`
 - `DELETE /api/users/{userId}/follow`
 - `GET /api/home`

@@ -54,6 +54,7 @@ export interface EventCard {
   place?: Place | null;
   isFavorite?: boolean;
   invitedBy?: EventInviter | null;
+  invitationStatus?: InvitationStatus | null;
 }
 
 export interface EventAuthor {
